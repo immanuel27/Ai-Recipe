@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/select"
 import { StepHeader } from "@/components/sell/step-header"
 import { useAppStore } from "@/components/providers/app-store"
+import { CountryFlag } from "@/components/shared/country-flag"
 import { COUNTRIES, PAYOUT_METHODS } from "@/lib/countries"
 
 const schema = z.object({
@@ -130,7 +131,8 @@ export function SellerSetup() {
                     </SelectTrigger>
                     <SelectContent>
                       {COUNTRIES.map((c) => (
-                        <SelectItem key={c} value={c}>
+                        <SelectItem key={c} value={c} textValue={c} className="gap-2">
+                          <CountryFlag country={c} />
                           {c}
                         </SelectItem>
                       ))}

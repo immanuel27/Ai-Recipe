@@ -1,7 +1,8 @@
 import type { Metadata } from "next"
 import Link from "next/link"
 
-import { CanvasHeader } from "@/components/shell/canvas-header"
+import { ThemeToggle } from "@/components/shell/canvas-header"
+import { Logo } from "@/components/shell/logo"
 import { ExploreChips } from "@/components/explore/explore-chips"
 import { ExploreSidebar } from "@/components/explore/explore-sidebar"
 import { ExploreFeed } from "@/components/explore/explore-feed"
@@ -24,8 +25,7 @@ export default async function ExplorePage(props: PageProps<"/explore">) {
 
   return (
     <>
-      <CanvasHeader showSearch={false} />
-      <div className="grid w-full gap-6 px-3 pt-6 pb-16 md:px-6 lg:grid-cols-[13rem_minmax(0,1fr)] lg:gap-x-12 lg:px-10">
+      <div className="grid w-full gap-6 px-3 pt-4 pb-16 md:px-6 md:pt-8 lg:grid-cols-[13rem_minmax(0,1fr)] lg:gap-x-12 lg:px-10">
         <aside aria-label="Browse recipes" className="hidden lg:sticky lg:top-8 lg:block lg:self-start">
           <ExploreSidebar filters={filters} toolCounts={toolCounts} />
         </aside>
@@ -33,7 +33,18 @@ export default async function ExplorePage(props: PageProps<"/explore">) {
         <div className="flex min-w-0 flex-col gap-8">
           <div className="flex flex-col gap-6">
             <div className="flex flex-col gap-4">
-              <h1 className="type-headline">What do you want to make?</h1>
+              {/* One row with the sidebar's logo: title left, theme right (phones get the logo here) */}
+              <div className="grid grid-cols-[1fr_auto] items-center gap-x-4 gap-y-4">
+                <div className="lg:hidden">
+                  <Logo />
+                </div>
+                <div className="col-start-2 row-start-1">
+                  <ThemeToggle />
+                </div>
+                <h1 className="col-span-2 type-headline lg:col-span-1 lg:col-start-1 lg:row-start-1">
+                  What do you want to make?
+                </h1>
+              </div>
               <ExploreSearch filters={filters} />
             </div>
             <ExploreChips filters={filters} count={results.length} filtered={!browsing} />

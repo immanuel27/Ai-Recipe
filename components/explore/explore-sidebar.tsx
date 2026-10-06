@@ -1,6 +1,7 @@
 import Link from "next/link"
 
 import { ForwardIcon } from "@/components/icons"
+import { Logo } from "@/components/shell/logo"
 import { LogoMark } from "@/components/shell/logo-mark"
 import { ToolLogo } from "@/components/shared/tool-logo"
 import { exploreHref } from "@/lib/explore-params"
@@ -42,6 +43,9 @@ export function ExploreSidebar({ filters, toolCounts }: { filters: ExploreFilter
     filters.type === t && !filters.tag && filters.tool === "all" && filters.price === "any" && !filters.q
   return (
     <div className="flex h-full flex-col gap-8">
+      <div className="flex h-12 items-center">
+        <Logo />
+      </div>
       <Group label="Browse">
         <Item href="/explore" active={onlyType("all")}>
           All recipes

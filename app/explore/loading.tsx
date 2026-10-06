@@ -7,7 +7,7 @@ export default function ExploreLoading() {
     <div
       role="status"
       aria-label="Loading Explore"
-      className="grid w-full gap-6 px-3 pt-24 pb-16 md:px-6 lg:grid-cols-[13rem_minmax(0,1fr)] lg:gap-x-12 lg:px-10"
+      className="grid w-full gap-6 px-3 pt-4 pb-16 md:px-6 md:pt-8 lg:grid-cols-[13rem_minmax(0,1fr)] lg:gap-x-12 lg:px-10"
     >
       <div className="hidden flex-col gap-3 lg:flex">
         {Array.from({ length: 8 }, (_, i) => (

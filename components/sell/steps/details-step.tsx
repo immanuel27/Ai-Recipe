@@ -24,6 +24,7 @@ import type { ListingFormValues } from "@/components/sell/listing-schema"
 import { TagInput } from "@/components/sell/tag-input"
 import { CoverField } from "@/components/sell/steps/cover-field"
 import { PricingFields } from "@/components/sell/steps/pricing-step"
+import { ToolLogo } from "@/components/shared/tool-logo"
 import { TOOLS } from "@/lib/mock/tools"
 
 /** Final step: cover + live preview on the left, post details on the right. */
@@ -68,7 +69,8 @@ export function DetailsStep({ footer }: { footer: React.ReactNode }) {
                     </SelectTrigger>
                     <SelectContent>
                       {TOOLS.map((t) => (
-                        <SelectItem key={t.id} value={t.id}>
+                        <SelectItem key={t.id} value={t.id} textValue={t.name} className="gap-2">
+                          <ToolLogo tool={t.id} className="size-4" />
                           {t.name}
                         </SelectItem>
                       ))}

@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import * as React from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Controller, useForm } from "react-hook-form"
@@ -159,9 +160,13 @@ export function SellerSetup() {
             </Field>
           )}
         </CardContent>
-        <CardFooter>
+        <CardFooter className="flex-col gap-2">
           <Button type="submit" size="pill" className="w-full">
             {last ? "Finish setup" : "Continue"}
+          </Button>
+          {/* Selling is optional: set it up later from New recipe */}
+          <Button asChild variant="ghost" size="pill" className="w-full text-muted-foreground">
+            <Link href="/">Skip for now</Link>
           </Button>
         </CardFooter>
       </form>

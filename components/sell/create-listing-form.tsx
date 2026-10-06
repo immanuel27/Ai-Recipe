@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Loader2Icon } from "lucide-react"
@@ -146,6 +147,12 @@ export function CreateListingForm() {
   // Buttons follow the step's position: Previous only after the first, Publish only on the last
   const footer = (
     <div className="grid grid-cols-2 gap-3 sm:flex sm:items-center">
+      {/* Nobody has to list a recipe to finish signing up */}
+      {isFirst && (
+        <Button asChild type="button" variant="ghost" size="pill" className="col-span-2 text-muted-foreground sm:col-span-1">
+          <Link href="/">Skip for now</Link>
+        </Button>
+      )}
       {!isFirst && (
         <Button
           type="button"

@@ -29,7 +29,7 @@ const link = "rounded-sm outline-none transition-colors duration-160 hover:text-
 /** Quiet site links: in Home's sidebar and at the foot of other pages. */
 export function SiteLinks({ className, align = "start" }: { className?: string; align?: "start" | "center" }) {
   return (
-    <div className={cn("flex flex-col gap-4 type-meta text-muted-foreground", align === "center" && "items-center", className)}>
+    <div className={cn("flex flex-col gap-4 type-meta text-foreground/80", align === "center" && "items-center", className)}>
       <ul className={cn("flex flex-wrap gap-x-4 gap-y-2", align === "center" && "justify-center")}>
         {LINKS.map((l) => (
           <li key={l.href}>
@@ -62,8 +62,9 @@ export function SiteFooter() {
   // Discover is a full-canvas reel; New recipe is a focused flow
   if (pathname === "/" || pathname.startsWith("/sell")) return null
   return (
-    <footer className="relative px-4 pt-16 pb-8">
-      <SiteLinks align="center" />
+    <footer className="relative flex justify-center px-3 pt-16 pb-6">
+      {/* Dark glass keeps the links readable over the brightest part of the glow */}
+      <SiteLinks align="center" className="glass rounded-3xl px-6 py-4" />
     </footer>
   )
 }

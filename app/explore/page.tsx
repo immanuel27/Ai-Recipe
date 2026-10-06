@@ -7,7 +7,7 @@ import { ExploreChips } from "@/components/explore/explore-chips"
 import { ExploreSidebar } from "@/components/explore/explore-sidebar"
 import { ExploreFeed } from "@/components/explore/explore-feed"
 import { ExploreSearch } from "@/components/explore/explore-search"
-import { filterListings, getCreator, getFeedListings } from "@/lib/data"
+import { filterListings, getCatalog, getFeedListings } from "@/lib/data"
 import { isBrowsing, parseExploreParams } from "@/lib/explore-params"
 import { posterSize } from "@/lib/poster-size"
 
@@ -17,8 +17,8 @@ export default async function ExplorePage(props: PageProps<"/explore">) {
   const sp = await props.searchParams
   const filters = parseExploreParams(sp)
   const browsing = isBrowsing(filters)
-  const feed = getFeedListings()
-  const results = filterListings([...feed], filters)
+  const [feed, { creators }] = await Promise.all([getFeedListings(), getCatalog()])
+  const results = filterListings([...feed], filters, creators)
 
   const toolCounts: Record<string, number> = {}
   for (const l of feed) toolCounts[l.tool] = (toolCounts[l.tool] ?? 0) + 1
@@ -52,7 +52,7 @@ export default async function ExplorePage(props: PageProps<"/explore">) {
 
           {results.length > 0 ? (
             <ExploreFeed
-              items={results.map((l) => ({ listing: l, creator: getCreator(l.creatorId), size: posterSize(l.posterUrl) }))}
+              items={results.map((l) => ({ listing: l, creator: creators.find((c) => c.id === l.creatorId), size: posterSize(l.posterUrl) }))}
               initialSlug={typeof sp.r === "string" ? sp.r : undefined}
             />
           ) : (

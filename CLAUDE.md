@@ -33,6 +33,30 @@ A marketplace where creators sell step-by-step recipes for AI-made videos and im
 | `scrim` / `on-media` | Gradients and text over video or images |
 | `--radius` = 0.875rem | `rounded-xl` ≈ 20px for cards, `rounded-lg` for inputs and inset panels |
 
+## Backend: Supabase
+
+- Project `diwvhzriwkpkocyguaet` (eu-north-1). Keys go in `.env.local` (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`); see `.env.example`. Never commit the secret/service-role key.
+- Schema and seed live in `supabase/migrations/*.sql` and `supabase/seed.sql`. Every schema change gets a new migration file; Row Level Security is on for every table.
+- Tables:
+  - `profiles` (public; `auth_user_id` is null for the seeded demo creators)
+  - `seller_settings` (owner only)
+  - `listings` (public, with a `preview` teaser)
+  - `recipes` (readable only for free listings, the creator, or buyers)
+  - `purchases`, `likes` and `saves` (owner only; triggers keep the listing counters in sync)
+  - Storage bucket `media`: public read, and users write only to `<auth uid>/…`
+- Helper and trigger functions live in the private `private` schema, not the public API.
+- Clients:
+  - `lib/supabase/server.ts` for server components and routes
+  - `lib/supabase/client.ts` for the browser
+  - `proxy.ts` refreshes sessions (Next 16's renamed middleware)
+  - Rows map to app types in `lib/supabase/mappers.ts`
+- Reads: `lib/data.ts` (async, cached per request) reads Supabase, falling back to `lib/mock` when env vars are missing, so a fresh clone still runs.
+- Locked recipes: unbought recipes arrive as a teaser (`listing.recipeLocked`), and `useOwnedRecipe()` fetches the full recipe once owned.
+- Account: `<AccountSync>` loads the signed-in account into the store; store actions write purchases, likes, saves, profile, seller setup and payout threshold back through `lib/supabase/account.ts`.
+- Publishing: `lib/supabase/publish.ts` uploads media to Storage, then inserts the listing and its recipe.
+- Auth: email magic link and Google (`/auth/callback` exchanges the code, `/auth/confirm` handles token-hash links). After the first sign-in, people pick a username, which creates their profile.
+- Still browser-only: follows, drafts, and the dashboard's sample sales/earnings.
+
 ## Design language
 
 - Soft neutral grey page background (`bg-background`).
@@ -63,12 +87,17 @@ A marketplace where creators sell step-by-step recipes for AI-made videos and im
 
 - Server components by default; add `"use client"` only where needed (state, effects, browser APIs, event handlers).
 - Shared types in `lib/types.ts`.
-- Mock data in `lib/mock/`. Data access goes through `lib/data.ts` so it can be swapped for a real backend.
-- Client-side mock state (session, purchases, saves, created listings, seller settings) lives in `components/providers/app-store.tsx` (`useAppStore()`, an external store over `localStorage`; no provider needed).
+- Data access goes through `lib/data.ts` (Supabase, with `lib/mock/` as the fallback and the seed source).
+- Client state lives in `components/providers/app-store.tsx` (`useAppStore()`, an external store cached in `localStorage`; no provider needed). With Supabase configured, it mirrors the signed-in account (see Backend).
 - Feature components in `components/<feature>/` (`feed`, `explore`, `listing`, `auth`, `sell`, `profile`, `dashboard` for the seller tools, `shell`). Cross-feature building blocks are in `components/shared/`. shadcn primitives are in `components/ui/`.
 - **Profile** (`/profile`, formerly Dashboard; `/dashboard` redirects).
   - For everyone: Profile (header plus your posts), Library (purchased, saved and liked) and Settings.
   - Seller tools under a "Selling" label: Overview, Listings, Sales and Payouts.
   - Public creator profiles are at `/u/[username]` (`profileHref()` in `lib/profile.ts`), and creator names across the app link there.
+- **Uploads must be made with AI.** Every uploaded image or video (the cover and failed-attempt images) is checked with `detectAiTag()` in `lib/ai-provenance.ts` before it's accepted.
+  - The check reads the original file's provenance metadata: C2PA Content Credentials or an IPTC digital source type of trained algorithmic media, or generator metadata (Stable Diffusion or ComfyUI PNG data, or a known AI tool named in a software/creator-tool field).
+  - Files without a tag get a clear error. Accepted posts carry `Listing.aiTag` and show `<AiTagBadge>` ("Made with AI").
+  - Run the check on the original `File`, before any canvas re-encode, which strips metadata.
+  - This is client-side only; production must also verify C2PA signatures on the server.
 - Prices are integers in cents. Format with `formatPrice` from `lib/format.ts`. The platform fee is 20% (`PLATFORM_FEE` in `lib/format.ts`).
 - Next 16: `params` and `searchParams` are Promises. Read the guides in `node_modules/next/dist/docs/` before using unfamiliar APIs.

@@ -3,7 +3,7 @@ import Link from "next/link"
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { PageContainer, PageHeader } from "@/components/shell/page-container"
-import { LISTINGS } from "@/lib/mock/listings"
+import { getFeedListings } from "@/lib/data"
 import type { MediaCredit } from "@/lib/types"
 
 export const metadata: Metadata = { title: "Media credits" }
@@ -21,10 +21,10 @@ const OTHER_SOURCES = [
   { name: "Avatars", detail: "DiceBear “Notionists” style (see source for terms)", url: "https://www.dicebear.com/styles/notionists/" },
 ]
 
-export default function CreditsPage() {
+export default async function CreditsPage() {
   // One entry per credited work, with the listings that use it
   const byWork = new Map<string, { credit: MediaCredit; listings: { slug: string; title: string }[] }>()
-  for (const l of LISTINGS) {
+  for (const l of await getFeedListings()) {
     if (!l.credit) continue
     const entry = byWork.get(l.credit.work) ?? { credit: l.credit, listings: [] }
     entry.listings.push({ slug: l.slug, title: l.title })

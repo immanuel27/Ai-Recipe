@@ -15,6 +15,10 @@ export const listingSchema = z
       type: z.enum(["video", "image"]),
       /** Image posts: all images in order (first is the cover). Empty for video. */
       images: z.array(z.string()).max(MAX_IMAGES, `Up to ${MAX_IMAGES} images.`),
+      /** The AI tag found in the uploaded file(s); required to publish */
+      aiTag: z
+        .object({ method: z.enum(["c2pa", "iptc", "generator"]), detail: z.string() })
+        .optional(),
     }),
     title: z.string().trim().min(4, "At least 4 characters.").max(80, "80 characters max."),
     description: z.string().trim().max(280, "280 characters max."),
@@ -58,6 +62,10 @@ export const listingSchema = z
       .max(500, "$500 max.")
       .refine((n) => Number.isInteger(n * 100), "Use whole cents."),
     bundleSlugs: z.array(z.string()),
+  })
+  .refine((v) => !v.media.url || !!v.media.aiTag, {
+    path: ["media", "url"],
+    message: "This file has no AI tag. Upload the original export from your AI tool.",
   })
   .refine((v) => v.pricingMode === "single" || v.bundleSlugs.length > 0, {
     path: ["bundleSlugs"],

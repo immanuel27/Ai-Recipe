@@ -11,7 +11,7 @@ import { formatCompact } from "@/lib/format"
 
 export async function generateMetadata(props: PageProps<"/u/[username]">): Promise<Metadata> {
   const { username } = await props.params
-  const creator = getCreatorByUsername(decodeURIComponent(username))
+  const creator = await getCreatorByUsername(decodeURIComponent(username))
   return creator
     ? { title: `${creator.displayName} (@${creator.username})`, description: creator.bio }
     : { title: "Profile" }
@@ -19,7 +19,7 @@ export async function generateMetadata(props: PageProps<"/u/[username]">): Promi
 
 export default async function PublicProfilePage(props: PageProps<"/u/[username]">) {
   const username = decodeURIComponent((await props.params).username)
-  const creator = getCreatorByUsername(username)
+  const creator = await getCreatorByUsername(username)
 
   // Creators who signed up in this browser live in client state
   if (!creator) {
@@ -30,7 +30,7 @@ export default async function PublicProfilePage(props: PageProps<"/u/[username]"
     )
   }
 
-  const posts = getCreatorListings(creator.id)
+  const posts = await getCreatorListings(creator.id)
   const likes = posts.reduce((sum, l) => sum + l.stats.likes, 0)
   const sales = posts.reduce((sum, l) => sum + l.stats.sales, 0)
 

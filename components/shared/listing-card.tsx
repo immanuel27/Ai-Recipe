@@ -14,6 +14,7 @@ import { formatPrice } from "@/lib/format"
 import { profileHref } from "@/lib/profile"
 import type { Creator, Listing } from "@/lib/types"
 import { cn } from "@/lib/utils"
+import { AiTagBadge } from "@/components/shared/ai-tag-badge"
 
 export function ListingCard({
   listing,
@@ -70,9 +71,14 @@ export function ListingCard({
             className="absolute inset-0 size-full object-cover"
           />
         )}
-        {listing.isAdult && (
-          <span className="absolute top-3 left-3 rounded-full bg-scrim/70 px-2 py-0.5 text-xs font-semibold text-on-media backdrop-blur-md">
-            18+
+        {(listing.isAdult || listing.aiTag) && (
+          <span className="absolute top-3 left-3 flex flex-wrap gap-1.5">
+            {listing.aiTag && <AiTagBadge tag={listing.aiTag} onMedia />}
+            {listing.isAdult && (
+              <span className="rounded-full bg-scrim/70 px-2 py-0.5 text-xs font-semibold text-on-media backdrop-blur-md">
+                18+
+              </span>
+            )}
           </span>
         )}
         {(listing.images?.length ?? 0) > 1 && (

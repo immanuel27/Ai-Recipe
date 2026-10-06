@@ -10,6 +10,7 @@ import { ToolBadge } from "@/components/shared/tool-badge"
 import { formatCompact, formatPrice } from "@/lib/format"
 import { profileHref } from "@/lib/profile"
 import type { Creator, Listing } from "@/lib/types"
+import { AiTagBadge } from "@/components/shared/ai-tag-badge"
 
 export function PurchaseCard({
   listing,
@@ -39,6 +40,7 @@ export function PurchaseCard({
             </div>
             <LikeButton listing={listing} />
           </div>
+          {listing.aiTag && <AiTagBadge tag={listing.aiTag} showSource />}
           <h1 className="text-2xl leading-tight font-bold tracking-tight text-balance">
             {listing.title}
           </h1>

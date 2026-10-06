@@ -3,10 +3,12 @@ import localFont from "next/font/local"
 
 import { Toaster } from "@/components/ui/sonner"
 import { TooltipProvider } from "@/components/ui/tooltip"
+import { AccountSync } from "@/components/providers/account-sync"
 import { ThemeProvider } from "@/components/providers/theme-provider"
 import { CanvasScroll } from "@/components/shell/canvas-scroll"
 import { Dock } from "@/components/shell/dock"
 import { SiteFooter } from "@/components/shell/site-footer"
+import { WelcomeDialog } from "@/components/shell/welcome-dialog"
 import { BRAND } from "@/lib/brand"
 import "./globals.css"
 
@@ -70,6 +72,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
               <Dock />
             </div>
             <Toaster position="top-center" />
+            <WelcomeDialog />
+            <AccountSync />
           </TooltipProvider>
         </ThemeProvider>
       </body>

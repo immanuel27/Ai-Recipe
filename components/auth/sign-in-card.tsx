@@ -17,9 +17,12 @@ import {
 import { Field, FieldDescription, FieldError, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { useAppStore } from "@/components/providers/app-store"
+import { createProfile } from "@/lib/supabase/account"
+import { createClient } from "@/lib/supabase/client"
+import { supabaseConfigured } from "@/lib/supabase/env"
 import type { SessionUser } from "@/lib/types"
 
-type Step = "method" | "email" | "username"
+type Step = "method" | "email" | "sent" | "username"
 
 const USERNAME_RE = /^[a-z0-9_.]{3,20}$/
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -32,35 +35,91 @@ function safeNext(next: string | null) {
 export function SignInCard() {
   const router = useRouter()
   const params = useSearchParams()
-  const { signIn } = useAppStore()
+  const { signIn, authIdentity, user, hydrated } = useAppStore()
   const signup = params.get("mode") === "signup"
   const [step, setStep] = React.useState<Step>("method")
   const [provider, setProvider] = React.useState<SessionUser["provider"]>("email")
   const [email, setEmail] = React.useState("")
   const [username, setUsername] = React.useState("")
-  const [error, setError] = React.useState<string | null>(null)
+  const [error, setError] = React.useState<string | null>(
+    params.get("error") === "link" ? "That sign-in link expired or was already used. Try again." : null
+  )
+  const [busy, setBusy] = React.useState(false)
+  const next = safeNext(params.get("next"))
 
-  function continueWithGoogle() {
-    // Mock OAuth: pretend Google returned an address
+  // Supabase: back from Google or an email link, signed in but no profile yet → pick a username
+  const needsUsername = supabaseConfigured && !!authIdentity && !user
+  const shownStep: Step = needsUsername ? "username" : step
+  const shownEmail = needsUsername ? authIdentity!.email : email
+
+  // Already fully signed in: carry on to where they were going
+  React.useEffect(() => {
+    if (supabaseConfigured && hydrated && user) router.replace(next)
+  }, [hydrated, user, next, router])
+
+  /** Where Supabase sends them after Google or the email link */
+  function callbackUrl() {
+    const back = `/signin?next=${encodeURIComponent(next)}`
+    return `${window.location.origin}/auth/callback?next=${encodeURIComponent(back)}`
+  }
+
+  async function continueWithGoogle() {
+    if (supabaseConfigured) {
+      setError(null)
+      const { error } = await createClient().auth.signInWithOAuth({
+        provider: "google",
+        options: { redirectTo: callbackUrl() },
+      })
+      if (error) {
+        setError(
+          /provider is not enabled/i.test(error.message)
+            ? "Google sign-in isn't switched on yet. Use email for now."
+            : error.message
+        )
+      }
+      return
+    }
+    // Demo mode: pretend Google returned an address
     setProvider("google")
     setEmail("google.user@example.com")
     setStep("username")
   }
 
-  function submitEmail(e: React.FormEvent) {
+  async function submitEmail(e: React.FormEvent) {
     e.preventDefault()
     if (!EMAIL_RE.test(email)) return setError("Enter a valid email address.")
     setError(null)
+    if (supabaseConfigured) {
+      setBusy(true)
+      const { error } = await createClient().auth.signInWithOtp({
+        email,
+        options: { emailRedirectTo: callbackUrl() },
+      })
+      setBusy(false)
+      if (error) return setError(error.message)
+      setStep("sent")
+      return
+    }
     setProvider("email")
     setUsername((u) => u || email.split("@")[0]!.toLowerCase().replace(/[^a-z0-9_.]/g, ""))
     setStep("username")
   }
 
-  function submitUsername(e: React.FormEvent) {
+  async function submitUsername(e: React.FormEvent) {
     e.preventDefault()
     const u = username.trim().toLowerCase()
     if (!USERNAME_RE.test(u)) {
       return setError("3–20 characters: lowercase letters, numbers, dots or underscores.")
+    }
+    if (supabaseConfigured) {
+      setBusy(true)
+      const { profileId, error } = await createProfile(u)
+      setBusy(false)
+      if (error || !profileId) return setError(error ?? "Couldn't create your profile.")
+      signIn({ username: u, profileId, email: shownEmail, provider: authIdentity?.provider ?? "email", isSeller: false })
+      toast.success(`Welcome, @${u}`)
+      router.push(next)
+      return
     }
     signIn({ username: u, email, provider, isSeller: false })
     toast.success(`Welcome, @${u}`)
@@ -75,7 +134,7 @@ export function SignInCard() {
   return (
     <Card className="w-full max-w-sm">
       <CardHeader className="gap-2">
-        {step !== "method" && (
+        {shownStep !== "method" && shownStep !== "sent" && !needsUsername && (
           <Button
             variant="ghost"
             size="icon-sm"
@@ -88,21 +147,25 @@ export function SignInCard() {
         )}
         <CardTitle className="text-2xl font-bold tracking-tight">
           <h1>
-            {step === "username"
+            {shownStep === "username"
               ? "Pick a username"
+              : shownStep === "sent"
+                ? "Check your inbox"
               : signup
                 ? "Create your account"
                 : "Sign in to AI Recipe"}
           </h1>
         </CardTitle>
         <CardDescription>
-          {step === "username"
+          {shownStep === "username"
             ? "This is how buyers and creators will see you."
+            : shownStep === "sent"
+              ? `We sent a sign-in link to ${email}. Open it on this device to continue.`
             : "Buy recipes, save favourites and start selling."}
         </CardDescription>
       </CardHeader>
 
-      {step === "method" && (
+      {shownStep === "method" && (
         <CardFooter className="flex-col items-stretch gap-3">
           <Button size="pill" variant="outline" className="w-full" onClick={continueWithGoogle}>
             <GoogleGlyph />
@@ -112,13 +175,16 @@ export function SignInCard() {
             <MailIcon aria-hidden />
             Continue with email
           </Button>
+          {error && <FieldError className="text-center">{error}</FieldError>}
           <p className="pt-1 text-center text-xs text-muted-foreground">
-            Demo sign-in. Nothing leaves your browser.
+            {supabaseConfigured
+              ? "We'll email you a link: no password needed."
+              : "Demo sign-in. Nothing leaves your browser."}
           </p>
         </CardFooter>
       )}
 
-      {step === "email" && (
+      {shownStep === "email" && (
         <form onSubmit={submitEmail} noValidate className="contents">
           <CardContent>
             <Field data-invalid={!!error}>
@@ -137,14 +203,33 @@ export function SignInCard() {
             </Field>
           </CardContent>
           <CardFooter>
-            <Button type="submit" size="pill" className="w-full">
-              Continue
+            <Button type="submit" size="pill" className="w-full" disabled={busy}>
+              {busy ? "Just a moment…" : "Continue"}
             </Button>
           </CardFooter>
         </form>
       )}
 
-      {step === "username" && (
+      {shownStep === "sent" && (
+        <CardFooter className="flex-col items-stretch gap-3">
+          <Button
+            size="pill"
+            variant="outline"
+            className="w-full"
+            onClick={() => {
+              setError(null)
+              setStep("email")
+            }}
+          >
+            Use a different email
+          </Button>
+          <p className="text-center text-xs text-muted-foreground">
+            No email? Check spam, or wait a minute and try again.
+          </p>
+        </CardFooter>
+      )}
+
+      {shownStep === "username" && (
         <form onSubmit={submitUsername} noValidate className="contents">
           <CardContent>
             <Field data-invalid={!!error}>
@@ -167,13 +252,13 @@ export function SignInCard() {
               {error ? (
                 <FieldError>{error}</FieldError>
               ) : (
-                <FieldDescription>Signed in as {email}</FieldDescription>
+                <FieldDescription>Signed in as {shownEmail}</FieldDescription>
               )}
             </Field>
           </CardContent>
           <CardFooter>
-            <Button type="submit" size="pill" className="w-full">
-              Continue
+            <Button type="submit" size="pill" className="w-full" disabled={busy}>
+              {busy ? "Just a moment…" : "Continue"}
             </Button>
           </CardFooter>
         </form>

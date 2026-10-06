@@ -13,6 +13,7 @@ import {
   RecipeSettingsIcon,
 } from "@/components/icons"
 import { BuyDialog } from "@/components/listing/buy-dialog"
+import { useOwnedRecipe } from "@/components/shared/use-owned-recipe"
 import { useAppStore, userCreatorId } from "@/components/providers/app-store"
 import { MediaImage } from "@/components/shared/media-image"
 import { RecipeStep as Step, TeaserSnippet } from "@/components/shared/recipe-steps"
@@ -20,6 +21,7 @@ import { ToolBadge } from "@/components/shared/tool-badge"
 import { formatCompact, formatPrice } from "@/lib/format"
 import type { Listing } from "@/lib/types"
 import { cn } from "@/lib/utils"
+import { AiTagBadge } from "@/components/shared/ai-tag-badge"
 
 /** Fanned like prints; they spread a little more on hover. */
 const TAKE_REST = ["-rotate-6", "rotate-1", "rotate-7"]
@@ -30,11 +32,13 @@ const TAKE_SPREAD = [
 ]
 
 /** What you're buying with a shot: its recipe, what's locked, and the unlock. */
-export function RecipeCard({ listing, className }: { listing: Listing; className?: string }) {
+export function RecipeCard({ listing: baseListing, className }: { listing: Listing; className?: string }) {
   const { user, purchased, purchase } = useAppStore()
   const [buying, setBuying] = React.useState(false)
   const owned =
-    purchased.includes(listing.slug) || (!!user && listing.creatorId === userCreatorId(user.username))
+    purchased.includes(baseListing.slug) || (!!user && baseListing.creatorId === userCreatorId(user.username))
+  // Swap in the full recipe from Supabase once it's theirs
+  const listing = useOwnedRecipe(baseListing, owned)
   const { prompts, settings, editStack, failures } = listing.recipe
 
   function unlock() {
@@ -54,6 +58,7 @@ export function RecipeCard({ listing, className }: { listing: Listing; className
           <ToolBadge tool={listing.tool} version={listing.toolVersion} />
         </div>
         <h2 className="type-section text-balance">{listing.title}</h2>
+        {listing.aiTag && <AiTagBadge tag={listing.aiTag} showSource />}
       </header>
 
       <ol className="-mx-2 flex min-h-0 flex-col gap-5 overflow-y-auto px-2">

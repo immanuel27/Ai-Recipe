@@ -1,3 +1,5 @@
+import type { AiTag } from "@/lib/ai-provenance"
+
 export type MediaType = "video" | "image"
 
 export type ToolId =
@@ -90,6 +92,8 @@ export interface Listing {
   clip?: { start: number; end: number }
   /** Attribution for third-party placeholder footage (required by CC BY) */
   credit?: MediaCredit
+  /** Verified "made with AI" tag read from the uploaded file(s) */
+  aiTag?: AiTag
   tool: ToolId
   toolVersion: string
   tags: string[]
@@ -102,6 +106,12 @@ export interface Listing {
   /** Creator flagged the media as adult content */
   isAdult?: boolean
   recipe: Recipe
+  /**
+   * True when `recipe` is only the public teaser (counts, a cut-off first
+   * prompt, the first failure): the viewer hasn't bought it. The full recipe
+   * is fetched from Supabase once they own it.
+   */
+  recipeLocked?: boolean
 }
 
 export interface Sale {
@@ -122,6 +132,8 @@ export interface MonthlyEarning {
 
 export interface SessionUser {
   username: string
+  /** Supabase profile id (absent in demo mode without Supabase) */
+  profileId?: string
   displayName?: string
   bio?: string
   email: string

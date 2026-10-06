@@ -12,12 +12,13 @@ import { PurchaseCard } from "@/components/listing/purchase-card"
 import { RecipeBreadcrumb } from "@/components/listing/recipe-breadcrumb"
 import { WhatsInside } from "@/components/listing/whats-inside"
 import { MasonryTile } from "@/components/explore/masonry-tile"
+import { useOwnedRecipe } from "@/components/shared/use-owned-recipe"
 import { useAppStore, userCreatorId } from "@/components/providers/app-store"
 import { profileHref } from "@/lib/profile"
 import type { Creator, Listing } from "@/lib/types"
 
 export function ListingDetail({
-  listing,
+  listing: baseListing,
   creator,
   more,
 }: {
@@ -27,8 +28,10 @@ export function ListingDetail({
 }) {
   const { purchased, purchase, user } = useAppStore()
   const [dialogOpen, setDialogOpen] = React.useState(false)
-  const isOwner = !!user && listing.creatorId === userCreatorId(user.username)
-  const unlocked = isOwner || purchased.includes(listing.slug)
+  const isOwner = !!user && baseListing.creatorId === userCreatorId(user.username)
+  const unlocked = isOwner || purchased.includes(baseListing.slug)
+  // Swap in the full recipe from Supabase once it's theirs
+  const listing = useOwnedRecipe(baseListing, unlocked)
 
   function revealRecipe() {
     requestAnimationFrame(() =>

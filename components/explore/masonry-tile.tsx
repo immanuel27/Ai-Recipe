@@ -13,6 +13,7 @@ import { formatPrice } from "@/lib/format"
 import { getToolName } from "@/lib/mock/tools"
 import { profileHref } from "@/lib/profile"
 import type { Creator, Listing } from "@/lib/types"
+import { AiTagBadge } from "@/components/shared/ai-tag-badge"
 
 /**
  * One shot at its true shape. Videos loop silently while on screen; hover
@@ -82,6 +83,10 @@ export function MasonryTile({
             aria-hidden
             className="absolute inset-0 size-full object-cover transition-transform duration-500 ease-enter group-hover:scale-[1.03]"
           />
+        )}
+
+        {listing.aiTag && (
+          <AiTagBadge tag={listing.aiTag} onMedia className="pointer-events-none absolute top-3 right-3" />
         )}
 
         {/* Revealed on hover: what it is and what it costs */}

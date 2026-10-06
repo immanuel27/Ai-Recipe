@@ -21,6 +21,8 @@ import { DetailsStep } from "@/components/sell/steps/details-step"
 import { RecipeStep } from "@/components/sell/steps/recipe-step"
 import { useAppStore, userCreatorId } from "@/components/providers/app-store"
 import { slugify } from "@/lib/format"
+import { supabaseConfigured } from "@/lib/supabase/env"
+import { publishListing } from "@/lib/supabase/publish"
 import type { Listing } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
@@ -102,7 +104,6 @@ export function CreateListingForm() {
   async function publish(values: ListingFormValues) {
     if (!user) return
     setPublishing(true)
-    await new Promise((r) => setTimeout(r, 500))
     const slug = `${slugify(values.title)}-${Math.random().toString(36).slice(2, 6)}`
     const listing: Listing = {
       id: crypto.randomUUID(),
@@ -114,6 +115,7 @@ export function CreateListingForm() {
       mediaUrl: values.media.url,
       posterUrl: values.media.posterUrl,
       images: values.media.type === "image" ? values.media.images : undefined,
+      aiTag: values.media.aiTag,
       tool: values.tool,
       toolVersion: values.toolVersion,
       tags: values.tags,
@@ -134,7 +136,18 @@ export function CreateListingForm() {
         failures: values.failures.map((f) => ({ imageUrl: f.imageUrl || undefined, note: f.note })),
       },
     }
-    addListing(listing)
+    let published = listing
+    if (supabaseConfigured && user.profileId) {
+      // Upload media to Storage and save the listing + locked recipe
+      try {
+        published = await publishListing(listing, user.profileId)
+      } catch (error) {
+        setPublishing(false)
+        toast.error(error instanceof Error ? error.message : "Couldn't publish. Try again.")
+        return
+      }
+    }
+    addListing(published)
     clearDraft()
     toast.success("Your recipe is live")
     router.push(`/r/${slug}`)

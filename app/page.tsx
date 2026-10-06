@@ -1,11 +1,12 @@
 import { Reels } from "@/components/discover/reels"
 import { VideoIcon } from "@/components/icons"
 import { EmptyState } from "@/components/shared/empty-state"
-import { getCreator, getFeedListings } from "@/lib/data"
+import { getCatalog, getFeedListings } from "@/lib/data"
 
-export default function DiscoverPage() {
-  const items = getFeedListings().flatMap((listing) => {
-    const creator = getCreator(listing.creatorId)
+export default async function DiscoverPage() {
+  const [feed, { creators }] = await Promise.all([getFeedListings(), getCatalog()])
+  const items = feed.flatMap((listing) => {
+    const creator = creators.find((c) => c.id === listing.creatorId)
     return creator ? [{ listing, creator }] : []
   })
 

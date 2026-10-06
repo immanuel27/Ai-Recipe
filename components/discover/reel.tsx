@@ -15,6 +15,7 @@ import { clipSrc, useClipLoop } from "@/components/shared/use-clip"
 import { formatPrice } from "@/lib/format"
 import { profileHref } from "@/lib/profile"
 import type { Creator, Listing } from "@/lib/types"
+import { AiTagBadge } from "@/components/shared/ai-tag-badge"
 
 export interface ReelEntry {
   listing: Listing
@@ -178,6 +179,7 @@ export function Reel({
             <CreatorAvatar creator={creator} className="size-8" />
             {creator.displayName}
           </Link>
+          {listing.aiTag && <AiTagBadge tag={listing.aiTag} onMedia />}
           <p className="line-clamp-2 type-heading">{listing.title}</p>
           <button
             type="button"

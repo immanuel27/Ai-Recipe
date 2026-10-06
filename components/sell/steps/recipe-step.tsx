@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { toast } from "sonner"
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form"
 
 import { Field, FieldError, FieldLabel } from "@/components/ui/field"
@@ -18,6 +19,7 @@ import {
   type IconType,
 } from "@/components/icons"
 import type { ListingFormValues } from "@/components/sell/listing-schema"
+import { detectAiTag, missingAiTagMessage } from "@/lib/ai-provenance"
 import { imageToDataUrl } from "@/lib/media"
 import { cn } from "@/lib/utils"
 
@@ -320,6 +322,11 @@ function FailuresPart() {
 
   async function onImage(i: number, file: File | undefined) {
     if (!file || !file.type.startsWith("image/")) return
+    // Failed attempts are AI generations too: same AI-tag rule as the cover
+    if (!(await detectAiTag(file))) {
+      toast.error(missingAiTagMessage(file.name))
+      return
+    }
     const url = await imageToDataUrl(file, 480, 0.75)
     setValue(`failures.${i}.imageUrl`, url)
   }

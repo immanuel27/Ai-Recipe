@@ -7,7 +7,7 @@ import { getCreator, getCreatorListings, getListing } from "@/lib/data"
 
 export async function generateMetadata(props: PageProps<"/r/[slug]">): Promise<Metadata> {
   const { slug } = await props.params
-  const listing = getListing(slug)
+  const listing = await getListing(slug)
   return listing
     ? { title: listing.title, description: listing.description }
     : { title: "Recipe" }
@@ -15,8 +15,9 @@ export async function generateMetadata(props: PageProps<"/r/[slug]">): Promise<M
 
 export default async function ListingPage(props: PageProps<"/r/[slug]">) {
   const { slug } = await props.params
-  const listing = getListing(slug)
-  const creator = listing && getCreator(listing.creatorId)
+  const listing = await getListing(slug)
+  const creator = listing && (await getCreator(listing.creatorId))
+  const more = creator ? await getCreatorListings(creator.id, slug) : []
 
   return (
     <PageContainer>
@@ -24,7 +25,7 @@ export default async function ListingPage(props: PageProps<"/r/[slug]">) {
         <ListingDetail
           listing={listing}
           creator={creator}
-          more={getCreatorListings(creator.id, slug)}
+          more={more}
         />
       ) : (
         <LocalListing slug={slug} />

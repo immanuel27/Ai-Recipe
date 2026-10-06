@@ -2,13 +2,21 @@
 
 import * as React from "react"
 
+import { toast } from "sonner"
+
 import type { ListingFormValues } from "@/components/sell/listing-schema"
+import { remote, type Account, type AuthIdentity } from "@/lib/supabase/account"
+import { supabaseConfigured } from "@/lib/supabase/env"
 import type { Creator, Listing, SessionUser } from "@/lib/types"
 
 /**
- * Client-side mock state: session, purchases, saves, listings the user has
- * created and seller settings. Persisted to localStorage. Replace with real
- * auth + API calls later.
+ * Client state: session, purchases, saves, likes, listings the user has
+ * created and seller settings, cached in localStorage.
+ *
+ * With Supabase configured, the signed-in account is loaded from the database
+ * (`applyAccount`, called by <AccountSync>) and changes are written back; the
+ * UI updates optimistically. Without it, everything stays in this browser
+ * (demo mode). Follows and drafts are browser-only for now.
  */
 
 interface PayoutThreshold {
@@ -18,6 +26,8 @@ interface PayoutThreshold {
 
 interface StoreState {
   user: SessionUser | null
+  /** Signed in with Supabase Auth; `user` stays null until they pick a username */
+  authIdentity: AuthIdentity | null
   purchased: string[]
   saved: string[]
   liked: string[]
@@ -26,6 +36,8 @@ interface StoreState {
   createdListings: Listing[]
   sampleData: boolean
   payoutThreshold: PayoutThreshold
+  /** Has this browser seen the first-visit welcome pop-up? */
+  welcomed: boolean
   /** One in-progress listing, saved with "Save to draft" */
   draft: { values: ListingFormValues; step: number; savedAt: string } | null
 }
@@ -44,6 +56,9 @@ interface StoreActions {
   setPayoutThreshold: (t: PayoutThreshold) => void
   saveDraft: (values: ListingFormValues, step: number) => void
   clearDraft: () => void
+  dismissWelcome: () => void
+  /** Replace account state with what's in Supabase (null = signed out) */
+  applyAccount: (account: Account | null) => void
 }
 
 type Store = StoreState & StoreActions & { hydrated: boolean }
@@ -52,6 +67,7 @@ const STORAGE_KEY = "recipe-store-v1"
 
 const initialState: StoreState = {
   user: null,
+  authIdentity: null,
   purchased: [],
   saved: [],
   liked: [],
@@ -60,6 +76,7 @@ const initialState: StoreState = {
   sampleData: true,
   payoutThreshold: { currency: "USD", amount: 50 },
   draft: null,
+  welcomed: false,
 }
 
 type Snapshot = StoreState & { hydrated: boolean }
@@ -106,21 +123,48 @@ function getSnapshot() {
   return snapshot
 }
 
+/** Write to Supabase when signed in there; keep the optimistic UI either way. */
+function sync(write: (profileId: string) => Promise<unknown>) {
+  const profileId = data.user?.profileId
+  if (!supabaseConfigured || !profileId) return
+  write(profileId).catch((error) => {
+    console.error(error)
+    toast.error("Couldn't save that change. Check your connection and try again.")
+  })
+}
+
 const actions: StoreActions = {
   signIn: (user) => setState((s) => ({ ...s, user })),
-  signOut: () => setState((s) => ({ ...s, user: null })),
-  becomeSeller: (seller) =>
-    setState((s) => (s.user ? { ...s, user: { ...s.user, isSeller: true, seller } } : s)),
-  updateProfile: (profile) =>
-    setState((s) => (s.user ? { ...s, user: { ...s.user, ...profile } } : s)),
-  purchase: (slug) =>
-    setState((s) => (s.purchased.includes(slug) ? s : { ...s, purchased: [...s.purchased, slug] })),
+  signOut: () => {
+    if (supabaseConfigured) void remote.signOut()
+    setState((s) => ({
+      ...s,
+      user: null,
+      authIdentity: null,
+      // Account data belongs to the account, not the device
+      ...(supabaseConfigured ? { purchased: [], saved: [], liked: [], createdListings: [] } : {}),
+    }))
+  },
+  becomeSeller: (seller) => {
+    setState((s) => (s.user ? { ...s, user: { ...s.user, isSeller: true, seller } } : s))
+    sync((id) => remote.becomeSeller(id, seller))
+  },
+  updateProfile: (profile) => {
+    setState((s) => (s.user ? { ...s, user: { ...s.user, ...profile } } : s))
+    const user = data.user
+    if (user) sync((id) => remote.updateProfile(id, { ...profile, username: user.username }))
+  },
+  purchase: (slug) => {
+    setState((s) => (s.purchased.includes(slug) ? s : { ...s, purchased: [...s.purchased, slug] }))
+    sync(() => remote.purchase(slug))
+  },
   toggleSave: (slug) => {
     const nowSaved = !getSnapshot().saved.includes(slug)
     setState((s) => ({
       ...s,
       saved: nowSaved ? [...s.saved, slug] : s.saved.filter((x) => x !== slug),
     }))
+    sync(() => remote.setSave(slug, nowSaved))
     return nowSaved
   },
   toggleLike: (slug) => {
@@ -129,6 +173,7 @@ const actions: StoreActions = {
       ...s,
       liked: nowLiked ? [...s.liked, slug] : s.liked.filter((x) => x !== slug),
     }))
+    sync(() => remote.setLike(slug, nowLiked))
     return nowLiked
   },
   toggleFollow: (creatorId) => {
@@ -144,10 +189,30 @@ const actions: StoreActions = {
   addListing: (listing) =>
     setState((s) => ({ ...s, createdListings: [listing, ...s.createdListings] })),
   setSampleData: (sampleData) => setState((s) => ({ ...s, sampleData })),
-  setPayoutThreshold: (payoutThreshold) => setState((s) => ({ ...s, payoutThreshold })),
+  setPayoutThreshold: (payoutThreshold) => {
+    setState((s) => ({ ...s, payoutThreshold }))
+    sync((id) => remote.setPayoutThreshold(id, payoutThreshold))
+  },
   saveDraft: (values, step) =>
     setState((s) => ({ ...s, draft: { values, step, savedAt: new Date().toISOString() } })),
   clearDraft: () => setState((s) => ({ ...s, draft: null })),
+  dismissWelcome: () => setState((s) => ({ ...s, welcomed: true })),
+  applyAccount: (account) =>
+    setState((s) =>
+      account
+        ? {
+            ...s,
+            authIdentity: account.identity,
+            user: account.user,
+            purchased: account.purchased,
+            saved: account.saved,
+            liked: account.liked,
+            createdListings: account.createdListings,
+            payoutThreshold: account.payoutThreshold ?? s.payoutThreshold,
+          }
+        : // Signed out elsewhere (or session expired): drop account data
+          { ...s, authIdentity: null, user: null, purchased: [], saved: [], liked: [], createdListings: [] }
+    ),
 }
 
 export function useAppStore(): Store {
@@ -155,8 +220,13 @@ export function useAppStore(): Store {
   return React.useMemo(() => ({ ...state, ...actions }), [state])
 }
 
+/**
+ * The creator id for the signed-in user's listings: their Supabase profile id,
+ * or a local id in demo mode.
+ */
 export function userCreatorId(username: string) {
-  return `user:${username}`
+  const user = data.user
+  return user?.username === username && user.profileId ? user.profileId : `user:${username}`
 }
 
 /** A Creator record for the signed-in user, used for listings they create. */

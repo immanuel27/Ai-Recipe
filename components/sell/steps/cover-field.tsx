@@ -16,6 +16,7 @@ import { toast } from "sonner"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { FieldError } from "@/components/ui/field"
+import { AiTagBadge } from "@/components/shared/ai-tag-badge"
 import { FitImage, useFitMode, useVideoAspect } from "@/components/shared/fit-media"
 import {
   MAX_IMAGES,
@@ -25,6 +26,7 @@ import {
 import { useAppStore } from "@/components/providers/app-store"
 import { usePrefersReducedMotion } from "@/hooks/use-prefers-reduced-motion"
 import { initials } from "@/lib/format"
+import { detectAiTag, missingAiTagMessage, type AiTag } from "@/lib/ai-provenance"
 import { captureVideoPoster, imageToDataUrl } from "@/lib/media"
 import { cn } from "@/lib/utils"
 
@@ -60,14 +62,14 @@ export function CoverField() {
   const full = images.length >= MAX_IMAGES
   const current = Math.min(selected, Math.max(0, images.length - 1))
 
-  function setImages(next: string[]) {
+  function setImages(next: string[], aiTag: AiTag | undefined = media.aiTag) {
     if (next.length === 0) {
       setValue("media", listingDefaults.media, { shouldValidate: true })
       return
     }
     setValue(
       "media",
-      { url: next[0]!, posterUrl: next[0]!, type: "image", images: next },
+      { url: next[0]!, posterUrl: next[0]!, type: "image", images: next, aiTag },
       { shouldValidate: true }
     )
   }
@@ -86,10 +88,14 @@ export function CoverField() {
       if (!photos.length) {
         const file = videos[0]!
         if (file.size > MAX_VIDEO_MB * 1024 * 1024) return setLocalError(`Videos up to ${MAX_VIDEO_MB} MB.`)
+        // Only AI-made media: the original file must carry an AI tag
+        const aiTag = await detectAiTag(file)
+        if (!aiTag) return setLocalError(missingAiTagMessage(file.name))
         // Mock storage: the video lives in memory for this session; the poster is persisted.
         const url = URL.createObjectURL(file)
         const posterUrl = await captureVideoPoster(url)
-        setValue("media", { url, posterUrl, type: "video", images: [] }, { shouldValidate: true })
+        setValue("media", { url, posterUrl, type: "video", images: [], aiTag }, { shouldValidate: true })
+        toast.success(`AI tag found: ${aiTag.detail}`)
         if (videos.length > 1) toast("Only one video per post: we used the first one.")
         return
       }
@@ -101,8 +107,26 @@ export function CoverField() {
       const room = MAX_IMAGES - images.length
       if (room <= 0) return setLocalError(`Up to ${MAX_IMAGES} images per post.`)
       if (ok.length > room) toast(`Up to ${MAX_IMAGES} images: added the first ${room}.`)
-      const urls = await Promise.all(ok.slice(0, room).map((f) => imageToDataUrl(f, 1080, 0.8)))
-      setImages([...images, ...urls])
+      // Only AI-made media: check every original file for its AI tag before re-encoding
+      const checked = await Promise.all(
+        ok.slice(0, room).map(async (file) => ({ file, aiTag: await detectAiTag(file) }))
+      )
+      const tagged = checked.filter((c) => c.aiTag)
+      const untagged = checked.filter((c) => !c.aiTag)
+      if (!tagged.length) {
+        return setLocalError(
+          untagged.length === 1
+            ? missingAiTagMessage(untagged[0]!.file.name)
+            : `None of these ${untagged.length} files has an AI tag. AI Recipe only accepts images and videos made with AI. Upload the original files exported from your AI tool (screenshots and edited copies lose the tag).`
+        )
+      }
+      if (untagged.length) {
+        toast.error(
+          `Skipped ${untagged.length} without an AI tag: ${untagged.map((c) => c.file.name).join(", ")}`
+        )
+      }
+      const urls = await Promise.all(tagged.map((c) => imageToDataUrl(c.file, 1080, 0.8)))
+      setImages([...images, ...urls], media.aiTag ?? tagged[0]!.aiTag!)
       setSelected(images.length) // show the first new image
     } catch {
       setLocalError("We couldn't read that file. Try another one.")
@@ -203,6 +227,9 @@ export function CoverField() {
                 className="absolute inset-0"
               />
             )}
+            {media.aiTag && (
+              <AiTagBadge tag={media.aiTag} onMedia showSource className="absolute top-3 left-3" />
+            )}
             <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-linear-to-t from-scrim/90 via-scrim/40 to-transparent px-6 pt-24 pb-6">
               <p
                 className={cn(
@@ -221,8 +248,8 @@ export function CoverField() {
               {busy ? "Processing…" : "Upload images or video"}
             </Button>
             <p className="max-w-64 text-sm text-muted-foreground">
-              Up to {MAX_IMAGES} images or one video. Vertical, square and landscape all work.
-              Or drag files here.
+              Up to {MAX_IMAGES} images or one video, made with AI. Upload the original export
+              from your AI tool: we check each file for its AI tag. Or drag files here.
             </p>
           </>
         )}

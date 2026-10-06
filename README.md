@@ -2,7 +2,7 @@
 
 A marketplace where creators sell the **step-by-step recipes** behind AI-made videos and images. A listing is the artifact itself (an autoplaying video or an image). Buyers get the full recipe: prompts, tool and version, settings and seeds, reference assets, the edit stack, and failed attempts with notes on why they failed.
 
-> **Demo status:** this is a front-end prototype. Sign-in, purchases, uploads and payouts are mocked and stored in your browser (`localStorage`). There's no backend and no real payment.
+> **Status:** prototype backed by Supabase (accounts, listings, locked recipes, purchases, likes, saves, uploads). Checkout is still a demo: no real payment is taken. Without Supabase keys, the app falls back to in-browser demo data.
 
 ## Features
 
@@ -48,9 +48,18 @@ npm run start   # serve the production build
 npm run lint
 ```
 
+### Supabase (database, auth, storage)
+
+The app reads and writes a Supabase project when `.env.local` has its keys. Without them, it runs on the built-in demo data.
+
+1. Copy `.env.example` to `.env.local` and fill in the project URL and **publishable** key (Supabase → Project Settings → API Keys).
+2. For a new project, run `supabase/migrations/*.sql` in order, then `supabase/seed.sql`, in the SQL editor (or with `supabase db push` plus the seed).
+3. In Supabase → **Authentication → URL Configuration**, set the Site URL and add `http://localhost:3000/auth/callback` (plus your production URL's `/auth/callback`) to Redirect URLs.
+4. Optional: enable **Google** under Authentication → Providers, and set up custom SMTP so sign-in emails reach everyone.
+
 ### Deploying
 
-The easiest host is [Vercel](https://vercel.com/new): import the GitHub repo, and the defaults work with no environment variables. Any Node host that runs `npm run build && npm run start` works too.
+The easiest host is [Vercel](https://vercel.com/new): import the GitHub repo and add `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` as environment variables. Then add the deployed URL's `/auth/callback` to Supabase's Redirect URLs. Any Node host that runs `npm run build && npm run start` works too.
 
 ## Project structure
 

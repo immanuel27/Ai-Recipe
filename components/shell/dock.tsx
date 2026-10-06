@@ -13,7 +13,7 @@ import { UserAvatar } from "@/components/shell/user-avatar"
 import { cn } from "@/lib/utils"
 
 const round =
-  "flex size-11 shrink-0 items-center justify-center rounded-full outline-none sm:size-12 transition-colors duration-160 focus-visible:ring-2 focus-visible:ring-ring"
+  "flex size-10 shrink-0 items-center justify-center rounded-full outline-none sm:size-12 transition-colors duration-160 focus-visible:ring-2 focus-visible:ring-ring"
 
 /**
  * The dock sits on the frame, under the canvas: page title on the left,
@@ -25,7 +25,7 @@ export function Dock() {
   const items = DOCK_ITEMS.filter((i) => !i.seller || (hydrated && user?.isSeller))
 
   return (
-    <footer className="grid h-dock shrink-0 grid-cols-[1fr_auto_1fr] items-center gap-2 px-1 md:gap-4 md:px-6">
+    <footer className="grid h-dock shrink-0 grid-cols-[1fr_auto_1fr] items-center gap-1 px-1 sm:gap-2 md:gap-4 md:px-6">
       <p aria-live="polite" className="hidden truncate text-2xl font-semibold tracking-tight text-foreground md:block">
         {pageTitle(pathname)}
       </p>
@@ -84,7 +84,7 @@ export function Dock() {
                 aria-label="Account menu"
                 className="flex items-center gap-3 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
-                <UserAvatar username={user.username} className="size-11 sm:size-12" />
+                <UserAvatar username={user.username} className="size-10 sm:size-12" />
                 <span className="hidden max-w-32 truncate font-semibold lg:block">
                   {user.displayName ?? user.username}
                 </span>

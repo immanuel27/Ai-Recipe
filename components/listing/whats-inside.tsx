@@ -44,7 +44,7 @@ export function WhatsInside({
   const tools = [...new Set(editStack.map((e) => e.tool))]
 
   return (
-    <section id="recipe" aria-labelledby="recipe-heading" className="glass flex scroll-mt-24 flex-col gap-8 rounded-3xl p-6 md:p-8">
+    <section id="recipe" aria-labelledby="recipe-heading" className="glass flex scroll-mt-6 flex-col gap-8 rounded-3xl p-6 md:p-8">
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div className="flex flex-col gap-2">
           <h2 id="recipe-heading" className="type-section">

@@ -34,7 +34,7 @@ export function DetailsStep({ footer }: { footer: React.ReactNode }) {
 
   return (
     <div className="grid grid-cols-1 gap-10 md:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] md:gap-12">
-      <div className="md:sticky md:top-24 md:self-start">
+      <div className="md:sticky md:top-6 md:self-start">
         <CoverField />
       </div>
 

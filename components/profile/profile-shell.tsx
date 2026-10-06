@@ -73,7 +73,7 @@ export function ProfileShell({ children }: { children: React.ReactNode }) {
       <aside className="lg:w-56 lg:shrink-0">
         <nav
           aria-label="Profile"
-          className="no-scrollbar -mx-4 flex gap-1 overflow-x-auto px-4 lg:sticky lg:top-24 lg:mx-0 lg:flex-col lg:rounded-xl lg:bg-sidebar lg:p-3 lg:ring-1 lg:ring-foreground/10"
+          className="no-scrollbar -mx-4 flex gap-1 overflow-x-auto px-4 lg:sticky lg:top-6 lg:mx-0 lg:flex-col lg:rounded-xl lg:bg-sidebar lg:p-3 lg:ring-1 lg:ring-foreground/10"
         >
           {NAV.map((item, i) => {
             const active = pathname === item.href

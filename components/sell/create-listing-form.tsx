@@ -191,7 +191,7 @@ export function CreateListingForm() {
 
   return (
     <FormProvider {...methods}>
-      <div ref={topRef} className="scroll-mt-24">
+      <div ref={topRef} className="scroll-mt-6">
         <Card
           className={cn(
             "mx-auto w-full gap-8",

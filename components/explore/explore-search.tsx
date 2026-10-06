@@ -4,14 +4,14 @@ import { CloseIcon, SearchIcon } from "@/components/icons"
 import { EXPLORE_DEFAULTS, exploreHref } from "@/lib/explore-params"
 import type { ExploreFilters } from "@/lib/types"
 
-/** The command bar at the top of Explore. Keeps the other filters when you search. */
+/** The search under the Explore title. Keeps the other filters when you search. */
 export function ExploreSearch({ filters }: { filters: ExploreFilters }) {
   const keep = (["type", "tag", "tool", "price", "sort"] as const).filter((k) => filters[k] !== EXPLORE_DEFAULTS[k])
   return (
     <form
       action="/explore"
       role="search"
-      className="glass flex h-12 w-full items-center gap-3 rounded-full pr-2 pl-5 focus-within:ring-2 focus-within:ring-ring md:w-[min(36rem,45vw)]"
+      className="glass flex h-12 w-full items-center gap-3 rounded-full pr-2 pl-5 focus-within:ring-2 focus-within:ring-ring"
     >
       <SearchIcon aria-hidden className="size-5 shrink-0 text-muted-foreground" />
       <input

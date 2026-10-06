@@ -24,15 +24,18 @@ export default async function ExplorePage(props: PageProps<"/explore">) {
 
   return (
     <>
-      <CanvasHeader showSearch={false} center={<ExploreSearch filters={filters} />} />
+      <CanvasHeader showSearch={false} />
       <div className="grid w-full gap-6 px-3 pt-6 pb-16 md:px-6 lg:grid-cols-[13rem_minmax(0,1fr)] lg:gap-x-12 lg:px-10">
         <aside aria-label="Browse recipes" className="hidden lg:sticky lg:top-8 lg:block lg:self-start">
           <ExploreSidebar filters={filters} toolCounts={toolCounts} />
         </aside>
 
         <div className="flex min-w-0 flex-col gap-8">
-          <div className="flex flex-col gap-4">
-            <h1 className="type-headline">What do you want to make?</h1>
+          <div className="flex flex-col gap-6">
+            <div className="flex flex-col gap-4">
+              <h1 className="type-headline">What do you want to make?</h1>
+              <ExploreSearch filters={filters} />
+            </div>
             <ExploreChips filters={filters} count={results.length} filtered={!browsing} />
           </div>
 

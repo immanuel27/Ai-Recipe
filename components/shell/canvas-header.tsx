@@ -50,7 +50,16 @@ export function ScopeTabs({
 }
 
 /** The top of the canvas: logo, optional centre scope, search and theme. */
-export function CanvasHeader({ center, className }: { center?: React.ReactNode; className?: string }) {
+export function CanvasHeader({
+  center,
+  showSearch = true,
+  className,
+}: {
+  center?: React.ReactNode
+  /** Pages with their own search field hide the shortcut */
+  showSearch?: boolean
+  className?: string
+}) {
   const { resolvedTheme, setTheme } = useTheme()
   const dark = resolvedTheme !== "light"
 
@@ -59,14 +68,16 @@ export function CanvasHeader({ center, className }: { center?: React.ReactNode; 
       <Logo />
       <div className="col-start-2 hidden md:block">{center}</div>
       <div className="col-start-3 flex items-center justify-end gap-2">
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Link href="/explore" aria-label="Search" className={round}>
-              <SearchIcon aria-hidden className="size-5" />
-            </Link>
-          </TooltipTrigger>
-          <TooltipContent>Search</TooltipContent>
-        </Tooltip>
+        {showSearch && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Link href="/explore" aria-label="Search" className={round}>
+                <SearchIcon aria-hidden className="size-5" />
+              </Link>
+            </TooltipTrigger>
+            <TooltipContent>Search</TooltipContent>
+          </Tooltip>
+        )}
         <Tooltip>
           <TooltipTrigger asChild>
             <button

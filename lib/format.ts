@@ -35,6 +35,22 @@ export function formatRelative(iso: string, now = new Date()) {
   return "just now"
 }
 
+/** IG-style short age: "45m", "3h", "2d", "5w", "1y" */
+export function formatAge(iso: string, now = new Date()) {
+  const secs = Math.max(0, (now.getTime() - new Date(iso).getTime()) / 1000)
+  const steps: [string, number][] = [
+    ["y", 31536000],
+    ["w", 604800],
+    ["d", 86400],
+    ["h", 3600],
+    ["m", 60],
+  ]
+  for (const [unit, size] of steps) {
+    if (secs >= size) return `${Math.floor(secs / size)}${unit}`
+  }
+  return "now"
+}
+
 export function formatDate(iso: string) {
   return new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric" }).format(
     new Date(iso)

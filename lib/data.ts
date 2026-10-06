@@ -13,6 +13,10 @@ export function getListing(slug: string) {
   return LISTINGS.find((l) => l.slug === slug)
 }
 
+export function getCreators() {
+  return CREATORS
+}
+
 export function getCreator(id: string) {
   return CREATORS.find((c) => c.id === id)
 }
@@ -25,7 +29,7 @@ export function getCreatorListings(creatorId: string, excludeSlug?: string) {
   return LISTINGS.filter((l) => l.creatorId === creatorId && l.slug !== excludeSlug)
 }
 
-export const EXPLORE_PAGE_SIZE = 6
+export const EXPLORE_PAGE_SIZE = 24
 
 function matchesQuery(l: Listing, q: string) {
   if (!q) return true
@@ -46,11 +50,28 @@ function matchesQuery(l: Listing, q: string) {
     .every((word) => haystack.includes(word))
 }
 
+function matchesPrice(l: Listing, price: ExploreFilters["price"]) {
+  switch (price) {
+    case "free":
+      return l.price === 0
+    case "under-10":
+      return l.price < 1000
+    case "10-20":
+      return l.price >= 1000 && l.price <= 2000
+    case "over-20":
+      return l.price > 2000
+    default:
+      return true
+  }
+}
+
 export function filterListings(listings: Listing[], f: Omit<ExploreFilters, "page">) {
   const out = listings.filter(
     (l) =>
       (f.type === "all" || l.type === f.type) &&
       (f.tool === "all" || l.tool === f.tool) &&
+      (!f.tag || l.tags.includes(f.tag)) &&
+      matchesPrice(l, f.price) &&
       matchesQuery(l, f.q)
   )
   switch (f.sort) {

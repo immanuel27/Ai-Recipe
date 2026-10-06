@@ -14,6 +14,10 @@ export interface Tool {
   id: ToolId
   name: string
   mediaTypes: MediaType[]
+  /** Maker's logo in public/logos (their trademark). Missing ones fall back to an initial. */
+  logo?: string
+  /** Where to make something with it */
+  url: string
 }
 
 export interface Creator {
@@ -132,10 +136,14 @@ export interface SessionUser {
 
 export type ExploreType = "all" | MediaType
 export type ExploreSort = "trending" | "newest" | "price-asc"
+export type ExplorePrice = "any" | "free" | "under-10" | "10-20" | "over-20"
 
 export interface ExploreFilters {
   type: ExploreType
   tool: ToolId | "all"
+  /** A style tag such as "cartoon"; empty for any */
+  tag: string
+  price: ExplorePrice
   sort: ExploreSort
   /** Free-text search over title, description, tags, tool and creator */
   q: string

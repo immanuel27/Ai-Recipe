@@ -1,6 +1,8 @@
 import type { NextConfig } from "next"
 
 const nextConfig: NextConfig = {
+  // The dev badge sits on top of the dock; errors still show their overlay
+  devIndicators: false,
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "picsum.photos" },

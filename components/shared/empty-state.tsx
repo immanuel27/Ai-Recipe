@@ -1,5 +1,5 @@
 import Link from "next/link"
-import type { LucideIcon } from "lucide-react"
+import type { IconType } from "@/components/icons"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
@@ -15,7 +15,7 @@ export function EmptyState({
   action,
   className,
 }: {
-  icon: LucideIcon
+  icon: IconType
   title: string
   description: string
   action?: Action

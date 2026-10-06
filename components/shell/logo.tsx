@@ -10,13 +10,13 @@ export function Logo({ className, onMedia }: { className?: string; onMedia?: boo
       href="/"
       aria-label={`${BRAND.name} home`}
       className={cn(
-        "flex items-center gap-2 rounded-full text-primary outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
+        "flex items-center gap-2 rounded-full text-foreground outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
         onMedia && "text-on-media",
         className
       )}
     >
       <LogoMark />
-      <span className="text-xl font-bold tracking-tight">{BRAND.name}</span>
+      <span className="type-section font-bold whitespace-nowrap">{BRAND.name}</span>
     </Link>
   )
 }

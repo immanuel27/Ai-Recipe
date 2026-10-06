@@ -13,7 +13,7 @@ export function FailuresGallery({
   unlocked: boolean
 }) {
   return (
-    <Card>
+    <Card id="failed-takes" className="scroll-mt-24">
       <CardHeader>
         <CardTitle className="text-lg">Failed attempts</CardTitle>
         <CardDescription>What didn&apos;t work, and why.</CardDescription>

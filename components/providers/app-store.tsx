@@ -21,6 +21,8 @@ interface StoreState {
   purchased: string[]
   saved: string[]
   liked: string[]
+  /** Creator ids the user follows */
+  following: string[]
   createdListings: Listing[]
   sampleData: boolean
   payoutThreshold: PayoutThreshold
@@ -36,6 +38,7 @@ interface StoreActions {
   purchase: (slug: string) => void
   toggleSave: (slug: string) => boolean
   toggleLike: (slug: string) => boolean
+  toggleFollow: (creatorId: string) => boolean
   addListing: (listing: Listing) => void
   setSampleData: (on: boolean) => void
   setPayoutThreshold: (t: PayoutThreshold) => void
@@ -52,6 +55,7 @@ const initialState: StoreState = {
   purchased: [],
   saved: [],
   liked: [],
+  following: [],
   createdListings: [],
   sampleData: true,
   payoutThreshold: { currency: "USD", amount: 50 },
@@ -126,6 +130,16 @@ const actions: StoreActions = {
       liked: nowLiked ? [...s.liked, slug] : s.liked.filter((x) => x !== slug),
     }))
     return nowLiked
+  },
+  toggleFollow: (creatorId) => {
+    const nowFollowing = !getSnapshot().following.includes(creatorId)
+    setState((s) => ({
+      ...s,
+      following: nowFollowing
+        ? [...s.following, creatorId]
+        : s.following.filter((x) => x !== creatorId),
+    }))
+    return nowFollowing
   },
   addListing: (listing) =>
     setState((s) => ({ ...s, createdListings: [listing, ...s.createdListings] })),

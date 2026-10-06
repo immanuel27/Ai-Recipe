@@ -109,7 +109,7 @@ function PromptsSection() {
             <Textarea
               id={`prompts.${i}.text`}
               rows={4}
-              className="bg-card font-mono text-sm"
+              className="bg-card text-sm"
               aria-invalid={!!errors?.[i]?.text}
               {...register(`prompts.${i}.text`)}
             />

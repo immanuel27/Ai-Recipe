@@ -1,7 +1,8 @@
-import { Badge } from "@/components/ui/badge"
+import { ToolLogo } from "@/components/shared/tool-logo"
 import { getToolName } from "@/lib/mock/tools"
 import { cn } from "@/lib/utils"
 
+/** Model name with its round logo on the left. */
 export function ToolBadge({
   tool,
   version,
@@ -14,15 +15,16 @@ export function ToolBadge({
   className?: string
 }) {
   return (
-    <Badge
-      variant="secondary"
+    <span
       className={cn(
-        onMedia && "bg-on-media/15 text-on-media backdrop-blur-md",
+        "inline-flex items-center gap-2 type-meta font-semibold",
+        onMedia ? "text-on-media" : "text-foreground",
         className
       )}
     >
+      <ToolLogo tool={tool} />
       {getToolName(tool)}
-      {version && <span className="opacity-70">{version}</span>}
-    </Badge>
+      {version && <span className="font-normal opacity-70">{version}</span>}
+    </span>
   )
 }

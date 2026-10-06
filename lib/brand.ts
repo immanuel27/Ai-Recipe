@@ -4,10 +4,10 @@ export const BRAND = {
   name: "AI Recipe",
   tagline: "A hub for AI creators: buy and sell the recipes behind amazing shots.",
   description: "Buy the step-by-step recipes behind AI-made videos and images.",
-  background: "#f3f4f6", // --background
-  backgroundDark: "#111216", // .dark --background
-  primary: "#3a49d1", // --primary
-  onPrimary: "#ffffff", // --primary-foreground
+  background: "#faf8f5", // --background
+  backgroundDark: "#141210", // .dark --background
+  primary: "#e8613c", // --brand (paprika, the single accent)
+  onPrimary: "#ffffff",
 }
 
 // Placeholder profile URLs: replace with the real accounts before launch.

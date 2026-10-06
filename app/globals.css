@@ -6,11 +6,20 @@
 /* A phone held sideways: wide but short. Keeps immersive layouts full-screen. */
 @custom-variant short (@media (orientation: landscape) and (max-height: 520px));
 
+/* Motion easing (Kubby MOTION.md). Durations: 160 quick, 240 base, 360 considered.
+   Not inline: keyframes and transitions read these as CSS variables too. */
+@theme {
+  --ease-enter: cubic-bezier(0.2, 0, 0, 1);
+  --ease-exit: cubic-bezier(0.4, 0, 1, 1);
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-uncut), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  /* One family across the product: even "mono" resolves to Uncut Sans */
+  --font-mono: var(--font-uncut), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-heading: var(--font-sans);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
@@ -20,6 +29,14 @@
   --color-sidebar-primary: var(--sidebar-primary);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar: var(--sidebar);
+  --color-brand: var(--brand);
+  --color-brand-foreground: var(--brand-foreground);
+  --color-frame: var(--frame);
+  --color-canvas: var(--canvas);
+  --color-glass: var(--glass);
+  --color-glass-border: var(--glass-border);
+  --color-dock: var(--dock);
+  --color-dock-hover: var(--dock-hover);
   --color-chart-5: var(--chart-5);
   --color-chart-4: var(--chart-4);
   --color-chart-3: var(--chart-3);
@@ -32,6 +49,7 @@
   --color-success: var(--success);
   --color-success-foreground: var(--success-foreground);
   --color-like: var(--like);
+  --color-link: var(--link);
   --color-highlight: var(--highlight);
   --color-highlight-foreground: var(--highlight-foreground);
   --color-scrim: var(--scrim);
@@ -48,111 +66,249 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
-  --radius-sm: calc(var(--radius) * 0.6);
-  --radius-md: calc(var(--radius) * 0.8);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.4);
-  --radius-2xl: calc(var(--radius) * 1.8);
-  --radius-3xl: calc(var(--radius) * 2.2);
-  --radius-4xl: calc(var(--radius) * 2.6);
+
+  /* Radius has hierarchy: chips 4, controls and media 8, panels and dialogs 16, pills full */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.5rem;
+  --radius-3xl: 1.5rem;
+  --radius-4xl: 2rem;
+  /* The app canvas that sits inside the frame */
+  --radius-canvas: 2.5rem;
+
+  /* Layout */
+  --spacing-dock: 5rem;
 }
 
+/* Type roles (Kubby scale). Hierarchy comes from weight and size, one family.
+   Named type-* (not text-*) so class merging never mistakes them for colours. */
+@utility type-display {
+  font-size: 2.75rem;
+  line-height: 3.25rem;
+  letter-spacing: -0.035em;
+  font-weight: 700;
+}
+@utility type-hero {
+  font-size: 5rem;
+  line-height: 1;
+  letter-spacing: -0.045em;
+  font-weight: 400;
+}
+@utility type-headline {
+  font-size: 1.5rem;
+  line-height: 2rem;
+  letter-spacing: -0.02em;
+  font-weight: 700;
+}
+@utility type-title {
+  font-size: 1.75rem;
+  line-height: 2.25rem;
+  letter-spacing: -0.025em;
+  font-weight: 700;
+}
+@utility type-section {
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+  letter-spacing: -0.01em;
+  font-weight: 600;
+}
+@utility type-heading {
+  font-size: 1rem;
+  line-height: 1.5rem;
+  font-weight: 600;
+}
+@utility type-read {
+  font-size: 1rem;
+  line-height: 1.5rem;
+}
+@utility type-body {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+@utility type-meta {
+  font-size: 0.8125rem;
+  line-height: 1.125rem;
+}
+
+/* The glow colours are typed so they can animate when a reel sets new ones */
+@property --glow-core {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: transparent;
+}
+@property --glow-mid {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: transparent;
+}
+@property --glow-rim {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: transparent;
+}
+
+/* Small frosted label over media (tool, price, tag) */
+@utility glass-chip {
+  background-color: oklch(1 0 0 / 16%);
+  border: 1px solid oklch(1 0 0 / 18%);
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
+  backdrop-filter: blur(12px) saturate(150%);
+}
+
+/* A locked teaser: the first line reads clearly, the second fades out to nothing */
+@utility fade-snippet {
+  -webkit-mask-image: linear-gradient(to bottom, #000 50%, transparent 50%), linear-gradient(to right, #000, transparent 85%);
+  mask-image: linear-gradient(to bottom, #000 50%, transparent 50%), linear-gradient(to right, #000, transparent 85%);
+}
+
+/* Frosted round controls: a faint tint, blur, a hairline edge and a top highlight */
+@utility glass-button {
+  background-color: color-mix(in oklch, var(--foreground) 8%, transparent);
+  border: 1px solid var(--glass-border);
+  box-shadow: inset 0 1px 0 oklch(1 0 0 / 12%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  backdrop-filter: blur(16px) saturate(160%);
+  &:hover {
+    background-color: color-mix(in oklch, var(--foreground) 14%, transparent);
+  }
+}
+/* The same glass over video, always tinted white */
+@utility glass-button-media {
+  background-color: oklch(1 0 0 / 14%);
+  border: 1px solid oklch(1 0 0 / 18%);
+  box-shadow: inset 0 1px 0 oklch(1 0 0 / 20%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  backdrop-filter: blur(16px) saturate(160%);
+  &:hover {
+    background-color: oklch(1 0 0 / 22%);
+  }
+}
+
+/* Light: pale frame, white canvas, ink text */
 :root {
-  /* Page + surfaces */
-  --background: oklch(0.962 0.003 264);
-  --foreground: oklch(0.18 0.01 264);
+  --background: oklch(0.985 0.004 275);
+  --foreground: oklch(0.18 0.006 275);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.18 0.01 264);
+  --card-foreground: oklch(0.18 0.006 275);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.18 0.01 264);
+  --popover-foreground: oklch(0.18 0.006 275);
 
-  /* Primary blue (pill buttons, links, active nav) */
-  --primary: oklch(0.5 0.2 272);
-  --primary-foreground: oklch(0.99 0 0);
-  --secondary: oklch(0.955 0.004 264);
-  --secondary-foreground: oklch(0.22 0.01 264);
+  /* Ink pill: the one filled button per screen */
+  --primary: oklch(0.18 0.006 275);
+  --primary-foreground: oklch(0.985 0.004 275);
+  /* Quiet fills: secondary buttons, inputs, hover */
+  --secondary: oklch(0.95 0.005 275);
+  --secondary-foreground: oklch(0.18 0.006 275);
+  --muted: oklch(0.95 0.005 275);
+  --muted-foreground: oklch(0.5 0.01 275);
+  --accent: oklch(0.94 0.006 275);
+  --accent-foreground: oklch(0.18 0.006 275);
 
-  /* Inset panels inside cards */
-  --muted: oklch(0.966 0.003 264);
-  --muted-foreground: oklch(0.52 0.012 264);
-  --accent: oklch(0.95 0.006 264);
-  --accent-foreground: oklch(0.22 0.01 264);
-
-  --destructive: oklch(0.577 0.245 27.325);
-  --success: oklch(0.6 0.14 155);
-  --success-foreground: oklch(0.99 0 0);
-  --like: oklch(0.63 0.23 15);
-
-  /* Orange accent for charts and data */
-  --highlight: oklch(0.72 0.17 52);
+  /* Electric indigo: the single accent. Selection, active states, focus, charts. */
+  --brand: oklch(0.52 0.26 270);
+  --brand-foreground: oklch(0.99 0 0);
+  --link: oklch(0.5 0.24 270);
+  --highlight: oklch(0.52 0.26 270);
   --highlight-foreground: oklch(0.99 0 0);
 
-  /* Over-media colours: scrims and text on top of video/images */
-  --scrim: oklch(0.13 0.005 264);
+  --destructive: oklch(0.577 0.245 27.325);
+  --success: oklch(0.6 0.13 155);
+  --success-foreground: oklch(0.99 0 0);
+  --like: oklch(0.62 0.22 18);
+
+  /* Over-media colours: text and controls on top of video/images */
+  --scrim: oklch(0.12 0.004 275);
   --on-media: oklch(0.99 0 0);
 
-  --border: oklch(0.91 0.004 264);
-  --input: oklch(0.9 0.004 264);
-  --ring: oklch(0.5 0.2 272);
+  --border: oklch(0.9 0.006 275);
+  --input: oklch(0.88 0.006 275);
+  --ring: oklch(0.52 0.26 270);
 
-  --chart-1: oklch(0.72 0.17 52);
-  --chart-2: oklch(0.82 0.11 62);
-  --chart-3: oklch(0.6 0.15 45);
-  --chart-4: oklch(0.7 0.02 264);
-  --chart-5: oklch(0.5 0.02 264);
+  --chart-1: oklch(0.52 0.26 270);
+  --chart-2: oklch(0.8 0.09 275);
+  --chart-3: oklch(0.68 0.01 275);
+  --chart-4: oklch(0.82 0.006 275);
+  --chart-5: oklch(0.9 0.005 275);
 
-  /* Base radius: cards use rounded-xl (≈20px), inputs/inner panels rounded-lg */
-  --radius: 0.875rem;
+  --radius: 0.5rem;
 
   --sidebar: oklch(1 0 0);
-  --sidebar-foreground: oklch(0.18 0.01 264);
-  --sidebar-primary: oklch(0.5 0.2 272);
-  --sidebar-primary-foreground: oklch(0.99 0 0);
-  --sidebar-accent: oklch(0.56 0.2 260 / 10%);
-  --sidebar-accent-foreground: oklch(0.45 0.2 272);
-  --sidebar-border: oklch(0.91 0.004 264);
-  --sidebar-ring: oklch(0.5 0.2 272);
+  --sidebar-foreground: oklch(0.18 0.006 275);
+  --sidebar-primary: oklch(0.18 0.006 275);
+  --sidebar-primary-foreground: oklch(0.985 0.004 275);
+  --sidebar-accent: oklch(0.95 0.005 275);
+  --sidebar-accent-foreground: oklch(0.18 0.006 275);
+  --sidebar-border: oklch(0.9 0.006 275);
+  --sidebar-ring: oklch(0.52 0.26 270);
+
+  /* App shell: a frame around a rounded canvas, the dock lives on the frame */
+  --frame: oklch(0.925 0.006 275);
+  --canvas: oklch(0.99 0.002 275);
+  --glass: oklch(1 0 0 / 62%);
+  --glass-border: oklch(0.2 0.02 275 / 8%);
+  --dock: oklch(0.88 0.006 275);
+  --dock-hover: oklch(0.84 0.008 275);
+  /* Bottom glow: core, mid, rim */
+  --glow-core: oklch(0.62 0.2 272 / 55%);
+  --glow-mid: oklch(0.72 0.16 290 / 35%);
+  --glow-rim: oklch(0.9 0.06 285 / 70%);
 }
 
+/* Dark (default): black frame, near-black canvas, indigo glow */
 .dark {
-  --background: oklch(0.16 0.006 264);
-  --foreground: oklch(0.97 0 0);
-  --card: oklch(0.21 0.006 264);
-  --card-foreground: oklch(0.97 0 0);
-  --popover: oklch(0.21 0.006 264);
-  --popover-foreground: oklch(0.97 0 0);
-  --primary: oklch(0.62 0.19 272);
-  --primary-foreground: oklch(0.99 0 0);
-  --secondary: oklch(0.27 0.006 264);
-  --secondary-foreground: oklch(0.97 0 0);
-  --muted: oklch(0.25 0.006 264);
-  --muted-foreground: oklch(0.7 0.01 264);
-  --accent: oklch(0.28 0.006 264);
-  --accent-foreground: oklch(0.97 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --success: oklch(0.68 0.14 155);
+  --background: oklch(0.11 0.006 275);
+  --foreground: oklch(0.97 0.004 275);
+  --card: oklch(0.15 0.006 275);
+  --card-foreground: oklch(0.97 0.004 275);
+  --popover: oklch(0.19 0.006 275);
+  --popover-foreground: oklch(0.97 0.004 275);
+  --primary: oklch(0.97 0.004 275);
+  --primary-foreground: oklch(0.11 0.006 275);
+  --secondary: oklch(0.21 0.006 275);
+  --secondary-foreground: oklch(0.97 0.004 275);
+  --muted: oklch(0.2 0.006 275);
+  --muted-foreground: oklch(0.68 0.01 275);
+  --accent: oklch(0.26 0.008 275);
+  --accent-foreground: oklch(0.97 0.004 275);
+  --brand: oklch(0.56 0.26 270);
+  --brand-foreground: oklch(0.99 0 0);
+  --link: oklch(0.74 0.14 275);
+  --highlight: oklch(0.62 0.22 272);
+  --highlight-foreground: oklch(0.99 0 0);
+  --destructive: oklch(0.66 0.19 22);
+  --success: oklch(0.7 0.13 155);
   --success-foreground: oklch(0.16 0 0);
-  --like: oklch(0.7 0.2 15);
-  --highlight: oklch(0.75 0.16 55);
-  --highlight-foreground: oklch(0.16 0 0);
-  --scrim: oklch(0.1 0.005 264);
+  --like: oklch(0.68 0.21 18);
+  --scrim: oklch(0.1 0.004 275);
   --on-media: oklch(0.99 0 0);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.62 0.19 272);
-  --chart-1: oklch(0.75 0.16 55);
-  --chart-2: oklch(0.83 0.1 65);
-  --chart-3: oklch(0.62 0.15 45);
-  --chart-4: oklch(0.6 0.02 264);
-  --chart-5: oklch(0.45 0.02 264);
-  --sidebar: oklch(0.21 0.006 264);
-  --sidebar-foreground: oklch(0.97 0 0);
-  --sidebar-primary: oklch(0.62 0.19 272);
-  --sidebar-primary-foreground: oklch(0.99 0 0);
-  --sidebar-accent: oklch(0.64 0.19 260 / 15%);
-  --sidebar-accent-foreground: oklch(0.78 0.12 272);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.62 0.19 272);
+  --border: oklch(1 0 0 / 9%);
+  --input: oklch(1 0 0 / 14%);
+  --ring: oklch(0.62 0.22 272);
+  --chart-1: oklch(0.62 0.22 272);
+  --chart-2: oklch(0.42 0.12 272);
+  --chart-3: oklch(0.55 0.01 275);
+  --chart-4: oklch(0.42 0.008 275);
+  --chart-5: oklch(0.32 0.006 275);
+  --sidebar: oklch(0.15 0.006 275);
+  --sidebar-foreground: oklch(0.97 0.004 275);
+  --sidebar-primary: oklch(0.97 0.004 275);
+  --sidebar-primary-foreground: oklch(0.11 0.006 275);
+  --sidebar-accent: oklch(0.21 0.006 275);
+  --sidebar-accent-foreground: oklch(0.97 0.004 275);
+  --sidebar-border: oklch(1 0 0 / 9%);
+  --sidebar-ring: oklch(0.62 0.22 272);
+
+  --frame: oklch(0 0 0);
+  --canvas: oklch(0.11 0.006 275);
+  --glass: oklch(0.2 0.01 275 / 55%);
+  --glass-border: oklch(1 0 0 / 9%);
+  --dock: oklch(0.2 0.004 275);
+  --dock-hover: oklch(0.26 0.006 275);
+  --glow-core: oklch(0.42 0.28 266);
+  --glow-mid: oklch(0.55 0.25 285);
+  --glow-rim: oklch(0.86 0.08 285);
 }
 
 @layer base {
@@ -160,20 +316,37 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background type-body text-foreground;
   }
   button:not(:disabled), [role="button"]:not(:disabled) {
     cursor: pointer;
   }
   html {
     @apply font-sans;
+    /* Reels repaint the glow from the current video; ease between them */
+    transition:
+      --glow-core 900ms var(--ease-standard),
+      --glow-mid 900ms var(--ease-standard),
+      --glow-rim 900ms var(--ease-standard);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }
 
 @layer utilities {
-  /* Small uppercase tracked label that sits above a large bold value */
-  .label-caps {
-    @apply text-[0.6875rem] font-medium tracking-[0.08em] text-muted-foreground uppercase;
+  /* Frosted card that floats over the canvas glow */
+  .glass {
+    background-color: var(--glass);
+    border: 1px solid var(--glass-border);
+    -webkit-backdrop-filter: blur(24px) saturate(140%);
+    backdrop-filter: blur(24px) saturate(140%);
+  }
+  /* The canvas atmosphere: light rising from the bottom edge */
+  .canvas-glow {
+    background:
+      radial-gradient(70% 38% at 50% 100%, var(--glow-rim) 0%, transparent 70%),
+      radial-gradient(95% 55% at 50% 100%, var(--glow-mid) 0%, transparent 72%),
+      radial-gradient(130% 75% at 50% 108%, var(--glow-core) 0%, transparent 70%);
   }
   .no-scrollbar {
     scrollbar-width: none;
@@ -183,17 +356,28 @@
   }
 }
 
-@keyframes float {
-  0%, 100% { translate: 0 0; }
-  50% { translate: 0 -12px; }
-}
-
 @keyframes heart-burst {
   0% { opacity: 0; scale: 0.4; rotate: -12deg; }
   15% { opacity: 1; scale: 1.2; rotate: -12deg; }
   30% { scale: 1; rotate: -12deg; }
   75% { opacity: 1; translate: 0 0; }
   100% { opacity: 0; scale: 1.1; translate: 0 -40px; rotate: -12deg; }
+}
+
+/* Like burst: hearts thrown out from the button, and a ring */
+@keyframes heart-fly {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.2) rotate(0deg); }
+  18% { opacity: 1; }
+  70% { opacity: 1; }
+  100% {
+    opacity: 0;
+    transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(var(--s)) rotate(var(--r));
+  }
+}
+
+@keyframes like-ring {
+  0% { opacity: 0.9; transform: scale(0.7); }
+  100% { opacity: 0; transform: scale(1.7); }
 }
 
 @keyframes like-pop {

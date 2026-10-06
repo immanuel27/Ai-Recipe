@@ -1,7 +1,8 @@
 import type { Creator } from "@/lib/types"
 
+// Saturated backdrops so avatars read as bright chips on the dark canvas
 const avatar = (seed: string) =>
-  `https://api.dicebear.com/9.x/notionists/svg?seed=${seed}`
+  `https://api.dicebear.com/9.x/notionists/svg?seed=${seed}&backgroundColor=ff5e5b,3d5afe,ffd23f,2ec4b6,c77dff,ff9f1c`
 
 export const CREATORS: Creator[] = [
   {

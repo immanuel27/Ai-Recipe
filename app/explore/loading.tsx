@@ -1,21 +1,28 @@
-import { ExploreGridSkeleton } from "@/components/explore/explore-grid"
 import { Skeleton } from "@/components/ui/skeleton"
 
-export default function Loading() {
+const HEIGHTS = ["h-72", "h-96", "h-64", "h-80", "h-56", "h-96"]
+
+export default function ExploreLoading() {
   return (
-    <div className="mx-auto w-full max-w-6xl px-4 pb-12 md:px-6 md:pb-16">
-      <div className="flex flex-col items-center gap-3 pt-8 pb-10 md:pt-14 md:pb-14">
-        <Skeleton className="size-8 rounded-md" />
-        <Skeleton className="h-12 w-48" />
-        <Skeleton className="h-5 w-56" />
-        <Skeleton className="mt-4 h-11 w-full max-w-md rounded-full" />
+    <div
+      role="status"
+      aria-label="Loading Explore"
+      className="grid w-full gap-6 px-3 pt-24 pb-16 md:px-6 lg:grid-cols-[13rem_minmax(0,1fr)] lg:gap-x-12 lg:px-10"
+    >
+      <div className="hidden flex-col gap-3 lg:flex">
+        {Array.from({ length: 8 }, (_, i) => (
+          <Skeleton key={i} className="h-6 w-32 rounded-lg" />
+        ))}
       </div>
-      <Skeleton className="mx-auto h-9 w-56 rounded-full" />
-      <div className="mt-8 mb-6 flex items-center justify-between md:mt-12">
-        <Skeleton className="h-7 w-32" />
-        <Skeleton className="h-10 w-48 rounded-full" />
+      <div className="flex flex-col gap-6">
+        <Skeleton className="h-10 w-1/2 rounded-full" />
+        <Skeleton className="h-10 rounded-full" />
+        <div className="columns-2 gap-4 xl:columns-3 2xl:columns-4">
+          {HEIGHTS.map((h, i) => (
+            <Skeleton key={i} className={`mb-4 ${h} rounded-2xl`} />
+          ))}
+        </div>
       </div>
-      <ExploreGridSkeleton />
     </div>
   )
 }

@@ -1,8 +1,8 @@
 "use client"
 
 import * as React from "react"
-import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react"
 
+import { CaretLeftIcon, CaretRightIcon } from "@/components/icons"
 import { FitImage } from "@/components/shared/fit-media"
 import { usePrefersReducedMotion } from "@/hooks/use-prefers-reduced-motion"
 import { cn } from "@/lib/utils"
@@ -92,16 +92,16 @@ export function MediaCarousel({
           <div
             aria-hidden
             className={cn(
-              "pointer-events-none absolute left-1/2 flex -translate-x-1/2 gap-1.5 rounded-full bg-scrim/40 px-2.5 py-1.5 backdrop-blur-md",
-              dotsClassName ?? "bottom-4"
+              "pointer-events-none absolute left-1/2 flex -translate-x-1/2 gap-1 drop-shadow",
+              dotsClassName ?? "bottom-3"
             )}
           >
             {images.map((_, i) => (
               <span
                 key={i}
                 className={cn(
-                  "size-1.5 rounded-full bg-on-media transition-all",
-                  i === index ? "w-4 opacity-100" : "opacity-50"
+                  "size-1.5 rounded-full bg-on-media transition-opacity duration-160",
+                  i === index ? "opacity-100" : "opacity-40"
                 )}
               />
             ))}
@@ -116,9 +116,9 @@ export function MediaCarousel({
               type="button"
               onClick={() => goTo(index - 1)}
               aria-label="Previous image"
-              className="absolute top-1/2 left-3 z-10 hidden size-9 -translate-y-1/2 items-center justify-center rounded-full bg-on-media/85 text-scrim shadow-md opacity-0 transition-opacity outline-none group-hover/carousel:opacity-100 focus-visible:opacity-100 focus-visible:ring-3 focus-visible:ring-on-media/60 pointer-fine:flex"
+              className="absolute top-1/2 left-3 z-10 hidden size-7 -translate-y-1/2 items-center justify-center rounded-full bg-on-media/85 text-scrim shadow-md opacity-0 transition-opacity outline-none group-hover/carousel:opacity-100 focus-visible:opacity-100 focus-visible:ring-3 focus-visible:ring-on-media/60 pointer-fine:flex"
             >
-              <ChevronLeftIcon className="size-5" aria-hidden />
+              <CaretLeftIcon weight="bold" className="size-4" aria-hidden />
             </button>
           )}
           {index < images.length - 1 && (
@@ -126,9 +126,9 @@ export function MediaCarousel({
               type="button"
               onClick={() => goTo(index + 1)}
               aria-label="Next image"
-              className="absolute top-1/2 right-3 z-10 hidden size-9 -translate-y-1/2 items-center justify-center rounded-full bg-on-media/85 text-scrim shadow-md opacity-0 transition-opacity outline-none group-hover/carousel:opacity-100 focus-visible:opacity-100 focus-visible:ring-3 focus-visible:ring-on-media/60 pointer-fine:flex"
+              className="absolute top-1/2 right-3 z-10 hidden size-7 -translate-y-1/2 items-center justify-center rounded-full bg-on-media/85 text-scrim shadow-md opacity-0 transition-opacity outline-none group-hover/carousel:opacity-100 focus-visible:opacity-100 focus-visible:ring-3 focus-visible:ring-on-media/60 pointer-fine:flex"
             >
-              <ChevronRightIcon className="size-5" aria-hidden />
+              <CaretRightIcon weight="bold" className="size-4" aria-hidden />
             </button>
           )}
         </>

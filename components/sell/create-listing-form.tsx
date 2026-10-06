@@ -29,7 +29,7 @@ const STEPS = [
   {
     id: "recipe",
     title: "Recipe",
-    description: "Everything buyers pay for: prompts, settings, assets, edits and failures. Then publish.",
+    description: "What buyers unlock. Only the prompts are required.",
   },
 ] as const
 

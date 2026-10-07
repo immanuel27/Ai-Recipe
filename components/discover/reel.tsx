@@ -117,11 +117,12 @@ export function Reel({
       data-reel
       data-index={index}
       aria-label={listing.title}
-      className="flex h-full snap-start snap-always items-center justify-center gap-8 px-3 pt-2 pb-3 md:px-10 md:pt-4 md:pb-6 xl:gap-12"
+      className="flex h-full snap-start snap-always items-center justify-center gap-8 md:px-10 md:pt-4 md:pb-6 xl:gap-12"
     >
       <RecipeCard listing={listing} className="hidden max-h-full w-80 shrink-0 lg:flex xl:w-88" />
 
-      <div className="relative aspect-9/16 h-full max-w-full overflow-hidden rounded-3xl bg-scrim shadow-2xl shadow-scrim/50">
+      {/* Phones: the reel fills the whole screen width; tablets and up: a framed 9:16 card */}
+      <div className="relative h-full w-full overflow-hidden bg-scrim md:aspect-9/16 md:w-auto md:max-w-full md:rounded-3xl md:shadow-2xl md:shadow-scrim/50">
         {isVideo ? (
           <>
             <video

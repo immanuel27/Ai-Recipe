@@ -15,6 +15,8 @@ const nextConfig: NextConfig = {
   // "Dashboard" was renamed to "Profile"
   async redirects() {
     return [
+      // Browsers request /favicon.ico on their own; the real icon is generated at /icon/32
+      { source: "/favicon.ico", destination: "/icon/32", permanent: true },
       { source: "/dashboard", destination: "/profile/overview", permanent: true },
       { source: "/dashboard/:path*", destination: "/profile/:path*", permanent: true },
     ]

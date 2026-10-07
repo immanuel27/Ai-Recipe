@@ -19,7 +19,7 @@ import { Input } from "@/components/ui/input"
 import { useAppStore } from "@/components/providers/app-store"
 import { createProfile } from "@/lib/supabase/account"
 import { createClient } from "@/lib/supabase/client"
-import { supabaseConfigured } from "@/lib/supabase/env"
+import { SUPABASE_KEY, SUPABASE_URL, supabaseConfigured } from "@/lib/supabase/env"
 import type { SessionUser } from "@/lib/types"
 
 type Step = "method" | "email" | "sent" | "username"
@@ -66,6 +66,17 @@ export function SignInCard() {
   async function continueWithGoogle() {
     if (supabaseConfigured) {
       setError(null)
+      // Supabase shows a raw JSON error page if Google is off, so check first
+      const enabled = await fetch(`${SUPABASE_URL}/auth/v1/settings`, {
+        headers: { apikey: SUPABASE_KEY! },
+      })
+        .then((r) => r.json())
+        .then((d: { external?: { google?: boolean } }) => !!d.external?.google)
+        .catch(() => true) // can't tell: let Supabase decide
+      if (!enabled) {
+        setError("Google sign-in isn't switched on yet. Use email for now.")
+        return
+      }
       const { error } = await createClient().auth.signInWithOAuth({
         provider: "google",
         options: { redirectTo: callbackUrl() },

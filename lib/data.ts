@@ -17,7 +17,16 @@ const LISTING_COLUMNS =
 /** Every listing (with teaser recipes) and creator. Fetched once per request. */
 export const getCatalog = cache(async (): Promise<{ listings: Listing[]; creators: Creator[] }> => {
   if (!supabaseConfigured) return { listings: LISTINGS, creators: CREATORS }
+  try {
+    return await fetchCatalog()
+  } catch (error) {
+    // Keep the site up if Supabase is misconfigured or down; the real error is in the server logs
+    console.error("[data] Supabase catalog read failed, showing demo data instead:", error)
+    return { listings: LISTINGS, creators: CREATORS }
+  }
+})
 
+async function fetchCatalog() {
   const supabase = await createClient()
   const [listingsRes, profilesRes] = await Promise.all([
     supabase.from("listings").select(LISTING_COLUMNS).order("trending_score", { ascending: false }),
@@ -29,7 +38,7 @@ export const getCatalog = cache(async (): Promise<{ listings: Listing[]; creator
     listings: (listingsRes.data as ListingRow[]).map((row) => listingFromRow(row)),
     creators: (profilesRes.data as ProfileRow[]).map(profileToCreator),
   }
-})
+}
 
 export async function getFeedListings() {
   const { listings } = await getCatalog()
@@ -60,7 +69,15 @@ export async function getCreatorListings(creatorId: string, excludeSlug?: string
  */
 export const getListing = cache(async (slug: string): Promise<Listing | undefined> => {
   if (!supabaseConfigured) return LISTINGS.find((l) => l.slug === slug)
+  try {
+    return await fetchListing(slug)
+  } catch (error) {
+    console.error(`[data] Supabase read of listing "${slug}" failed, showing demo data instead:`, error)
+    return LISTINGS.find((l) => l.slug === slug)
+  }
+})
 
+async function fetchListing(slug: string) {
   const supabase = await createClient()
   const { data: row, error } = await supabase
     .from("listings")
@@ -76,7 +93,7 @@ export const getListing = cache(async (slug: string): Promise<Listing | undefine
     .eq("listing_id", (row as ListingRow).id)
     .maybeSingle()
   return listingFromRow(row as ListingRow, recipe ?? undefined)
-})
+}
 
 export const EXPLORE_PAGE_SIZE = 24
 

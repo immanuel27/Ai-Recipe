@@ -83,7 +83,7 @@ public/              Posters, platform logos
 
 All media in this demo is **placeholder content and isn't AI-generated**. The recipes attached to it are illustrative.
 
-- Animated clips are short excerpts of [Blender Studio open movies](https://studio.blender.org/films/) (CC BY), streamed from Wikimedia Commons.
+- Animated clips are short excerpts of [Blender Studio open movies](https://studio.blender.org/films/) (CC BY) from Wikimedia Commons, cut to 12-second clips in `public/clips/`.
 - Some clips use the [Mixkit Stock Video Free License](https://mixkit.co/license/).
 - Other sources: test-videos.co.uk, MDN sample media, Lorem Picsum photos and DiceBear avatars.
 

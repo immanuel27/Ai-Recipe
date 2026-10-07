@@ -52,7 +52,11 @@ export function MasonryTile({
   React.useEffect(() => {
     const v = videoRef.current
     if (!v) return
-    if (inView && !reducedMotion) v.play().catch(() => {})
+    if (inView && !reducedMotion) {
+      // React doesn't reliably set the muted property, and browsers block unmuted autoplay
+      v.muted = true
+      v.play().catch(() => {})
+    }
     else v.pause()
   }, [inView, reducedMotion])
 
@@ -100,27 +104,31 @@ export function MasonryTile({
           <span className="tabular-nums opacity-80">{formatPrice(listing.price)}</span>
         </span>
 
-        <span className="absolute inset-x-0 bottom-0 flex items-end gap-3 p-3 text-on-media">
+        {/* The whole tile opens the recipe */}
+        <Link
+          href={`/r/${listing.slug}`}
+          aria-label={listing.title}
+          onClick={(e) => {
+            if (!onOpen || e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return
+            e.preventDefault()
+            onOpen()
+          }}
+          className="absolute inset-0 outline-none"
+        />
+
+        <span className="pointer-events-none absolute inset-x-0 bottom-0 flex items-end gap-3 p-3 text-on-media">
           {creator && (
             <Link
               href={profileHref(creator.username)}
               aria-label={`${creator.displayName} profile`}
-              className="relative z-10 shrink-0 rounded-full outline-none ring-2 ring-on-media/40 focus-visible:ring-on-media"
+              className="pointer-events-auto relative z-10 shrink-0 rounded-full outline-none ring-2 ring-on-media/40 focus-visible:ring-on-media"
             >
               <CreatorAvatar creator={creator} className="size-9" />
             </Link>
           )}
-          <Link
-            href={`/r/${listing.slug}`}
-            onClick={(e) => {
-              if (!onOpen || e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return
-              e.preventDefault()
-              onOpen()
-            }}
-            className="min-w-0 flex-1 translate-y-1 truncate pb-2 type-body font-semibold opacity-0 outline-none transition duration-240 ease-enter group-focus-within:translate-y-0 group-focus-within:opacity-100 group-hover:translate-y-0 group-hover:opacity-100 after:absolute after:inset-0"
-          >
+          <span className="min-w-0 flex-1 translate-y-1 truncate pb-2 type-body font-semibold opacity-0 transition duration-240 ease-enter group-focus-within:translate-y-0 group-focus-within:opacity-100 group-hover:translate-y-0 group-hover:opacity-100">
             {listing.title}
-          </Link>
+          </span>
           <span aria-hidden className="glass-chip relative flex size-9 shrink-0 items-center justify-center rounded-full">
             <GoIcon className="size-4" />
           </span>

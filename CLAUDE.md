@@ -13,7 +13,7 @@ A marketplace where creators sell step-by-step recipes for AI-made videos and im
 - Forms: react-hook-form + zod. Charts: shadcn `chart` (recharts). Toasts: sonner.
 - Node 20.9+ is required. Commands: `npm run dev`, `npm run lint`, `npm run build`. (On the original dev machine Node lives in `~/.local/node/bin`, which isn't on the default PATH.)
 - Mock media is placeholder only, and none of it is AI-generated.
-  - Cartoon videos are short `clip` ranges of Blender Studio open movies (CC BY, streamed from Wikimedia Commons) plus Mixkit clips. Only use Mixkit items labelled "Free License"; "Restricted" ones are personal-use only.
+  - Cartoon videos are 12-second clips of Blender Studio open movies (CC BY, from Wikimedia Commons), pre-cut to `public/clips/` so they load fast, plus Mixkit clips. Only use Mixkit items labelled "Free License"; "Restricted" ones are personal-use only.
   - Every third-party clip must carry a `credit` (shown under the listing media and on `/credits`). Posters are saved in `public/posters/`.
   - Older placeholders: test-videos.co.uk and MDN clips, picsum photos.
   - Uploaded videos are kept in memory for the session as blob URLs; only their captured poster is persisted.

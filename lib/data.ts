@@ -1,15 +1,31 @@
+import { unstable_cache } from "next/cache"
 import { cache } from "react"
 
 import { CREATORS } from "@/lib/mock/creators"
 import { LISTINGS } from "@/lib/mock/listings"
 import { getToolName } from "@/lib/mock/tools"
 import { supabaseConfigured } from "@/lib/supabase/env"
+import { createPublicClient } from "@/lib/supabase/public"
 import { createClient } from "@/lib/supabase/server"
-import { listingFromRow, profileToCreator, type ListingRow, type ProfileRow } from "@/lib/supabase/mappers"
+import {
+  listingFromRow,
+  profileToCreator,
+  recipeFromRow,
+  type ListingRow,
+  type ProfileRow,
+  type RecipeRow,
+} from "@/lib/supabase/mappers"
 import type { Creator, ExploreFilters, Listing } from "@/lib/types"
 
 // Data access for server components. Reads from Supabase when it's configured
 // (.env.local), otherwise from the demo data in lib/mock so a fresh clone runs.
+//
+// The public catalog (listings + creators) is the same for everyone, so it's
+// cached across requests for CATALOG_TTL seconds (tag "catalog"; publishing
+// revalidates it via /api/revalidate). Only recipe access is per viewer.
+
+export const CATALOG_TAG = "catalog"
+const CATALOG_TTL = 60
 
 const LISTING_COLUMNS =
   "id, slug, creator_id, title, description, type, media_url, poster_url, images, clip, credit, ai_tag, tool, tool_version, tags, price_cents, pricing, is_adult, views, sales, saves, likes, trending_score, preview, created_at"
@@ -18,7 +34,7 @@ const LISTING_COLUMNS =
 export const getCatalog = cache(async (): Promise<{ listings: Listing[]; creators: Creator[] }> => {
   if (!supabaseConfigured) return { listings: LISTINGS, creators: CREATORS }
   try {
-    return await fetchCatalog()
+    return await cachedCatalog()
   } catch (error) {
     // Keep the site up if Supabase is misconfigured or down; the real error is in the server logs
     console.error("[data] Supabase catalog read failed, showing demo data instead:", error)
@@ -26,8 +42,13 @@ export const getCatalog = cache(async (): Promise<{ listings: Listing[]; creator
   }
 })
 
+const cachedCatalog = unstable_cache(() => fetchCatalog(), ["catalog-v1"], {
+  revalidate: CATALOG_TTL,
+  tags: [CATALOG_TAG],
+})
+
 async function fetchCatalog() {
-  const supabase = await createClient()
+  const supabase = createPublicClient()
   const [listingsRes, profilesRes] = await Promise.all([
     supabase.from("listings").select(LISTING_COLUMNS).order("trending_score", { ascending: false }),
     supabase.from("profiles").select("id, username, display_name, bio, avatar_url"),
@@ -78,21 +99,25 @@ export const getListing = cache(async (slug: string): Promise<Listing | undefine
 })
 
 async function fetchListing(slug: string) {
+  // The listing itself comes from the shared cache; only the recipe depends on who's viewing
+  const { listings } = await cachedCatalog()
+  let listing = listings.find((l) => l.slug === slug)
   const supabase = await createClient()
-  const { data: row, error } = await supabase
-    .from("listings")
-    .select(LISTING_COLUMNS)
-    .eq("slug", slug)
-    .maybeSingle()
-  if (error) throw error
-  if (!row) return undefined
+  if (!listing) {
+    // Just published and not in the cache yet
+    const { data: row, error } = await supabase.from("listings").select(LISTING_COLUMNS).eq("slug", slug).maybeSingle()
+    if (error) throw error
+    if (!row) return undefined
+    listing = listingFromRow(row as ListingRow)
+  }
 
+  // RLS returns the recipe only for free listings, the creator, or buyers
   const { data: recipe } = await supabase
     .from("recipes")
     .select("prompts, settings, assets, edit_stack, failures")
-    .eq("listing_id", (row as ListingRow).id)
+    .eq("listing_id", listing.id)
     .maybeSingle()
-  return listingFromRow(row as ListingRow, recipe ?? undefined)
+  return recipe ? { ...listing, recipe: recipeFromRow(recipe as RecipeRow), recipeLocked: false } : listing
 }
 
 export const EXPLORE_PAGE_SIZE = 24

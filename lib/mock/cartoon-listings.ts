@@ -5,65 +5,54 @@ import type { Listing, MediaCredit, Recipe, ToolId } from "@/lib/types"
  *
  * Footage is NOT AI-generated. It's openly licensed animation used as stand-in
  * content until creators upload real work:
- * - Blender Studio open movies (CC BY), streamed from Wikimedia Commons; each
- *   listing plays a short clip of the film and credits it.
+ * - Blender Studio open movies (CC BY) from Wikimedia Commons. Each listing
+ *   plays a 12-second clip cut from the film (public/clips) and credits it.
  * - Mixkit clips under the Mixkit Stock Video Free License.
  * Posters are frames saved in /public/posters.
  */
 
-const COMMONS = "https://upload.wikimedia.org/wikipedia/commons"
-
 const FILMS = {
   wingit: {
-    path: "3/38/WING_IT%21_-_Blender_Open_Movie-full_movie.webm",
     work: "WING IT!",
     license: "CC BY 4.0",
     page: "https://commons.wikimedia.org/wiki/File:WING_IT!_-_Blender_Open_Movie-full_movie.webm",
   },
   sprite: {
-    path: "7/76/Sprite_Fright_-_Blender_Open_Movie-full_movie.webm",
     work: "Sprite Fright",
     license: "CC BY 4.0",
     page: "https://commons.wikimedia.org/wiki/File:Sprite_Fright_-_Blender_Open_Movie-full_movie.webm",
   },
   hero: {
-    path: "a/a9/HERO_-_Blender_Open_Movie-full_movie.webm",
     work: "HERO",
     license: "CC BY 4.0",
     page: "https://commons.wikimedia.org/wiki/File:HERO_-_Blender_Open_Movie-full_movie.webm",
   },
   llama: {
-    path: "a/ab/Caminandes_3_-_Llamigos_-_Blender_Animated_Short.webm",
     work: "Caminandes 3: Llamigos",
     license: "CC BY 3.0",
     page: "https://commons.wikimedia.org/wiki/File:Caminandes_3_-_Llamigos_-_Blender_Animated_Short.webm",
   },
   glass: {
-    path: "0/02/Glass_Half_-_Blender_Open_Movie-full_movie.webm",
     work: "Glass Half",
     license: "CC BY 4.0",
     page: "https://commons.wikimedia.org/wiki/File:Glass_Half_-_Blender_Open_Movie-full_movie.webm",
   },
   coffee: {
-    path: "3/3f/Coffee_Run_-_Blender_Open_Movie-full_movie.webm",
     work: "Coffee Run",
     license: "CC BY 4.0",
     page: "https://commons.wikimedia.org/wiki/File:Coffee_Run_-_Blender_Open_Movie-full_movie.webm",
   },
   spring: {
-    path: "a/a5/Spring_-_Blender_Open_Movie.webm",
     work: "Spring",
     license: "CC BY 4.0",
     page: "https://commons.wikimedia.org/wiki/File:Spring_-_Blender_Open_Movie.webm",
   },
   cosmos: {
-    path: "3/36/Cosmos_Laundromat_-_First_Cycle_-_Official_Blender_Foundation_release.webm",
     work: "Cosmos Laundromat",
     license: "CC BY-SA 3.0",
     page: "https://commons.wikimedia.org/wiki/File:Cosmos_Laundromat_-_First_Cycle_-_Official_Blender_Foundation_release.webm",
   },
   charge: {
-    path: "7/7a/Charge_-_Blender_Open_Movie-full_movie.webm",
     work: "Charge",
     license: "CC BY 4.0",
     page: "https://commons.wikimedia.org/wiki/File:Charge_-_Blender_Open_Movie-full_movie.webm",
@@ -76,12 +65,17 @@ const LICENSE_URLS: Record<string, string> = {
   "CC BY-SA 3.0": "https://creativecommons.org/licenses/by-sa/3.0/",
 }
 
-/** A short clip of a Blender open movie (720p VP9 transcode on Commons). */
+const timecode = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`
+
+/**
+ * A 12-second clip of a Blender open movie, starting `start` seconds in. The
+ * clip is pre-cut to public/clips/<poster>.mp4 so it loads fast; streaming the
+ * full film from Commons and seeking took 10s+ and ~30 MB per clip.
+ */
 function film(key: keyof typeof FILMS, start: number, poster: string) {
   const f = FILMS[key]
-  const file = f.path.split("/").pop()!
   const credit: MediaCredit = {
-    work: f.work,
+    work: `${f.work} (${timecode(start)}–${timecode(start + 12)})`,
     author: "Blender Foundation / Blender Studio",
     license: f.license,
     licenseUrl: LICENSE_URLS[f.license],
@@ -89,9 +83,8 @@ function film(key: keyof typeof FILMS, start: number, poster: string) {
   }
   return {
     type: "video" as const,
-    mediaUrl: `${COMMONS}/transcoded/${f.path}/${file}.720p.vp9.webm`,
+    mediaUrl: `/clips/${poster}.mp4`,
     posterUrl: `/posters/${poster}.jpg`,
-    clip: { start, end: start + 12 },
     credit,
   }
 }

@@ -98,6 +98,9 @@ export async function publishListing(draft: Listing, profileId: string): Promise
     throw new Error(recipeError.message)
   }
 
+  // Show the new listing everywhere right away (the public catalog is cached)
+  await fetch("/api/revalidate", { method: "POST" }).catch(() => {})
+
   return {
     ...draft,
     id: row.id,

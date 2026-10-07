@@ -85,8 +85,13 @@ export function Reel({
   React.useEffect(() => {
     const v = videoRef.current
     if (!v) return
-    if (active && !reducedMotion && !userPaused) v.play().catch(() => {})
-    else v.pause()
+    if (active && !reducedMotion && !userPaused) {
+      // Set before playing: browsers only autoplay muted video, and React doesn't reliably set it
+      v.muted = muted
+      v.play().catch(() => {})
+    } else v.pause()
+    // muted is applied here only for the first play; its own effect below handles toggles
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active, reducedMotion, userPaused])
 
   const [wasActive, setWasActive] = React.useState(active)

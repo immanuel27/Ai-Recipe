@@ -44,8 +44,16 @@ function ModalVideo({ listing }: { listing: Listing }) {
   useClipLoop(videoRef, listing.clip)
 
   React.useEffect(() => {
-    if (!reducedMotion) videoRef.current?.play().catch(() => {})
+    const v = videoRef.current
+    if (!v || reducedMotion) return
+    // Autoplay only works muted, and React doesn't reliably set the property itself
+    v.muted = true
+    v.play().catch(() => {})
   }, [reducedMotion])
+
+  React.useEffect(() => {
+    if (videoRef.current) videoRef.current.muted = muted
+  }, [muted])
 
   function toggle() {
     const v = videoRef.current

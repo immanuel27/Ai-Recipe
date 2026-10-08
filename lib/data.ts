@@ -61,9 +61,29 @@ async function fetchCatalog() {
   }
 }
 
+/** New posts start at the top of Trending, then settle into their own score over this many hours */
+const FRESH_HOURS = 72
+/** A brand-new post ranks this high (demo posts score up to ~100) */
+const FRESH_BOOST = 100
+
+/** Trending score plus a boost for new posts that fades out over FRESH_HOURS, so new creators get seen. */
+export function rankScore(listing: Listing, now = Date.now()) {
+  const ageHours = (now - new Date(listing.createdAt).getTime()) / 3_600_000
+  const fresh = Number.isFinite(ageHours) ? Math.max(0, 1 - Math.max(0, ageHours) / FRESH_HOURS) : 0
+  return listing.trendingScore + FRESH_BOOST * fresh
+}
+
+function byRank(listings: Listing[]) {
+  const now = Date.now()
+  return listings
+    .map((l) => [l, rankScore(l, now)] as const)
+    .sort((a, b) => b[1] - a[1])
+    .map(([l]) => l)
+}
+
 export async function getFeedListings() {
   const { listings } = await getCatalog()
-  return [...listings].sort((a, b) => b.trendingScore - a.trendingScore)
+  return byRank(listings)
 }
 
 export async function getCreators() {
@@ -175,7 +195,7 @@ export function filterListings(
     case "price-asc":
       return out.sort((a, b) => a.price - b.price)
     default:
-      return out.sort((a, b) => b.trendingScore - a.trendingScore)
+      return byRank(out)
   }
 }
 

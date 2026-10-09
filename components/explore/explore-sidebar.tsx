@@ -56,17 +56,17 @@ export function ExploreSidebar({ filters, toolCounts }: { filters: ExploreFilter
         <Item href={exploreHref({ type: "website" })} active={onlyType("website")}>
           Websites
         </Item>
-        <Item href={exploreHref({ price: "free" })} active={filters.price === "free"}>
+        <Item href={exploreHref({ type: "all", price: "free" })} active={filters.price === "free"}>
           Free to try
         </Item>
-        <Item href={exploreHref({ price: "under-10" })} active={filters.price === "under-10"}>
+        <Item href={exploreHref({ type: "all", price: "under-10" })} active={filters.price === "under-10"}>
           Under $10
         </Item>
       </Group>
 
       <Group label="Tools">
         {TOOLS.filter((t) => toolCounts[t.id]).map((t) => (
-          <Item key={t.id} href={exploreHref({ tool: t.id })} active={filters.tool === t.id}>
+          <Item key={t.id} href={exploreHref({ type: "all", tool: t.id })} active={filters.tool === t.id}>
             <ToolLogo tool={t.id} className="size-4" />
             {t.name}
             <span className="type-meta text-muted-foreground/70 tabular-nums">{toolCounts[t.id]}</span>

@@ -39,7 +39,7 @@ export default async function ExplorePage(props: PageProps<"/explore">) {
                   <Logo />
                 </div>
                 <h1 className="col-span-2 type-headline lg:col-span-1 lg:col-start-1 lg:row-start-1">
-                  What do you want to make?
+                  Steal the recipy, make it your own
                 </h1>
               </div>
               <ExploreSearch filters={filters} />

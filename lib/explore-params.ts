@@ -44,7 +44,8 @@ export function parseExploreParams(params: RawParams): ExploreFilters {
   const q = (first(params.q) ?? "").trim().slice(0, 80)
   const page = Number.parseInt(first(params.page) ?? "1", 10)
   return {
-    type: TYPE_OPTIONS.some((o) => o.value === type) ? (type as ExploreType) : "all",
+    // Explore opens on Videos; ?type=all still shows everything
+    type: TYPE_OPTIONS.some((o) => o.value === type) ? (type as ExploreType) : EXPLORE_DEFAULTS.type,
     tool: TOOLS.some((t) => t.id === tool) ? (tool as ToolId) : "all",
     tag,
     price: PRICE_OPTIONS.some((o) => o.value === price) ? (price as ExplorePrice) : "any",
@@ -55,7 +56,7 @@ export function parseExploreParams(params: RawParams): ExploreFilters {
 }
 
 export const EXPLORE_DEFAULTS: Omit<ExploreFilters, "page"> = {
-  type: "all",
+  type: "video",
   tool: "all",
   tag: "",
   price: "any",

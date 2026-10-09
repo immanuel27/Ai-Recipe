@@ -21,8 +21,7 @@ const TABS = [
 
 /**
  * The row under the title: media type as one segmented control on the left
- * (tap the active side again for everything), the result count and sort
- * grouped quietly on the right.
+ * (Videos by default), the result count and sort grouped quietly on the right.
  */
 export function ExploreChips({
   filters,
@@ -42,7 +41,7 @@ export function ExploreChips({
           return (
             <Link
               key={t.value}
-              href={exploreHref({ ...filters, type: active ? "all" : t.value, page: 1 })}
+              href={exploreHref({ ...filters, type: t.value, page: 1 })}
               aria-current={active ? "page" : undefined}
               className={cn(
                 "flex h-9 items-center rounded-full px-5 type-body font-semibold outline-none transition-colors duration-160 focus-visible:ring-2 focus-visible:ring-ring",

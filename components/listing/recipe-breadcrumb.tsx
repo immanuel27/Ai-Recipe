@@ -41,7 +41,7 @@ export function RecipeBreadcrumb({ listing }: { listing: Listing }) {
           </li>
           <li className="shrink-0">
             <Link
-              href={exploreHref({ tool: listing.tool })}
+              href={exploreHref({ type: "all", tool: listing.tool })}
               className="flex items-center gap-2 rounded-sm outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
             >
               <ToolLogo tool={listing.tool} className="size-4" />

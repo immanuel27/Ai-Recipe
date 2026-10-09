@@ -47,9 +47,6 @@ export function ExploreSidebar({ filters, toolCounts }: { filters: ExploreFilter
         <Logo />
       </div>
       <Group label="Browse">
-        <Item href="/explore" active={onlyType("all")}>
-          All recipes
-        </Item>
         <Item href={exploreHref({ type: "video" })} active={onlyType("video")}>
           Videos
         </Item>

@@ -80,6 +80,8 @@
 
   /* Layout */
   --spacing-dock: 5rem;
+  /* Phones: the dock is a full-width bar fixed to the bottom, above the home indicator */
+  --spacing-dock-bar: calc(4rem + env(safe-area-inset-bottom));
 }
 
 /* Type roles (Kubby scale). Hierarchy comes from weight and size, one family.
@@ -347,6 +349,13 @@
       radial-gradient(70% 38% at 50% 100%, var(--glow-rim) 0%, transparent 70%),
       radial-gradient(95% 55% at 50% 100%, var(--glow-mid) 0%, transparent 72%),
       radial-gradient(130% 75% at 50% 108%, var(--glow-core) 0%, transparent 70%);
+  }
+  /* Phones scroll the page itself (so the browser can tuck its toolbar away); the home
+     feed snaps reel by reel. Larger screens scroll inside the canvas instead. */
+  @media (width < 48rem) {
+    html.snap-feed {
+      scroll-snap-type: y mandatory;
+    }
   }
   .no-scrollbar {
     scrollbar-width: none;

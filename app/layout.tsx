@@ -47,7 +47,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       suppressHydrationWarning
       className={`${uncut.variable} antialiased`}
     >
-      <body className="h-dvh overflow-hidden bg-frame">
+      {/* Phones: the page itself scrolls, so the browser can hide its toolbar and the dock is a
+          full-width bar. md and up: a fixed frame with the canvas scrolling inside it. */}
+      <body className="min-h-dvh bg-frame md:h-dvh md:overflow-hidden">
         <a
           href="#main"
           className="sr-only z-50 rounded-full bg-primary px-4 py-2 text-primary-foreground focus:not-sr-only focus:fixed focus:top-3 focus:left-3"
@@ -58,10 +60,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <TooltipProvider>
             {/* The frame's inset lives here, not on <body>: menus and sheets lock scroll by
                 rewriting body padding, which would make the canvas jump */}
-            <div className="flex h-full flex-col px-1 pt-1 md:px-4 md:pt-4">
-              {/* The canvas: everything scrolls in here, over a light rising from the bottom */}
-              <div className="relative min-h-0 flex-1 overflow-hidden rounded-2xl bg-canvas md:rounded-canvas">
-                <div aria-hidden className="canvas-glow pointer-events-none absolute inset-0" />
+            <div className="flex min-h-dvh flex-col md:h-full md:min-h-0 md:px-4 md:pt-4">
+              {/* The canvas: everything scrolls in here (md+), over a light rising from the bottom */}
+              <div className="relative flex flex-1 flex-col bg-canvas pb-dock-bar md:min-h-0 md:overflow-hidden md:rounded-canvas md:pb-0">
+                <div aria-hidden className="canvas-glow pointer-events-none fixed inset-0 md:absolute" />
                 <CanvasScroll>
                   <main id="main" className="relative flex flex-1 flex-col">
                     {children}

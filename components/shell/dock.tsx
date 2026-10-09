@@ -18,6 +18,7 @@ const round =
 /**
  * The dock sits on the frame, under the canvas: page title on the left,
  * round nav in the middle (active is solid), settings and you on the right.
+ * Phones: a full-width bar fixed to the bottom, with the buttons spread across it.
  */
 export function Dock() {
   const pathname = usePathname()
@@ -25,12 +26,12 @@ export function Dock() {
   const items = DOCK_ITEMS.filter((i) => !i.seller || (hydrated && user?.isSeller))
 
   return (
-    <footer className="grid h-dock shrink-0 grid-cols-[1fr_auto_1fr] items-center gap-1 px-1 sm:gap-2 md:gap-4 md:px-6">
+    <footer className="fixed inset-x-0 bottom-0 z-40 flex h-dock-bar items-start border-t border-foreground/10 bg-frame/85 px-3 pt-3 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl md:static md:z-auto md:grid md:h-dock md:shrink-0 md:grid-cols-[1fr_auto_1fr] md:items-center md:gap-4 md:border-0 md:bg-transparent md:px-6 md:pt-0 md:pb-0 md:backdrop-blur-none">
       <p aria-live="polite" className="hidden truncate text-2xl font-semibold tracking-tight text-foreground md:block">
         {pageTitle(pathname)}
       </p>
 
-      <nav aria-label="Main" className="col-start-2 flex items-center gap-1 sm:gap-2">
+      <nav aria-label="Main" className="flex flex-1 items-center justify-around md:col-start-2 md:flex-none md:justify-center md:gap-2">
         {items.map((item) => {
           const active = isActive(pathname, item.href)
           const Icon = item.icon
@@ -61,7 +62,7 @@ export function Dock() {
         })}
       </nav>
 
-      <div className="col-start-3 flex items-center justify-end gap-3">
+      <div className="flex items-center justify-end gap-3 pl-2 md:col-start-3 md:pl-0">
         {hydrated && user ? (
           <>
             <Tooltip>

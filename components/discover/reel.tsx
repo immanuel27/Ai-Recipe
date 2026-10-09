@@ -4,7 +4,7 @@ import * as React from "react"
 import Link from "next/link"
 
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet"
-import { ExpandIcon, PlayIcon } from "@/components/icons"
+import { ExpandIcon, PlayIcon, SoundIcon } from "@/components/icons"
 import { RecipeModal } from "@/components/explore/recipe-modal"
 import { RecipeCard } from "@/components/discover/recipe-card"
 import { ReelActions } from "@/components/discover/reel-actions"
@@ -34,12 +34,20 @@ export function Reel({
   index,
   active,
   near,
+  soundOn,
+  soundBlocked,
+  onSoundBlocked,
   onHide,
 }: {
   entry: ReelEntry
   index: number
   active: boolean
   near: boolean
+  /** Sound wanted (on by default) */
+  soundOn: boolean
+  /** The browser refused sound until the visitor taps: playing muted for now */
+  soundBlocked: boolean
+  onSoundBlocked: () => void
   onHide: () => void
 }) {
   const videoRef = React.useRef<HTMLVideoElement>(null)
@@ -68,6 +76,8 @@ export function Reel({
       ? () => {
           const v = videoRef.current
           if (!v) return
+          // The first tap turns sound on (handled page-wide by Reels) rather than pausing
+          if (soundBlocked) return
           if (v.paused) {
             setUserPaused(false)
             v.play().catch(() => {})
@@ -79,16 +89,41 @@ export function Reel({
       : undefined,
   })
 
-  // Only the reel on screen plays, always muted (a product choice: the feed autoplays even with
-  // reduced motion; tap to pause). Leaving a reel clears its pause; the preview pauses it.
+  // Only the reel on screen plays, with sound when the browser allows it (a product choice: the
+  // feed autoplays even with reduced motion; tap to pause). Leaving a reel clears its pause;
+  // the preview pauses it.
   React.useEffect(() => {
     const v = videoRef.current
     if (!v) return
     if (active && !userPaused && !previewOpen) {
-      // Set before playing: browsers only autoplay muted video, and React doesn't reliably set it
-      v.muted = true
-      v.play().catch(() => {})
+      // Set before playing: React doesn't reliably set the muted property
+      v.muted = !soundOn || soundBlocked
+      v.play().catch(() => {
+        if (v.muted) return
+        // No sound until the visitor interacts: play muted and offer "Tap for sound"
+        v.muted = true
+        onSoundBlocked()
+        v.play().catch(() => {})
+      })
     } else v.pause()
+    // soundOn/soundBlocked changes are applied by the effect below, without restarting playback
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [active, userPaused, previewOpen])
+
+  React.useEffect(() => {
+    const v = videoRef.current
+    if (v && active && !soundBlocked) v.muted = !soundOn
+  }, [soundOn, soundBlocked, active])
+
+  // Browsers hold back playback in a hidden tab: start again when the page is visible
+  React.useEffect(() => {
+    if (!active || userPaused || previewOpen) return
+    function resume() {
+      const v = videoRef.current
+      if (document.visibilityState === "visible" && v?.paused) v.play().catch(() => {})
+    }
+    document.addEventListener("visibilitychange", resume)
+    return () => document.removeEventListener("visibilitychange", resume)
   }, [active, userPaused, previewOpen])
 
   const [wasActive, setWasActive] = React.useState(active)
@@ -114,8 +149,9 @@ export function Reel({
     <article
       data-reel
       data-index={index}
+      data-active={active || undefined}
       aria-label={listing.title}
-      className="flex h-full snap-start snap-always items-center justify-center gap-8 md:px-10 md:pt-4 md:pb-6 xl:gap-12"
+      className="flex h-[calc(100dvh-var(--spacing-dock-bar))] snap-start snap-always items-center justify-center gap-8 md:h-full md:px-10 md:pt-4 md:pb-6 xl:gap-12"
     >
       <RecipeCard listing={listing} className="hidden max-h-full w-80 shrink-0 lg:flex xl:w-88" />
 
@@ -143,6 +179,12 @@ export function Reel({
               aria-label={playing ? `Pause ${listing.title}` : `Play ${listing.title}`}
               className="absolute inset-0 cursor-pointer touch-manipulation outline-none focus-visible:ring-3 focus-visible:ring-on-media/60 focus-visible:ring-inset"
             />
+            {active && soundBlocked && (
+              <span className="pointer-events-none absolute top-36 left-4 flex md:top-4 items-center gap-1.5 rounded-full bg-scrim/50 px-3 py-1.5 text-xs font-semibold text-on-media backdrop-blur-md">
+                <SoundIcon aria-hidden weight="fill" className="size-4" />
+                Tap for sound
+              </span>
+            )}
             {!playing && userPaused && (
               <span aria-hidden className="glass-button-media pointer-events-none absolute top-1/2 left-1/2 flex size-18 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full text-on-media">
                 <PlayIcon weight="fill" className="size-8" />
@@ -157,7 +199,7 @@ export function Reel({
             sizes="(min-width: 1024px) 380px, 100vw"
             priority={index === 0}
             onTap={onTap}
-            dotsClassName="top-4"
+            dotsClassName="top-36 md:top-4"
             className="absolute inset-0"
           />
         )}
@@ -166,7 +208,7 @@ export function Reel({
           type="button"
           onClick={() => setPreviewOpen(true)}
           aria-label={`Open preview of ${listing.title}`}
-          className="absolute top-4 right-4 flex size-10 items-center justify-center rounded-full bg-scrim/40 text-on-media outline-none hover:bg-scrim/60 focus-visible:ring-2 focus-visible:ring-on-media"
+          className="absolute top-36 right-4 md:top-4 flex size-10 items-center justify-center rounded-full bg-scrim/40 text-on-media outline-none hover:bg-scrim/60 focus-visible:ring-2 focus-visible:ring-on-media"
         >
           <ExpandIcon aria-hidden weight="bold" className="size-5" />
         </button>

@@ -80,8 +80,9 @@ A marketplace where creators sell step-by-step recipes for AI-made videos and im
 - Empty states use `<EmptyState>`: an icon in a muted square, a title, one line of text, and one pill button.
 - Dark mode: `next-themes` (`components/providers/theme-provider.tsx`) toggles the `.dark` class. The site is **dark by default for everyone**; light and system are opt-in, only from Profile → Settings → Appearance (no theme toggle in headers or menus). Every colour must come from a token with a `.dark` value.
 - Every icon-only button has an `aria-label`. Every image has `alt`. Every video has a `poster`, and `preload="none"` when off-screen.
-- Respect `prefers-reduced-motion`: no autoplay and no smooth scrolling when it's set (`usePrefersReducedMotion`). Exception, by product decision: home reels always autoplay muted (tap to pause); their top-right button expands into the preview (`RecipeModal`) instead of toggling sound.
+- Respect `prefers-reduced-motion`: no autoplay and no smooth scrolling when it's set (`usePrefersReducedMotion`). Exception, by product decision: home reels always autoplay, **with sound by default** (browsers block sound until the first tap, so reels play muted with a "Tap for sound" chip until then; `m` toggles sound on desktop). Their expand button opens the preview (`RecipeModal`); tapping the video pauses.
 - Mobile-first: check at 375px with no horizontal scroll.
+- Scrolling: on phones (< md) the **page itself scrolls** so the browser can tuck its toolbar away; the dock is a full-width bar fixed to the bottom (`--spacing-dock-bar`, includes the home-indicator inset), and the home feed snaps on `<html>` (`.snap-feed`) with each reel `100dvh` minus the bar. From md up, the frame is fixed and the canvas (`#canvas`) scrolls inside it. Don't assume either scroller: use viewport-based IntersectionObservers and `scrollIntoView`.
 
 ## Conventions
 

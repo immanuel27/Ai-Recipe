@@ -35,6 +35,7 @@ export function OwnProfileView() {
           Posts
         </h2>
         <PostsGrid
+          editable
           items={posts.map((listing) => ({ listing, creator }))}
           empty={{
             icon: SparklesIcon,

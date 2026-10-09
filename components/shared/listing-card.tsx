@@ -22,12 +22,15 @@ export function ListingCard({
   className,
   priority,
   sizes = "(min-width: 1024px) 360px, (min-width: 640px) 50vw, 100vw",
+  actions,
 }: {
   listing: Listing
   creator?: Creator
   className?: string
   priority?: boolean
   sizes?: string
+  /** Controls over the media's top-right corner (e.g. the owner's menu), above the card link */
+  actions?: React.ReactNode
 }) {
   const reducedMotion = usePrefersReducedMotion()
   const [previewing, setPreviewing] = React.useState(false)
@@ -81,12 +84,17 @@ export function ListingCard({
             )}
           </span>
         )}
-        {(listing.images?.length ?? 0) > 1 && (
-          <span className="absolute top-3 right-3 flex items-center gap-1 rounded-full bg-scrim/60 px-2 py-0.5 text-xs font-semibold text-on-media backdrop-blur-md">
-            <ImagesIcon className="size-3.5" aria-hidden />
-            {listing.images!.length}
-            <span className="sr-only">images</span>
-          </span>
+        {((listing.images?.length ?? 0) > 1 || actions) && (
+          <div className="absolute top-3 right-3 z-10 flex items-center gap-2">
+            {(listing.images?.length ?? 0) > 1 && (
+              <span className="flex items-center gap-1 rounded-full bg-scrim/60 px-2 py-0.5 text-xs font-semibold text-on-media backdrop-blur-md">
+                <ImagesIcon className="size-3.5" aria-hidden />
+                {listing.images!.length}
+                <span className="sr-only">images</span>
+              </span>
+            )}
+            {actions}
+          </div>
         )}
         {isVideo && (
           <span

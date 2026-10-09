@@ -187,6 +187,29 @@ export const remote = {
       .eq("profile_id", profileId)
     if (error) throw error
   },
+  /**
+   * Delete one of your listings. The recipe, proof link, likes and saves go with
+   * it (on delete cascade); then its files in Storage are removed.
+   */
+  async deleteListing(slug: string) {
+    const supabase = createClient()
+    const { data: auth } = await supabase.auth.getUser()
+    if (!auth.user) throw new Error("Your sign-in expired. Please sign in again.")
+    const id = await listingId(slug)
+    if (id) {
+      // RLS only lets creators delete their own rows; check one actually went
+      const { data, error } = await supabase.from("listings").delete().eq("id", id).select("id")
+      if (error) throw error
+      if (!data?.length) throw new Error("You can only delete your own posts.")
+    }
+    // Media lives at <uid>/<slug>/…; leftovers aren't fatal, the post is already gone
+    const folder = `${auth.user.id}/${slug}`
+    const { data: files } = await supabase.storage.from("media").list(folder)
+    if (files?.length) {
+      await supabase.storage.from("media").remove(files.map((f) => `${folder}/${f.name}`))
+    }
+    await fetch("/api/revalidate", { method: "POST" }).catch(() => {})
+  },
   async signOut() {
     await createClient().auth.signOut()
   },

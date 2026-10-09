@@ -52,6 +52,8 @@ interface StoreActions {
   toggleLike: (slug: string) => boolean
   toggleFollow: (creatorId: string) => boolean
   addListing: (listing: Listing) => void
+  /** Delete one of your own listings. Rejects (and restores it) if the server says no. */
+  deleteListing: (slug: string) => Promise<void>
   setSampleData: (on: boolean) => void
   setPayoutThreshold: (t: PayoutThreshold) => void
   saveDraft: (values: ListingFormValues, step: number) => void
@@ -188,6 +190,29 @@ const actions: StoreActions = {
   },
   addListing: (listing) =>
     setState((s) => ({ ...s, createdListings: [listing, ...s.createdListings] })),
+  deleteListing: async (slug) => {
+    const before = data
+    const drop = (slugs: string[]) => slugs.filter((x) => x !== slug)
+    setState((s) => ({
+      ...s,
+      createdListings: s.createdListings.filter((l) => l.slug !== slug),
+      saved: drop(s.saved),
+      liked: drop(s.liked),
+    }))
+    if (!supabaseConfigured || !data.user?.profileId) return
+    try {
+      await remote.deleteListing(slug)
+    } catch (error) {
+      // Put it back so the UI never claims a delete that didn't happen
+      setState((s) => ({
+        ...s,
+        createdListings: before.createdListings,
+        saved: before.saved,
+        liked: before.liked,
+      }))
+      throw error
+    }
+  },
   setSampleData: (sampleData) => setState((s) => ({ ...s, sampleData })),
   setPayoutThreshold: (payoutThreshold) => {
     setState((s) => ({ ...s, payoutThreshold }))

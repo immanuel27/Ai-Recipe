@@ -7,6 +7,7 @@ import { toast } from "sonner"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { ListingOwnerMenu } from "@/components/profile/listing-owner-menu"
 import { InsetPanel } from "@/components/shared/inset-panel"
 import { MediaImage } from "@/components/shared/media-image"
 import { formatCompact, formatDate, formatPrice, formatRelative } from "@/lib/format"
@@ -129,6 +130,7 @@ export function MyListingsCard({ listings }: { listings: Listing[] }) {
                 >
                   <PencilIcon />
                 </Button>
+                <ListingOwnerMenu listing={l} variant="row" />
               </li>
             ))}
           </ul>

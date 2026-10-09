@@ -77,6 +77,7 @@ export async function loadAccount(): Promise<Account | null> {
       .from("listings")
       .select("*, recipes(prompts, settings, assets, edit_stack, failures)")
       .eq("creator_id", p.id)
+      .is("archived_at", null)
       .order("created_at", { ascending: false })
     createdListings = ((own ?? []) as (ListingRow & { recipes: RecipeRow | null })[]).map((row) =>
       listingFromRow(row, row.recipes ?? undefined)

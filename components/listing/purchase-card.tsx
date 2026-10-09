@@ -11,7 +11,7 @@ import { formatCompact, formatPrice } from "@/lib/format"
 import { profileHref } from "@/lib/profile"
 import type { Creator, Listing } from "@/lib/types"
 import { VerifiedBadge } from "@/components/shared/verified-badge"
-import { OpenIcon, WebsiteIcon } from "@/components/icons"
+import { DeleteIcon, EditIcon, OpenIcon, WebsiteIcon } from "@/components/icons"
 import { getToolName, listingTools } from "@/lib/mock/tools"
 
 export function PurchaseCard({
@@ -19,11 +19,16 @@ export function PurchaseCard({
   creator,
   unlocked,
   proofUrl,
+  isOwner,
+  onDelete,
   onBuy,
 }: {
   listing: Listing
   creator: Creator
   unlocked: boolean
+  /** Your own post: show Edit and Delete */
+  isOwner?: boolean
+  onDelete?: () => void
   /** The creator's share link from the tool, for owners and buyers */
   proofUrl?: string | null
   onBuy: () => void
@@ -109,6 +114,20 @@ export function PurchaseCard({
         <p className="text-center text-xs text-muted-foreground">
           Includes prompts, settings, assets, edit stack and failed attempts.
         </p>
+        {isOwner && !listing.archived && (
+          <div className="flex gap-2 border-t pt-3">
+            <Button asChild variant="ghost" size="sm" className="flex-1">
+              <Link href={`/r/${listing.slug}/edit`}>
+                <EditIcon aria-hidden />
+                Edit post
+              </Link>
+            </Button>
+            <Button variant="ghost" size="sm" className="flex-1 text-destructive hover:text-destructive" onClick={onDelete}>
+              <DeleteIcon aria-hidden />
+              Delete
+            </Button>
+          </div>
+        )}
         {unlocked && proofUrl && (
           <a
             href={proofUrl}

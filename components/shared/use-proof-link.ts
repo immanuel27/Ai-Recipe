@@ -7,11 +7,11 @@ import { supabaseConfigured } from "@/lib/supabase/env"
 
 /**
  * The creator's proof link (the tool's share link) once the viewer owns the
- * listing. RLS only returns it to the creator and buyers.
+ * listing, and whether it has loaded. RLS only returns it to the creator and buyers.
  */
-export function useProofLink(listingId: string, owned: boolean) {
-  const [url, setUrl] = React.useState<string | null>(null)
-  const enabled = supabaseConfigured && owned
+export function useProofLinkState(listingId: string, owned: boolean) {
+  const [state, setState] = React.useState<{ id: string; url: string | null } | null>(null)
+  const enabled = supabaseConfigured && owned && !!listingId
 
   React.useEffect(() => {
     if (!enabled) return
@@ -22,12 +22,17 @@ export function useProofLink(listingId: string, owned: boolean) {
       .eq("listing_id", listingId)
       .maybeSingle()
       .then(({ data }) => {
-        if (!cancelled) setUrl(data?.url ?? null)
+        if (!cancelled) setState({ id: listingId, url: data?.url ?? null })
       })
     return () => {
       cancelled = true
     }
   }, [enabled, listingId])
 
-  return enabled ? url : null
+  const current = state?.id === listingId ? state : null
+  return { url: enabled ? (current?.url ?? null) : null, loaded: !enabled || !!current }
+}
+
+export function useProofLink(listingId: string, owned: boolean) {
+  return useProofLinkState(listingId, owned).url
 }

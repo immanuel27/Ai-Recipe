@@ -52,6 +52,10 @@ interface StoreActions {
   toggleLike: (slug: string) => boolean
   toggleFollow: (creatorId: string) => boolean
   addListing: (listing: Listing) => void
+  /** Replace one of your listings after editing it */
+  updateListing: (listing: Listing) => void
+  /** Drop one of your listings after deleting it */
+  removeListing: (slug: string) => void
   setSampleData: (on: boolean) => void
   setPayoutThreshold: (t: PayoutThreshold) => void
   saveDraft: (values: ListingFormValues, step: number) => void
@@ -188,6 +192,13 @@ const actions: StoreActions = {
   },
   addListing: (listing) =>
     setState((s) => ({ ...s, createdListings: [listing, ...s.createdListings] })),
+  updateListing: (listing) =>
+    setState((s) => ({
+      ...s,
+      createdListings: s.createdListings.map((l) => (l.slug === listing.slug ? listing : l)),
+    })),
+  removeListing: (slug) =>
+    setState((s) => ({ ...s, createdListings: s.createdListings.filter((l) => l.slug !== slug) })),
   setSampleData: (sampleData) => setState((s) => ({ ...s, sampleData })),
   setPayoutThreshold: (payoutThreshold) => {
     setState((s) => ({ ...s, payoutThreshold }))

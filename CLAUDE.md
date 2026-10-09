@@ -55,6 +55,7 @@ A marketplace where creators sell step-by-step recipes for AI-made videos and im
 - Account: `<AccountSync>` loads the signed-in account into the store; store actions write purchases, likes, saves, profile, seller setup and payout threshold back through `lib/supabase/account.ts`.
 - Publishing: `lib/supabase/publish.ts` uploads media to Storage, then inserts the listing and its recipe.
 - Auth: email magic link and Google (`/auth/callback` exchanges the code, `/auth/confirm` handles token-hash links). After the first sign-in, people pick a username, which creates their profile.
+- Editing and deleting: owners see Edit post / Delete on their post (and in Profile → Listings). `/r/[slug]/edit` reuses `CreateListingForm` with `editing` (from Details on, no drafts; `valuesFromListing()` fills it) and saves through `updateListing()` (replaced media gets new file names). Delete is a soft delete (`deleteListing()` sets `listings.archived_at`): RLS hides it from everyone except the creator and its buyers, who keep their recipe, and it can't be bought any more.
 - Still browser-only: follows, drafts, and the dashboard's sample sales/earnings.
 
 ## Design language

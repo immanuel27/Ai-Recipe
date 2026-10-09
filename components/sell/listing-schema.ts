@@ -1,7 +1,7 @@
 import { z } from "zod"
 
-import { TOOLS, isProofLinkForAny, parseHttpsUrl, toolsForPostType } from "@/lib/mock/tools"
-import type { PostType, ToolId } from "@/lib/types"
+import { TOOLS, isProofLinkForAny, listingTools, parseHttpsUrl, toolKind, toolsForPostType } from "@/lib/mock/tools"
+import type { Listing, PostType, ToolId } from "@/lib/types"
 
 export const MAX_IMAGES = 8
 
@@ -82,8 +82,9 @@ export const listingSchema = z
     path: ["liveUrl"],
     message: "Get a preview of your site first.",
   })
-  // AI media must carry an AI tag; websites have no file, so their proof link stands in for it
-  .refine((v) => v.postType === "website" || !v.media.url || !!v.media.aiTag, {
+  // New AI media must carry an AI tag (already-published media was checked when posted);
+  // websites have no file, so their proof link stands in for it
+  .refine((v) => v.postType === "website" || !v.media.url || !!v.media.aiTag || /^https?:/.test(v.media.url), {
     path: ["media", "url"],
     message: "This file has no AI tag. Upload the original export from your AI tool.",
   })
@@ -152,6 +153,37 @@ export function withDefaults(values: LegacyDraft): ListingFormValues {
     postType: postType ?? listingDefaults.postType,
     tools: rest.tools ?? (tool ? [tool] : []),
     media: { ...listingDefaults.media, ...rest.media },
+  }
+}
+
+/** An existing post as form values, for editing it */
+export function valuesFromListing(l: Listing, proofUrl = ""): ListingFormValues {
+  const r = l.recipe
+  return {
+    ...listingDefaults,
+    postType: toolKind(l.tool) === "website" ? "website" : l.type === "video" ? "video" : "photo",
+    media: {
+      url: l.mediaUrl,
+      posterUrl: l.posterUrl,
+      type: l.type,
+      images: l.type === "image" ? (l.images ?? [l.mediaUrl]) : [],
+      aiTag: l.aiTag,
+    },
+    title: l.title,
+    description: l.description,
+    tools: listingTools(l),
+    proofUrl,
+    liveUrl: l.liveUrl ?? "",
+    tags: l.tags,
+    adult: !!l.isAdult,
+    prompts: r.prompts.length ? r.prompts : listingDefaults.prompts,
+    settings: r.settings,
+    assets: r.assets.map((a) => ({ name: a.name, note: a.note ?? "" })),
+    editSteps: r.editStack,
+    failures: r.failures.map((f) => ({ imageUrl: f.imageUrl ?? "", note: f.note })),
+    pricingMode: l.pricing.mode,
+    price: l.price / 100,
+    bundleSlugs: l.pricing.bundleSlugs ?? [],
   }
 }
 

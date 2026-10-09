@@ -134,6 +134,8 @@ export interface Listing {
   liveUrl?: string
   /** The team checked the creator's private proof link (share link from the tool) */
   verified?: boolean
+  /** The creator deleted it: only they and its buyers can still open it */
+  archived?: boolean
   recipe: Recipe
   /**
    * True when `recipe` is only the public teaser (counts, a cut-off first

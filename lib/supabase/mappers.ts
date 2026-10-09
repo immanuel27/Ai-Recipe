@@ -50,6 +50,7 @@ export interface ListingRow {
   preview: RecipePreview
   live_url: string | null
   verified_at: string | null
+  archived_at?: string | null
   created_at: string
 }
 
@@ -130,6 +131,7 @@ export function listingFromRow(row: ListingRow, recipe?: RecipeRow): Listing {
     isAdult: row.is_adult || undefined,
     liveUrl: row.live_url ?? undefined,
     verified: !!row.verified_at || undefined,
+    archived: !!row.archived_at || undefined,
     createdAt: row.created_at,
     stats: { views: row.views, sales: row.sales, saves: row.saves, likes: row.likes },
     trendingScore: Number(row.trending_score),

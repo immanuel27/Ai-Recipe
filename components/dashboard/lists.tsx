@@ -1,12 +1,14 @@
 "use client"
 
+import * as React from "react"
 import Link from "next/link"
-import { PencilIcon, ReceiptIcon } from "lucide-react"
-import { toast } from "sonner"
+import { PencilIcon, ReceiptIcon, Trash2Icon } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { DeletePostDialog } from "@/components/listing/delete-post-dialog"
+import { useAppStore } from "@/components/providers/app-store"
 import { InsetPanel } from "@/components/shared/inset-panel"
 import { MediaImage } from "@/components/shared/media-image"
 import { formatCompact, formatDate, formatPrice, formatRelative } from "@/lib/format"
@@ -81,6 +83,10 @@ export function RecentSalesCard({
 }
 
 export function MyListingsCard({ listings }: { listings: Listing[] }) {
+  const [deleting, setDeleting] = React.useState<Listing | null>(null)
+  // Sample listings (demo data) can't be edited or deleted
+  const { createdListings } = useAppStore()
+  const mine = new Set(createdListings.map((l) => l.slug))
   return (
     <Card>
       <CardHeader>
@@ -121,17 +127,41 @@ export function MyListingsCard({ listings }: { listings: Listing[] }) {
                 <span className="shrink-0 text-sm font-bold tabular-nums">
                   {formatPrice(l.price)}
                 </span>
-                <Button
-                  variant="ghost"
-                  size="icon-sm"
-                  aria-label={`Edit ${l.title}`}
-                  onClick={() => toast("Editing listings is coming soon")}
-                >
-                  <PencilIcon />
-                </Button>
+                {mine.has(l.slug) && (
+                  <>
+                    <Button asChild variant="ghost" size="icon-sm">
+                      <Link href={`/r/${l.slug}/edit`} aria-label={`Edit ${l.title}`}>
+                        <PencilIcon />
+                      </Link>
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      aria-label={`Delete ${l.title}`}
+                      className="text-destructive hover:text-destructive"
+                      onClick={() => setDeleting(l)}
+                    >
+                      <Trash2Icon />
+                    </Button>
+                  </>
+                )}
               </li>
             ))}
           </ul>
+        )}
+        {deleting && (
+          <DeletePostDialog
+            listing={deleting}
+            open
+            onOpenChange={(open) => !open && setDeleting(null)}
+          />
+        )}
+        {deleting && (
+          <DeletePostDialog
+            listing={deleting}
+            open
+            onOpenChange={(open) => !open && setDeleting(null)}
+          />
         )}
       </CardContent>
     </Card>

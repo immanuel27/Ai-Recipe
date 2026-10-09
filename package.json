@@ -1,7 +1,7 @@
 {
   "name": "ai-recipe",
   "version": "0.1.0",
-  "description": "AI Recipe: a marketplace for the step-by-step recipes behind AI-made videos and images (Next.js demo).",
+  "description": "Ai Recipy: a marketplace for the step-by-step recipes behind AI-made videos and images (Next.js demo).",
   "private": true,
   "engines": {
     "node": ">=20.9"

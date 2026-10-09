@@ -29,7 +29,7 @@ export function LocalListing({ slug }: { slug: string }) {
 
   return (
     <>
-      <title>{`${listing.title} · AI Recipe`}</title>
+      <title>{`${listing.title} · Ai Recipy`}</title>
       <ListingDetail
       listing={listing}
       creator={creatorFromUser(user)}

@@ -52,5 +52,5 @@ export function pageTitle(pathname: string) {
   if (pathname.startsWith("/credits")) return "Credits"
   if (pathname.startsWith("/privacy")) return "Privacy"
   if (pathname.startsWith("/terms")) return "Terms"
-  return "AI Recipe"
+  return "Ai Recipy"
 }

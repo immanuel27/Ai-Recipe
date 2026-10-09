@@ -10,7 +10,6 @@ import { ToolBadge } from "@/components/shared/tool-badge"
 import { formatCompact, formatPrice } from "@/lib/format"
 import { profileHref } from "@/lib/profile"
 import type { Creator, Listing } from "@/lib/types"
-import { AiTagBadge } from "@/components/shared/ai-tag-badge"
 import { VerifiedBadge } from "@/components/shared/verified-badge"
 import { OpenIcon, WebsiteIcon } from "@/components/icons"
 import { getToolName } from "@/lib/mock/tools"
@@ -46,12 +45,7 @@ export function PurchaseCard({
             </div>
             <LikeButton listing={listing} />
           </div>
-          {(listing.aiTag || listing.verified) && (
-            <div className="flex flex-wrap gap-2">
-              {listing.verified && <VerifiedBadge tool={listing.tool} />}
-              {listing.aiTag && <AiTagBadge tag={listing.aiTag} showSource />}
-            </div>
-          )}
+          {listing.verified && <VerifiedBadge tool={listing.tool} />}
           <h1 className="text-2xl leading-tight font-bold tracking-tight text-balance">
             {listing.title}
           </h1>

@@ -114,5 +114,5 @@ export async function detectAiTag(file: File): Promise<AiTag | null> {
 
 /** The error shown when a file has no AI tag. */
 export function missingAiTagMessage(fileName: string) {
-  return `“${fileName}” has no AI tag. AI Recipe only accepts images and videos made with AI. Upload the original file exported from your AI tool so its Content Credentials or generator tag stay in it (screenshots and edited copies lose them).`
+  return `“${fileName}” has no AI tag. Ai Recipy only accepts images and videos made with AI. Upload the original file exported from your AI tool so its Content Credentials or generator tag stay in it (screenshots and edited copies lose them).`
 }

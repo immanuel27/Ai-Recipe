@@ -1,4 +1,4 @@
-# AI Recipe
+# Ai Recipy
 
 A marketplace where creators sell the **step-by-step recipes** behind AI-made videos and images. A listing is the artifact itself (an autoplaying video or an image). Buyers get the full recipe: prompts, tool and version, settings and seeds, reference assets, the edit stack, and failed attempts with notes on why they failed.
 

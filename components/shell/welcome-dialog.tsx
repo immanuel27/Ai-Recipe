@@ -53,7 +53,7 @@ export function WelcomeDialog() {
           <span className="flex size-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
             <LogoMark className="h-7 w-9" />
           </span>
-          <DialogTitle className="text-2xl font-bold tracking-tight">Welcome to AI Recipe</DialogTitle>
+          <DialogTitle className="text-2xl font-bold tracking-tight">Welcome to Ai Recipy</DialogTitle>
           <DialogDescription className="text-base text-balance">
             See something amazing made with AI? Here you can find out exactly how it was made.
           </DialogDescription>

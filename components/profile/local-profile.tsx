@@ -43,7 +43,7 @@ export function LocalProfile({ username }: { username: string }) {
 
   return (
     <div className="flex flex-col gap-8">
-      <title>{`${creator.displayName} (@${user.username}) · AI Recipe`}</title>
+      <title>{`${creator.displayName} (@${user.username}) · Ai Recipy`}</title>
       <ProfileHeader
         displayName={creator.displayName}
         username={user.username}

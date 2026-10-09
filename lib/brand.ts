@@ -1,7 +1,7 @@
 // Literal colours for contexts that cannot read CSS variables (web manifest,
 // ImageResponse icons). Keep in sync with :root tokens in app/globals.css.
 export const BRAND = {
-  name: "AI Recipe",
+  name: "Ai Recipy",
   tagline: "A hub for AI creators: buy and sell the recipes behind amazing shots.",
   description: "Buy the step-by-step recipes behind AI-made videos, images and websites.",
   background: "#faf8f5", // --background

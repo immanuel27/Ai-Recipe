@@ -1,6 +1,6 @@
 @AGENTS.md
 
-# AI Recipe
+# Ai Recipy
 
 A marketplace where creators sell step-by-step recipes for AI-made videos and images.
 
@@ -97,7 +97,7 @@ A marketplace where creators sell step-by-step recipes for AI-made videos and im
   - Public creator profiles are at `/u/[username]` (`profileHref()` in `lib/profile.ts`), and creator names across the app link there.
 - **Uploads must be made with AI.** Every uploaded image or video (the cover and failed-attempt images) is checked with `detectAiTag()` in `lib/ai-provenance.ts` before it's accepted.
   - The check reads the original file's provenance metadata: C2PA Content Credentials or an IPTC digital source type of trained algorithmic media, or generator metadata (Stable Diffusion or ComfyUI PNG data, or a known AI tool named in a software/creator-tool field).
-  - Files without a tag get a clear error. Accepted posts carry `Listing.aiTag` and show `<AiTagBadge>` ("Made with AI").
+  - Files without a tag get a clear error. Accepted posts store `Listing.aiTag`, but no "Made with AI" label is shown: the only badge on posts is `<VerifiedBadge>` (team-checked proof link).
   - Run the check on the original `File`, before any canvas re-encode, which strips metadata.
   - This is client-side only; production must also verify C2PA signatures on the server.
 - **Website recipes and proof links.** Tools have a `kind` (`media` or `website`, in `lib/mock/tools.ts`). Website tools (ChatGPT, Claude, Lovable, Figma Make, Framer) post screenshots or a screen recording, skip the AI-tag check, and must include a proof link. Explore has a Websites type.

@@ -11,7 +11,7 @@ export function ShareProfileButton({ username, name }: { username: string; name:
     const url = `${window.location.origin}${profileHref(username)}`
     try {
       if (navigator.share) {
-        await navigator.share({ title: `${name} on AI Recipe`, url })
+        await navigator.share({ title: `${name} on Ai Recipy`, url })
         return
       }
       await navigator.clipboard.writeText(url)

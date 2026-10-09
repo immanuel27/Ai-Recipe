@@ -21,7 +21,6 @@ import { ToolBadge } from "@/components/shared/tool-badge"
 import { formatCompact, formatPrice } from "@/lib/format"
 import type { Listing } from "@/lib/types"
 import { cn } from "@/lib/utils"
-import { AiTagBadge } from "@/components/shared/ai-tag-badge"
 import { VerifiedBadge } from "@/components/shared/verified-badge"
 
 /** Fanned like prints; they spread a little more on hover. */
@@ -59,12 +58,7 @@ export function RecipeCard({ listing: baseListing, className }: { listing: Listi
           <ToolBadge tool={listing.tool} version={listing.toolVersion} />
         </div>
         <h2 className="type-section text-balance">{listing.title}</h2>
-        {(listing.verified || listing.aiTag) && (
-          <div className="flex flex-wrap gap-2">
-            {listing.verified && <VerifiedBadge tool={listing.tool} />}
-            {listing.aiTag && <AiTagBadge tag={listing.aiTag} showSource />}
-          </div>
-        )}
+        {listing.verified && <VerifiedBadge tool={listing.tool} />}
       </header>
 
       <ol className="-mx-2 flex min-h-0 flex-col gap-5 overflow-y-auto px-2">

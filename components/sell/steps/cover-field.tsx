@@ -16,7 +16,6 @@ import { toast } from "sonner"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { FieldError } from "@/components/ui/field"
-import { AiTagBadge } from "@/components/shared/ai-tag-badge"
 import { FitImage, useFitMode, useVideoAspect } from "@/components/shared/fit-media"
 import {
   MAX_IMAGES,
@@ -126,7 +125,7 @@ export function CoverField() {
         return setLocalError(
           untagged.length === 1
             ? missingAiTagMessage(untagged[0]!.file.name)
-            : `None of these ${untagged.length} files has an AI tag. AI Recipe only accepts images and videos made with AI. Upload the original files exported from your AI tool (screenshots and edited copies lose the tag).`
+            : `None of these ${untagged.length} files has an AI tag. Ai Recipy only accepts images and videos made with AI. Upload the original files exported from your AI tool (screenshots and edited copies lose the tag).`
         )
       }
       if (untagged.length) {
@@ -235,9 +234,6 @@ export function CoverField() {
                 sizes="(min-width: 768px) 420px, 100vw"
                 className="absolute inset-0"
               />
-            )}
-            {media.aiTag && (
-              <AiTagBadge tag={media.aiTag} onMedia showSource className="absolute top-3 left-3" />
             )}
             <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-linear-to-t from-scrim/90 via-scrim/40 to-transparent px-6 pt-24 pb-6">
               <p

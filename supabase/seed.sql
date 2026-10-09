@@ -1,4 +1,4 @@
--- AI Recipe demo seed: placeholder creators and listings (credited, not AI-made).
+-- Ai Recipy demo seed: placeholder creators and listings (credited, not AI-made).
 -- Generated from lib/mock. Safe to re-run: skips rows that already exist.
 
 insert into public.profiles (username, display_name, bio, avatar_url, is_seller) values ('mira.frames', 'Mira Okafor', 'Cinematic product shots and moody light. Ex-commercial DP.', 'https://api.dicebear.com/9.x/notionists/svg?seed=mira&backgroundColor=ff5e5b,3d5afe,ffd23f,2ec4b6,c77dff,ff9f1c', true) on conflict (username) do nothing;

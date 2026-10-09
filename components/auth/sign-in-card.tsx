@@ -164,7 +164,7 @@ export function SignInCard() {
                 ? "Check your inbox"
               : signup
                 ? "Create your account"
-                : "Sign in to AI Recipe"}
+                : "Sign in to Ai Recipy"}
           </h1>
         </CardTitle>
         <CardDescription>

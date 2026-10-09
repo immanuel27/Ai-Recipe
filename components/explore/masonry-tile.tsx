@@ -13,7 +13,7 @@ import { formatPrice } from "@/lib/format"
 import { getToolName } from "@/lib/mock/tools"
 import { profileHref } from "@/lib/profile"
 import type { Creator, Listing } from "@/lib/types"
-import { AiTagBadge } from "@/components/shared/ai-tag-badge"
+import { VerifiedBadge } from "@/components/shared/verified-badge"
 
 /**
  * One shot at its true shape. Videos loop silently while on screen; hover
@@ -89,8 +89,8 @@ export function MasonryTile({
           />
         )}
 
-        {listing.aiTag && (
-          <AiTagBadge tag={listing.aiTag} onMedia className="pointer-events-none absolute top-3 right-3" />
+        {listing.verified && (
+          <VerifiedBadge tool={listing.tool} onMedia className="pointer-events-none absolute top-3 right-3" />
         )}
 
         {/* Revealed on hover: what it is and what it costs */}

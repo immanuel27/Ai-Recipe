@@ -1,7 +1,7 @@
 // Browser-only helpers for local media uploads (mock storage).
 
 /** Read an image file and downscale it to a JPEG data URL small enough for localStorage. */
-export async function imageToDataUrl(file: File, maxSize = 1080, quality = 0.82) {
+export async function imageToDataUrl(file: Blob, maxSize = 1080, quality = 0.82) {
   const url = URL.createObjectURL(file)
   try {
     const img = await loadImage(url)

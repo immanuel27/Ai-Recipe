@@ -1,4 +1,4 @@
-import type { ListingKind, Tool } from "@/lib/types"
+import type { Listing, ListingKind, PostType, Tool, ToolId } from "@/lib/types"
 
 export const TOOLS: Tool[] = [
   {
@@ -123,4 +123,21 @@ export function isProofLinkFor(toolId: string, value: string) {
     const hostOk = pHost.startsWith("*.") ? host.endsWith(pHost.slice(1)) : host === pHost
     return hostOk && path.startsWith(pPath)
   })
+}
+
+/** Every tool a listing used, main one first */
+export function listingTools(listing: Pick<Listing, "tool" | "tools">): ToolId[] {
+  return listing.tools?.length ? listing.tools : [listing.tool]
+}
+
+/** Tools offered for each kind of post */
+export function toolsForPostType(type: PostType) {
+  if (type === "website") return TOOLS.filter((t) => t.kind === "website")
+  const media = type === "video" ? "video" : "image"
+  return TOOLS.filter((t) => t.kind === "media" && t.mediaTypes.includes(media))
+}
+
+/** A share link from any of the tools used */
+export function isProofLinkForAny(toolIds: string[], value: string) {
+  return toolIds.some((id) => isProofLinkFor(id, value))
 }

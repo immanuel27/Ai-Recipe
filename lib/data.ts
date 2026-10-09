@@ -3,7 +3,7 @@ import { cache } from "react"
 
 import { CREATORS } from "@/lib/mock/creators"
 import { LISTINGS } from "@/lib/mock/listings"
-import { getToolName, toolKind } from "@/lib/mock/tools"
+import { getToolName, listingTools, toolKind } from "@/lib/mock/tools"
 import { supabaseConfigured } from "@/lib/supabase/env"
 import { createPublicClient } from "@/lib/supabase/public"
 import { createClient } from "@/lib/supabase/server"
@@ -28,7 +28,7 @@ export const CATALOG_TAG = "catalog"
 const CATALOG_TTL = 60
 
 const LISTING_COLUMNS =
-  "id, slug, creator_id, title, description, type, media_url, poster_url, images, clip, credit, ai_tag, tool, tool_version, tags, price_cents, pricing, is_adult, views, sales, saves, likes, trending_score, preview, live_url, verified_at, created_at"
+  "id, slug, creator_id, title, description, type, media_url, poster_url, images, clip, credit, ai_tag, tool, tools, tool_version, tags, price_cents, pricing, is_adult, views, sales, saves, likes, trending_score, preview, live_url, verified_at, created_at"
 
 /** Every listing (with teaser recipes) and creator. Fetched once per request. */
 export const getCatalog = cache(async (): Promise<{ listings: Listing[]; creators: Creator[] }> => {
@@ -149,7 +149,7 @@ function matchesQuery(l: Listing, q: string, creators: Creator[]) {
     l.title,
     l.description,
     ...l.tags,
-    getToolName(l.tool),
+    ...listingTools(l).map(getToolName),
     creator?.displayName,
     creator?.username,
   ]
@@ -184,7 +184,7 @@ export function filterListings(
   const out = listings.filter(
     (l) =>
       matchesType(l, f.type) &&
-      (f.tool === "all" || l.tool === f.tool) &&
+      (f.tool === "all" || listingTools(l).includes(f.tool)) &&
       (!f.tag || l.tags.includes(f.tag)) &&
       matchesPrice(l, f.price) &&
       matchesQuery(l, f.q, creators)

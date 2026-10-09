@@ -21,6 +21,9 @@ export type ToolId =
 /** What a recipe makes: AI video/images, or a website built from prompts */
 export type ListingKind = "media" | "website"
 
+/** The first choice when posting */
+export type PostType = "video" | "photo" | "website"
+
 export interface Tool {
   id: ToolId
   name: string
@@ -112,7 +115,11 @@ export interface Listing {
   credit?: MediaCredit
   /** Verified "made with AI" tag read from the uploaded file(s) */
   aiTag?: AiTag
+  /** The main tool (first of `tools`) */
   tool: ToolId
+  /** Every tool used, main one first. Older listings only have `tool`. */
+  tools?: ToolId[]
+  /** No longer collected (kept for older listings); not shown */
   toolVersion: string
   tags: string[]
   /** In cents. 0 = free. */

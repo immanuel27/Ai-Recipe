@@ -36,6 +36,7 @@ export interface ListingRow {
   credit: MediaCredit | null
   ai_tag: AiTag | null
   tool: string
+  tools: string[] | null
   tool_version: string
   tags: string[]
   price_cents: number
@@ -121,6 +122,7 @@ export function listingFromRow(row: ListingRow, recipe?: RecipeRow): Listing {
     credit: row.credit ?? undefined,
     aiTag: row.ai_tag ?? undefined,
     tool: row.tool as ToolId,
+    tools: row.tools?.length ? (row.tools as ToolId[]) : undefined,
     toolVersion: row.tool_version,
     tags: row.tags ?? [],
     price: row.price_cents,

@@ -1,7 +1,7 @@
 import { z } from "zod"
 
-import { TOOLS, isProofLinkFor, parseHttpsUrl, toolKind } from "@/lib/mock/tools"
-import type { ToolId } from "@/lib/types"
+import { TOOLS, isProofLinkForAny, parseHttpsUrl, toolsForPostType } from "@/lib/mock/tools"
+import type { PostType, ToolId } from "@/lib/types"
 
 export const MAX_IMAGES = 8
 
@@ -9,10 +9,11 @@ const TOOL_IDS = TOOLS.map((t) => t.id) as [ToolId, ...ToolId[]]
 
 export const listingSchema = z
   .object({
-    /** An AI video/image, or a website built with an AI tool */
-    kind: z.enum(["media", "website"]),
+    /** Step 1: videos, photos, or websites & apps */
+    postType: z.enum(["video", "photo", "website"], "Choose what you're posting."),
     media: z.object({
-      url: z.string().min(1, "Add a video or image."),
+      /** The video, the cover photo, or (websites) the captured screenshot of the live site */
+      url: z.string(),
       posterUrl: z.string(),
       type: z.enum(["video", "image"]),
       /** Image posts: all images in order (first is the cover). Empty for video. */
@@ -24,11 +25,11 @@ export const listingSchema = z
     }),
     title: z.string().trim().min(4, "At least 4 characters.").max(80, "80 characters max."),
     description: z.string().trim().max(280, "280 characters max."),
-    tool: z.enum(TOOL_IDS, "Choose the tool you used."),
-    toolVersion: z.string().trim().min(1, "Add the version, e.g. 3.1 or v7."),
+    /** Every tool used, main one first */
+    tools: z.array(z.enum(TOOL_IDS)).min(1, "Choose at least one tool.").max(5, "Up to 5 tools."),
     /** Private: the tool's share link for the generation, chat or project. Checked by the team. */
     proofUrl: z.string().trim().max(500, "That link is too long."),
-    /** Website recipes: where the site is live (public) */
+    /** Websites & apps: the live site (public). Its screenshot is the cover. */
     liveUrl: z.string().trim().max(500, "That link is too long."),
     tags: z
       .array(z.string().trim().min(1).max(24, "Tags are 24 characters max."))
@@ -69,16 +70,32 @@ export const listingSchema = z
       .refine((n) => Number.isInteger(n * 100), "Use whole cents."),
     bundleSlugs: z.array(z.string()),
   })
-  // AI media must carry an AI tag; website screenshots can't, so their proof link stands in for it
-  .refine((v) => v.kind === "website" || !v.media.url || !!v.media.aiTag, {
+  .refine((v) => v.postType === "website" || !!v.media.url, {
+    path: ["media", "url"],
+    message: "Add your video or photos.",
+  })
+  .refine((v) => v.postType !== "website" || !!v.liveUrl, {
+    path: ["liveUrl"],
+    message: "Paste the link to your site.",
+  })
+  .refine((v) => v.postType !== "website" || !v.liveUrl || !!v.media.url, {
+    path: ["liveUrl"],
+    message: "Get a preview of your site first.",
+  })
+  // AI media must carry an AI tag; websites have no file, so their proof link stands in for it
+  .refine((v) => v.postType === "website" || !v.media.url || !!v.media.aiTag, {
     path: ["media", "url"],
     message: "This file has no AI tag. Upload the original export from your AI tool.",
   })
-  .refine((v) => !v.tool || toolKind(v.tool) === v.kind, {
-    path: ["tool"],
-    message: "Choose a tool for this kind of post.",
+  .refine((v) => {
+    const allowed = new Set(toolsForPostType(v.postType).map((t) => t.id))
+    return v.tools.every((t) => allowed.has(t))
+  }, {
+    path: ["tools"],
+    message: "Choose tools for this kind of post.",
   })
-  .refine((v) => v.kind === "media" || !!v.proofUrl, {
+  // Websites need proof: a share link, unless the live link itself is one (e.g. a lovable.app site)
+  .refine((v) => v.postType !== "website" || !!v.proofUrl || (!!v.liveUrl && isProofLinkForAny(v.tools, v.liveUrl)), {
     path: ["proofUrl"],
     message: "Paste the share link so we can check where the site came from.",
   })
@@ -86,9 +103,9 @@ export const listingSchema = z
     path: ["proofUrl"],
     message: "Paste the full link, starting with https://",
   })
-  .refine((v) => !v.proofUrl || !v.tool || !parseHttpsUrl(v.proofUrl) || isProofLinkFor(v.tool, v.proofUrl), {
+  .refine((v) => !v.proofUrl || !v.tools.length || !parseHttpsUrl(v.proofUrl) || isProofLinkForAny(v.tools, v.proofUrl), {
     path: ["proofUrl"],
-    message: "This doesn't look like a share link from the tool you chose.",
+    message: "This doesn't look like a share link from the tools you chose.",
   })
   .refine((v) => !v.liveUrl || !!parseHttpsUrl(v.liveUrl), {
     path: ["liveUrl"],
@@ -102,14 +119,13 @@ export const listingSchema = z
 export type ListingFormValues = z.infer<typeof listingSchema>
 
 export const listingDefaults: ListingFormValues = {
-  kind: "media",
+  postType: "" as PostType,
   proofUrl: "",
   liveUrl: "",
   media: { url: "", posterUrl: "", type: "image", images: [] },
   title: "",
   description: "",
-  tool: "" as ToolId,
-  toolVersion: "",
+  tools: [],
   tags: [],
   adult: false,
   prompts: [{ label: "Main prompt", text: "" }],
@@ -122,25 +138,32 @@ export const listingDefaults: ListingFormValues = {
   bundleSlugs: [],
 }
 
+/** Older drafts had `kind`, a single `tool` and a version */
+type LegacyDraft = Partial<ListingFormValues> & { kind?: "media" | "website"; tool?: ToolId }
+
 /** Fill gaps in older drafts so they still match the current schema. */
-export function withDefaults(values: Partial<ListingFormValues>): ListingFormValues {
+export function withDefaults(values: LegacyDraft): ListingFormValues {
+  const { kind, tool, ...rest } = values
+  const postType: PostType | undefined =
+    rest.postType ?? (kind === "website" ? "website" : kind ? (rest.media?.type === "video" ? "video" : "photo") : undefined)
   return {
     ...listingDefaults,
-    ...values,
-    media: { ...listingDefaults.media, ...values.media },
+    ...rest,
+    postType: postType ?? listingDefaults.postType,
+    tools: rest.tools ?? (tool ? [tool] : []),
+    media: { ...listingDefaults.media, ...rest.media },
   }
 }
 
 export const STEP_FIELDS = [
+  ["postType"],
   [
-    "kind",
     "media",
     "proofUrl",
     "liveUrl",
     "title",
     "description",
-    "tool",
-    "toolVersion",
+    "tools",
     "tags",
     "adult",
     "pricingMode",

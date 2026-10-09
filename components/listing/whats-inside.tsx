@@ -15,6 +15,7 @@ import { RecipeStep, TeaserSnippet } from "@/components/shared/recipe-steps"
 import { ToolBadge } from "@/components/shared/tool-badge"
 import { formatPrice } from "@/lib/format"
 import type { Listing } from "@/lib/types"
+import { listingTools } from "@/lib/mock/tools"
 
 const chip = "flex items-center gap-2 rounded-lg bg-dock px-3 py-2 type-meta"
 
@@ -56,7 +57,7 @@ export function WhatsInside({
               : "Five parts, from first prompt to the takes that didn't work."}
           </p>
         </div>
-        <ToolBadge tool={listing.tool} version={listing.toolVersion} className="glass rounded-full px-3 py-2" />
+        <ToolBadge tools={listingTools(listing)} className="glass rounded-full px-3 py-2" />
       </header>
 
       <ol className="flex flex-col gap-6">

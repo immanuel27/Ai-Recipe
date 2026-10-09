@@ -22,6 +22,7 @@ import { formatCompact, formatPrice } from "@/lib/format"
 import type { Listing } from "@/lib/types"
 import { cn } from "@/lib/utils"
 import { VerifiedBadge } from "@/components/shared/verified-badge"
+import { listingTools } from "@/lib/mock/tools"
 
 /** Fanned like prints; they spread a little more on hover. */
 const TAKE_REST = ["-rotate-6", "rotate-1", "rotate-7"]
@@ -55,7 +56,7 @@ export function RecipeCard({ listing: baseListing, className }: { listing: Listi
       <header className="flex shrink-0 flex-col gap-2">
         <div className="flex items-center justify-between gap-3">
           <p className="type-meta text-muted-foreground">The recipe</p>
-          <ToolBadge tool={listing.tool} version={listing.toolVersion} />
+          <ToolBadge tools={listingTools(listing)} />
         </div>
         <h2 className="type-section text-balance">{listing.title}</h2>
         {listing.verified && <VerifiedBadge tool={listing.tool} />}

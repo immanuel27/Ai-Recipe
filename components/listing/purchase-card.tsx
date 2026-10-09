@@ -12,7 +12,7 @@ import { profileHref } from "@/lib/profile"
 import type { Creator, Listing } from "@/lib/types"
 import { VerifiedBadge } from "@/components/shared/verified-badge"
 import { OpenIcon, WebsiteIcon } from "@/components/icons"
-import { getToolName } from "@/lib/mock/tools"
+import { getToolName, listingTools } from "@/lib/mock/tools"
 
 export function PurchaseCard({
   listing,
@@ -36,7 +36,7 @@ export function PurchaseCard({
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2">
-              <ToolBadge tool={listing.tool} version={listing.toolVersion} />
+              <ToolBadge tools={listingTools(listing)} />
               {listing.isAdult && (
                 <Badge variant="outline" aria-label="Adult content">
                   18+

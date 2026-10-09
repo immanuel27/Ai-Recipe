@@ -18,6 +18,7 @@ import {
   type ListingFormValues,
 } from "@/components/sell/listing-schema"
 import { DetailsStep } from "@/components/sell/steps/details-step"
+import { TypeStep } from "@/components/sell/steps/type-step"
 import { RecipeStep } from "@/components/sell/steps/recipe-step"
 import { useAppStore, userCreatorId } from "@/components/providers/app-store"
 import { slugify } from "@/lib/format"
@@ -27,6 +28,7 @@ import type { Listing } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
 const STEPS = [
+  { id: "type", title: "What are you posting?", description: "Pick one. You can change it later." },
   { id: "details", title: "Details", description: "Add your cover and post details." },
   {
     id: "recipe",
@@ -36,8 +38,9 @@ const STEPS = [
 ] as const
 
 /**
- * Two-step posting flow, like posting on TikTok or Reels:
- * 1. Details (cover, info, price)  2. Recipe contents → Publish
+ * Three-step posting flow, like posting on TikTok or Reels:
+ * 1. Type (videos, photos, websites & apps)  2. Details (cover or site link, info, price)
+ * 3. Recipe contents → Publish
  */
 export function CreateListingForm() {
   const router = useRouter()
@@ -116,8 +119,9 @@ export function CreateListingForm() {
       posterUrl: values.media.posterUrl,
       images: values.media.type === "image" ? values.media.images : undefined,
       aiTag: values.media.aiTag,
-      tool: values.tool,
-      toolVersion: values.toolVersion,
+      tool: values.tools[0]!,
+      tools: values.tools,
+      toolVersion: "",
       tags: values.tags,
       price: Math.round(values.price * 100),
       pricing: {
@@ -128,7 +132,7 @@ export function CreateListingForm() {
       stats: { views: 0, sales: 0, saves: 0, likes: 0 },
       trendingScore: 0,
       isAdult: values.adult || undefined,
-      liveUrl: values.kind === "website" && values.liveUrl ? values.liveUrl : undefined,
+      liveUrl: values.postType === "website" && values.liveUrl ? values.liveUrl : undefined,
       recipe: {
         prompts: values.prompts,
         settings: values.settings,
@@ -141,7 +145,9 @@ export function CreateListingForm() {
     if (supabaseConfigured && user.profileId) {
       // Upload media to Storage and save the listing + locked recipe
       try {
-        published = await publishListing(listing, user.profileId, values.proofUrl || undefined)
+        // A site link that is itself a share link (e.g. a lovable.app site) doubles as proof
+        const proof = values.proofUrl || (values.postType === "website" ? values.liveUrl : "")
+        published = await publishListing(listing, user.profileId, proof || undefined)
       } catch (error) {
         setPublishing(false)
         toast.error(error instanceof Error ? error.message : "Couldn't publish. Try again.")
@@ -232,7 +238,12 @@ export function CreateListingForm() {
             }}
           >
             <CardContent className="md:px-10 md:pb-4">
-              {current.id === "details" ? (
+              {current.id === "type" ? (
+                <div className="flex flex-col gap-8">
+                  <TypeStep onPick={() => void next()} />
+                  <div className="border-t pt-6">{footer}</div>
+                </div>
+              ) : current.id === "details" ? (
                 <DetailsStep footer={footer} />
               ) : (
                 <div className="flex flex-col gap-8">

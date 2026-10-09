@@ -74,6 +74,7 @@ export async function publishListing(draft: Listing, profileId: string, proofUrl
       clip: draft.clip ?? null,
       ai_tag: draft.aiTag ?? null,
       tool: draft.tool,
+      tools: draft.tools ?? [draft.tool],
       tool_version: draft.toolVersion,
       tags: draft.tags,
       price_cents: draft.price,

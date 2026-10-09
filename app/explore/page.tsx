@@ -9,6 +9,7 @@ import { ExploreSearch } from "@/components/explore/explore-search"
 import { filterListings, getCatalog, getFeedListings } from "@/lib/data"
 import { isBrowsing, parseExploreParams } from "@/lib/explore-params"
 import { posterSize } from "@/lib/poster-size"
+import { listingTools } from "@/lib/mock/tools"
 
 export const metadata: Metadata = { title: "Explore" }
 
@@ -20,7 +21,7 @@ export default async function ExplorePage(props: PageProps<"/explore">) {
   const results = filterListings([...feed], filters, creators)
 
   const toolCounts: Record<string, number> = {}
-  for (const l of feed) toolCounts[l.tool] = (toolCounts[l.tool] ?? 0) + 1
+  for (const l of feed) for (const t of listingTools(l)) toolCounts[t] = (toolCounts[t] ?? 0) + 1
 
   return (
     <>

@@ -10,7 +10,7 @@ import { ToolLogo } from "@/components/shared/tool-logo"
 import { clipSrc, useClipLoop } from "@/components/shared/use-clip"
 import { usePrefersReducedMotion } from "@/hooks/use-prefers-reduced-motion"
 import { formatPrice } from "@/lib/format"
-import { getToolName } from "@/lib/mock/tools"
+import { getToolName, listingTools } from "@/lib/mock/tools"
 import { profileHref } from "@/lib/profile"
 import type { Creator, Listing } from "@/lib/types"
 import { VerifiedBadge } from "@/components/shared/verified-badge"
@@ -100,7 +100,7 @@ export function MasonryTile({
         />
         <span className="glass-chip pointer-events-none absolute top-3 left-3 flex -translate-y-1 items-center gap-2 rounded-full px-3 py-1 type-meta font-semibold text-on-media opacity-0 transition duration-240 ease-enter group-focus-within:translate-y-0 group-focus-within:opacity-100 group-hover:translate-y-0 group-hover:opacity-100">
           <ToolLogo tool={listing.tool} />
-          {getToolName(listing.tool)}
+          {listingTools(listing).map(getToolName).join(" · ")}
           <span className="tabular-nums opacity-80">{formatPrice(listing.price)}</span>
         </span>
 

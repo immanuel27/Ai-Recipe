@@ -318,12 +318,14 @@ function FailuresPart() {
   const { control, register, setValue, formState } = useFormContext<ListingFormValues>()
   const { fields, append, remove } = useFieldArray({ control, name: "failures" })
   const values = useWatch({ control, name: "failures" })
+  const postType = useWatch({ control, name: "postType" })
   const errors = formState.errors.failures
 
   async function onImage(i: number, file: File | undefined) {
     if (!file || !file.type.startsWith("image/")) return
     // Failed attempts are AI generations too: same AI-tag rule as the cover
-    if (!(await detectAiTag(file))) {
+    // (website posts show screenshots, which can't carry one)
+    if (postType !== "website" && !(await detectAiTag(file))) {
       toast.error(missingAiTagMessage(file.name))
       return
     }

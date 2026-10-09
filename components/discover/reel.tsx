@@ -16,6 +16,7 @@ import { formatPrice } from "@/lib/format"
 import { profileHref } from "@/lib/profile"
 import type { Creator, Listing } from "@/lib/types"
 import { AiTagBadge } from "@/components/shared/ai-tag-badge"
+import { VerifiedBadge } from "@/components/shared/verified-badge"
 
 export interface ReelEntry {
   listing: Listing
@@ -185,7 +186,12 @@ export function Reel({
             <CreatorAvatar creator={creator} className="size-8" />
             {creator.displayName}
           </Link>
-          {listing.aiTag && <AiTagBadge tag={listing.aiTag} onMedia />}
+          {(listing.verified || listing.aiTag) && (
+            <div className="flex flex-wrap gap-2">
+              {listing.verified && <VerifiedBadge tool={listing.tool} onMedia />}
+              {listing.aiTag && <AiTagBadge tag={listing.aiTag} onMedia />}
+            </div>
+          )}
           <p className="line-clamp-2 type-heading">{listing.title}</p>
           <button
             type="button"

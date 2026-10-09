@@ -11,6 +11,7 @@ const LINKS = [
   { label: "Explore", href: "/explore" },
   { label: "Videos", href: "/explore?type=video" },
   { label: "Images", href: "/explore?type=image" },
+  { label: "Websites", href: "/explore?type=website" },
   { label: "Start selling", href: "/sell" },
   { label: "Privacy", href: "/privacy" },
   { label: "Terms", href: "/terms" },

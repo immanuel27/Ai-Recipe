@@ -36,9 +36,10 @@ async function upload(url: string, folder: string, name: string) {
 /**
  * Publish a listing built by the sell form: upload its media to Storage, then
  * save the listing (public, with a recipe teaser) and its recipe (locked).
+ * The proof link (the tool's share link) is stored privately for review.
  * Returns the listing with its stored URLs and database id.
  */
-export async function publishListing(draft: Listing, profileId: string): Promise<Listing> {
+export async function publishListing(draft: Listing, profileId: string, proofUrl?: string): Promise<Listing> {
   const supabase = createClient()
   const { data: auth } = await supabase.auth.getUser()
   if (!auth.user) throw new Error("Your sign-in expired. Please sign in again.")
@@ -78,6 +79,7 @@ export async function publishListing(draft: Listing, profileId: string): Promise
       price_cents: draft.price,
       pricing: draft.pricing,
       is_adult: !!draft.isAdult,
+      live_url: draft.liveUrl ?? null,
       preview: previewFromRecipe(recipe),
     })
     .select("id, created_at")
@@ -96,6 +98,12 @@ export async function publishListing(draft: Listing, profileId: string): Promise
     // Don't leave a listing without its recipe
     await supabase.from("listings").delete().eq("id", row.id)
     throw new Error(recipeError.message)
+  }
+
+  if (proofUrl) {
+    const { error: proofError } = await supabase.from("listing_proofs").insert({ listing_id: row.id, url: proofUrl })
+    // The post is live either way; the creator can't be verified without it
+    if (proofError) console.warn("[publish] Couldn't save the proof link", proofError.message)
   }
 
   // Show the new listing everywhere right away (the public catalog is cached)

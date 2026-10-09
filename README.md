@@ -14,6 +14,8 @@ A marketplace where creators sell the **step-by-step recipes** behind AI-made vi
   - Rotate a phone sideways to watch landscape.
 - **Explore (`/explore`):** search, filters (All / Video / Image, tool, sort) and pagination, all driven by URL params.
 - **Listing page (`/r/[slug]`):** the media in its true shape, a sticky purchase card, a locked "What's inside" preview, a failed-attempts gallery and a fake checkout.
+- **Website recipes:** sell the prompts behind sites built with ChatGPT, Claude, Lovable, Figma Make or Framer (Explore → Websites).
+- **Proof links and Verified badges:** creators add their tool's share link (e.g. a Higgsfield, ChatGPT or Claude share link). It stays private, buyers see it after buying, and posts the team has checked get a Verified badge.
 - **Sell (`/sell`):** a two-step posting flow, Details then Recipe.
   - Upload up to 8 images or one video, with a live preview and tag chips.
   - Pricing that shows "You earn $X after the 20% fee".

@@ -128,6 +128,7 @@ export function CreateListingForm() {
       stats: { views: 0, sales: 0, saves: 0, likes: 0 },
       trendingScore: 0,
       isAdult: values.adult || undefined,
+      liveUrl: values.kind === "website" && values.liveUrl ? values.liveUrl : undefined,
       recipe: {
         prompts: values.prompts,
         settings: values.settings,
@@ -140,7 +141,7 @@ export function CreateListingForm() {
     if (supabaseConfigured && user.profileId) {
       // Upload media to Storage and save the listing + locked recipe
       try {
-        published = await publishListing(listing, user.profileId)
+        published = await publishListing(listing, user.profileId, values.proofUrl || undefined)
       } catch (error) {
         setPublishing(false)
         toast.error(error instanceof Error ? error.message : "Couldn't publish. Try again.")

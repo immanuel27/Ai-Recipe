@@ -13,6 +13,7 @@ import { RecipeBreadcrumb } from "@/components/listing/recipe-breadcrumb"
 import { WhatsInside } from "@/components/listing/whats-inside"
 import { MasonryTile } from "@/components/explore/masonry-tile"
 import { useOwnedRecipe } from "@/components/shared/use-owned-recipe"
+import { useProofLink } from "@/components/shared/use-proof-link"
 import { useAppStore, userCreatorId } from "@/components/providers/app-store"
 import { profileHref } from "@/lib/profile"
 import type { Creator, Listing } from "@/lib/types"
@@ -32,6 +33,7 @@ export function ListingDetail({
   const unlocked = isOwner || purchased.includes(baseListing.slug)
   // Swap in the full recipe from Supabase once it's theirs
   const listing = useOwnedRecipe(baseListing, unlocked)
+  const proofUrl = useProofLink(baseListing.id, unlocked)
 
   function revealRecipe() {
     requestAnimationFrame(() =>
@@ -67,7 +69,7 @@ export function ListingDetail({
           {listing.credit && <MediaCreditLine credit={listing.credit} />}
         </div>
         <div className="lg:sticky lg:top-6 lg:col-start-2 lg:row-span-3 lg:row-start-1 lg:self-start">
-          <PurchaseCard listing={listing} creator={creator} unlocked={unlocked} onBuy={onBuy} />
+          <PurchaseCard listing={listing} creator={creator} unlocked={unlocked} proofUrl={proofUrl} onBuy={onBuy} />
         </div>
         <div className="lg:col-start-1">
           <WhatsInside listing={listing} unlocked={unlocked} onBuy={onBuy} />

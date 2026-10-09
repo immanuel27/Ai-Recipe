@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils"
 const TABS = [
   { value: "video", label: "Videos" },
   { value: "image", label: "Images" },
+  { value: "website", label: "Websites" },
 ] as const
 
 /**

@@ -11,16 +11,22 @@ import { formatCompact, formatPrice } from "@/lib/format"
 import { profileHref } from "@/lib/profile"
 import type { Creator, Listing } from "@/lib/types"
 import { AiTagBadge } from "@/components/shared/ai-tag-badge"
+import { VerifiedBadge } from "@/components/shared/verified-badge"
+import { OpenIcon, WebsiteIcon } from "@/components/icons"
+import { getToolName } from "@/lib/mock/tools"
 
 export function PurchaseCard({
   listing,
   creator,
   unlocked,
+  proofUrl,
   onBuy,
 }: {
   listing: Listing
   creator: Creator
   unlocked: boolean
+  /** The creator's share link from the tool, for owners and buyers */
+  proofUrl?: string | null
   onBuy: () => void
 }) {
   const free = listing.price === 0
@@ -40,11 +46,28 @@ export function PurchaseCard({
             </div>
             <LikeButton listing={listing} />
           </div>
-          {listing.aiTag && <AiTagBadge tag={listing.aiTag} showSource />}
+          {(listing.aiTag || listing.verified) && (
+            <div className="flex flex-wrap gap-2">
+              {listing.verified && <VerifiedBadge tool={listing.tool} />}
+              {listing.aiTag && <AiTagBadge tag={listing.aiTag} showSource />}
+            </div>
+          )}
           <h1 className="text-2xl leading-tight font-bold tracking-tight text-balance">
             {listing.title}
           </h1>
           <p className="text-sm text-muted-foreground">{listing.description}</p>
+          {listing.liveUrl && (
+            <a
+              href={listing.liveUrl}
+              target="_blank"
+              rel="noopener noreferrer nofollow"
+              className="inline-flex items-center gap-1.5 self-start text-sm font-semibold text-primary underline-offset-4 outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <WebsiteIcon className="size-4" aria-hidden />
+              Visit the live site
+              <OpenIcon className="size-3.5" aria-hidden />
+            </a>
+          )}
         </div>
 
         <Link
@@ -92,6 +115,17 @@ export function PurchaseCard({
         <p className="text-center text-xs text-muted-foreground">
           Includes prompts, settings, assets, edit stack and failed attempts.
         </p>
+        {unlocked && proofUrl && (
+          <a
+            href={proofUrl}
+            target="_blank"
+            rel="noopener noreferrer nofollow"
+            className="inline-flex items-center justify-center gap-1 text-xs font-semibold text-primary underline-offset-4 outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            See the original on {getToolName(listing.tool)}
+            <OpenIcon className="size-3" aria-hidden />
+          </a>
+        )}
       </CardFooter>
     </Card>
   )

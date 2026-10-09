@@ -57,13 +57,27 @@ export default async function ExplorePage(props: PageProps<"/explore">) {
             />
           ) : (
             <div className="glass flex flex-col items-center gap-4 rounded-3xl px-6 py-16 text-center">
-              <p className="type-section">Nothing matches yet</p>
-              <p className="max-w-md type-read text-muted-foreground">
-                Try a broader style, another tool, or clear the filters to see every recipe.
-              </p>
-              <Link href="/explore" className="glass-button rounded-full px-5 py-2 font-semibold">
-                See all recipes
-              </Link>
+              {filters.type === "website" ? (
+                <>
+                  <p className="type-section">No website recipes yet</p>
+                  <p className="max-w-md type-read text-muted-foreground">
+                    Built a site with ChatGPT, Claude, Lovable, Figma Make or Framer? Be the first to sell how.
+                  </p>
+                  <Link href="/sell" className="glass-button rounded-full px-5 py-2 font-semibold">
+                    Post a website recipe
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <p className="type-section">Nothing matches yet</p>
+                  <p className="max-w-md type-read text-muted-foreground">
+                    Try a broader style, another tool, or clear the filters to see every recipe.
+                  </p>
+                  <Link href="/explore" className="glass-button rounded-full px-5 py-2 font-semibold">
+                    See all recipes
+                  </Link>
+                </>
+              )}
             </div>
           )}
         </div>

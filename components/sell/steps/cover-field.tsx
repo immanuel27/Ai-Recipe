@@ -39,7 +39,10 @@ const MAX_IMAGE_MB = 25
  */
 export function CoverField() {
   const { setValue, control } = useFormContext<ListingFormValues>()
-  const [media, title] = useWatch({ control, name: ["media", "title"] })
+  const [media, title, kind] = useWatch({ control, name: ["media", "title", "kind"] })
+  // Website posts show screenshots or a screen recording, which can't carry an AI tag:
+  // their private proof link is checked instead
+  const isWebsite = kind === "website"
   // Registers media.url so validation can report on it
   const { fieldState } = useController({ control, name: "media.url" })
   const { user } = useAppStore()
@@ -89,13 +92,13 @@ export function CoverField() {
         const file = videos[0]!
         if (file.size > MAX_VIDEO_MB * 1024 * 1024) return setLocalError(`Videos up to ${MAX_VIDEO_MB} MB.`)
         // Only AI-made media: the original file must carry an AI tag
-        const aiTag = await detectAiTag(file)
-        if (!aiTag) return setLocalError(missingAiTagMessage(file.name))
+        const aiTag = isWebsite ? undefined : ((await detectAiTag(file)) ?? undefined)
+        if (!aiTag && !isWebsite) return setLocalError(missingAiTagMessage(file.name))
         // Mock storage: the video lives in memory for this session; the poster is persisted.
         const url = URL.createObjectURL(file)
         const posterUrl = await captureVideoPoster(url)
         setValue("media", { url, posterUrl, type: "video", images: [], aiTag }, { shouldValidate: true })
-        toast.success(`AI tag found: ${aiTag.detail}`)
+        if (aiTag) toast.success(`AI tag found: ${aiTag.detail}`)
         if (videos.length > 1) toast("Only one video per post: we used the first one.")
         return
       }
@@ -107,6 +110,12 @@ export function CoverField() {
       const room = MAX_IMAGES - images.length
       if (room <= 0) return setLocalError(`Up to ${MAX_IMAGES} images per post.`)
       if (ok.length > room) toast(`Up to ${MAX_IMAGES} images: added the first ${room}.`)
+      if (isWebsite) {
+        const urls = await Promise.all(ok.slice(0, room).map((f) => imageToDataUrl(f, 1600, 0.85)))
+        setImages([...images, ...urls], undefined)
+        setSelected(images.length)
+        return
+      }
       // Only AI-made media: check every original file for its AI tag before re-encoding
       const checked = await Promise.all(
         ok.slice(0, room).map(async (file) => ({ file, aiTag: await detectAiTag(file) }))
@@ -245,11 +254,12 @@ export function CoverField() {
           <>
             <Button type="button" size="pill" onClick={browse} disabled={busy}>
               {busy && <Loader2Icon className="animate-spin" aria-hidden />}
-              {busy ? "Processing…" : "Upload images or video"}
+              {busy ? "Processing…" : isWebsite ? "Upload screenshots or video" : "Upload images or video"}
             </Button>
             <p className="max-w-64 text-sm text-muted-foreground">
-              Up to {MAX_IMAGES} images or one video, made with AI. Upload the original export
-              from your AI tool: we check each file for its AI tag. Or drag files here.
+              {isWebsite
+                ? `Up to ${MAX_IMAGES} screenshots of your site, or one screen recording. Or drag files here.`
+                : `Up to ${MAX_IMAGES} images or one video, made with AI. Upload the original export from your AI tool: we check each file for its AI tag. Or drag files here.`}
             </p>
           </>
         )}

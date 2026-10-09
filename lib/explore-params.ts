@@ -11,6 +11,7 @@ export const TYPE_OPTIONS: { value: ExploreType; label: string }[] = [
   { value: "all", label: "All" },
   { value: "video", label: "Videos" },
   { value: "image", label: "Images" },
+  { value: "website", label: "Websites" },
 ]
 
 export const PRICE_OPTIONS: { value: ExplorePrice; label: string }[] = [

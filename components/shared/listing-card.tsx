@@ -15,6 +15,7 @@ import { profileHref } from "@/lib/profile"
 import type { Creator, Listing } from "@/lib/types"
 import { cn } from "@/lib/utils"
 import { AiTagBadge } from "@/components/shared/ai-tag-badge"
+import { VerifiedBadge } from "@/components/shared/verified-badge"
 
 export function ListingCard({
   listing,
@@ -71,8 +72,9 @@ export function ListingCard({
             className="absolute inset-0 size-full object-cover"
           />
         )}
-        {(listing.isAdult || listing.aiTag) && (
+        {(listing.isAdult || listing.aiTag || listing.verified) && (
           <span className="absolute top-3 left-3 flex flex-wrap gap-1.5">
+            {listing.verified && <VerifiedBadge tool={listing.tool} onMedia />}
             {listing.aiTag && <AiTagBadge tag={listing.aiTag} onMedia />}
             {listing.isAdult && (
               <span className="rounded-full bg-scrim/70 px-2 py-0.5 text-xs font-semibold text-on-media backdrop-blur-md">

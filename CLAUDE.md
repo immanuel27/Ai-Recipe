@@ -99,5 +99,10 @@ A marketplace where creators sell step-by-step recipes for AI-made videos and im
   - Files without a tag get a clear error. Accepted posts carry `Listing.aiTag` and show `<AiTagBadge>` ("Made with AI").
   - Run the check on the original `File`, before any canvas re-encode, which strips metadata.
   - This is client-side only; production must also verify C2PA signatures on the server.
+- **Website recipes and proof links.** Tools have a `kind` (`media` or `website`, in `lib/mock/tools.ts`). Website tools (ChatGPT, Claude, Lovable, Figma Make, Framer) post screenshots or a screen recording, skip the AI-tag check, and must include a proof link. Explore has a Websites type.
+  - The proof link is the tool's share link (e.g. `higgsfield.ai/s/…`, `chatgpt.com/share/…`, `claude.ai/share/…`), checked against `Tool.proofLinks` by `isProofLinkFor()`. It's optional for media posts.
+  - It's stored privately in `listing_proofs` (RLS: the creator and buyers only) and shown to buyers as "See the original on <tool>".
+  - The team verifies posts by setting `listings.verified_at` in Supabase (queries in `supabase/migrations/20261009000001_website_recipes_and_proof.sql`), which shows `<VerifiedBadge>`. Creators can't set it, and changing the proof link clears it.
+  - Website posts may have a public `liveUrl` ("Visit the live site").
 - Prices are integers in cents. Format with `formatPrice` from `lib/format.ts`. The platform fee is 20% (`PLATFORM_FEE` in `lib/format.ts`).
 - Next 16: `params` and `searchParams` are Promises. Read the guides in `node_modules/next/dist/docs/` before using unfamiliar APIs.

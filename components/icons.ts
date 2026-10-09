@@ -77,6 +77,8 @@ export {
   Desktop as SystemIcon,
   // Status (always with a label)
   CheckCircle as SuccessIcon,
+  SealCheck as VerifiedIcon,
+  Globe as WebsiteIcon,
   Info as InfoIcon,
   Warning as WarningIcon,
   XCircle as ErrorIcon,

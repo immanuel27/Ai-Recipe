@@ -11,15 +11,33 @@ export type ToolId =
   | "flux"
   | "ideogram"
   | "imagen"
+  | "higgsfield"
+  | "chatgpt"
+  | "claude"
+  | "lovable"
+  | "figma-make"
+  | "framer"
+
+/** What a recipe makes: AI video/images, or a website built from prompts */
+export type ListingKind = "media" | "website"
 
 export interface Tool {
   id: ToolId
   name: string
+  kind: ListingKind
+  /** For media tools, what it makes. Website posts show screenshots or a screen recording. */
   mediaTypes: MediaType[]
   /** Maker's logo in public/logos (their trademark). Missing ones fall back to an initial. */
   logo?: string
   /** Where to make something with it */
   url: string
+  /**
+   * Share links that prove a post was made with this tool, as "host/path-prefix"
+   * ("*." matches subdomains), e.g. "claude.ai/share/". Empty: any https link.
+   */
+  proofLinks?: string[]
+  /** What to paste, shown under the proof link field */
+  proofHint?: string
 }
 
 export interface Creator {
@@ -105,6 +123,10 @@ export interface Listing {
   trendingScore: number
   /** Creator flagged the media as adult content */
   isAdult?: boolean
+  /** Website recipes: the live site */
+  liveUrl?: string
+  /** The team checked the creator's private proof link (share link from the tool) */
+  verified?: boolean
   recipe: Recipe
   /**
    * True when `recipe` is only the public teaser (counts, a cut-off first
@@ -146,7 +168,7 @@ export interface SessionUser {
   }
 }
 
-export type ExploreType = "all" | MediaType
+export type ExploreType = "all" | MediaType | "website"
 export type ExploreSort = "trending" | "newest" | "price-asc"
 export type ExplorePrice = "any" | "free" | "under-10" | "10-20" | "over-20"
 

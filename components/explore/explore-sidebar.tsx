@@ -56,6 +56,9 @@ export function ExploreSidebar({ filters, toolCounts }: { filters: ExploreFilter
         <Item href={exploreHref({ type: "image" })} active={onlyType("image")}>
           Images
         </Item>
+        <Item href={exploreHref({ type: "website" })} active={onlyType("website")}>
+          Websites
+        </Item>
         <Item href={exploreHref({ price: "free" })} active={filters.price === "free"}>
           Free to try
         </Item>

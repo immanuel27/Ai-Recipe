@@ -9,6 +9,8 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "fastly.picsum.photos" },
       // Country flags in the seller setup
       { protocol: "https", hostname: "flagcdn.com" },
+      // Creators' uploads (covers, photos, website previews) in Supabase Storage
+      { protocol: "https", hostname: "*.supabase.co", pathname: "/storage/v1/object/public/**" },
     ],
     qualities: [75],
   },

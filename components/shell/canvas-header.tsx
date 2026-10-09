@@ -1,10 +1,9 @@
 "use client"
 
 import Link from "next/link"
-import { useTheme } from "next-themes"
 
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
-import { DarkIcon, LightIcon, SearchIcon } from "@/components/icons"
+import { SearchIcon } from "@/components/icons"
 import { Logo } from "@/components/shell/logo"
 import { cn } from "@/lib/utils"
 
@@ -49,28 +48,7 @@ export function ScopeTabs({
   )
 }
 
-/** Light/dark switch as a round glass button. */
-export function ThemeToggle() {
-  const { resolvedTheme, setTheme } = useTheme()
-  const dark = resolvedTheme !== "light"
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <button
-          type="button"
-          aria-label={dark ? "Switch to light mode" : "Switch to dark mode"}
-          onClick={() => setTheme(dark ? "light" : "dark")}
-          className={round}
-        >
-          {dark ? <LightIcon aria-hidden className="size-5" /> : <DarkIcon aria-hidden className="size-5" />}
-        </button>
-      </TooltipTrigger>
-      <TooltipContent>{dark ? "Light mode" : "Dark mode"}</TooltipContent>
-    </Tooltip>
-  )
-}
-
-/** The top of the canvas: logo, optional centre scope, search and theme. */
+/** The top of the canvas: logo, optional centre scope and search. Theme lives in Settings. */
 export function CanvasHeader({
   center,
   showSearch = true,
@@ -96,7 +74,6 @@ export function CanvasHeader({
             <TooltipContent>Search</TooltipContent>
           </Tooltip>
         )}
-        <ThemeToggle />
       </div>
       {center && <div className="col-span-3 md:hidden">{center}</div>}
     </header>

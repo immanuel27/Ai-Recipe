@@ -78,9 +78,9 @@ A marketplace where creators sell step-by-step recipes for AI-made videos and im
   - The `short:` variant targets sideways phones; use it to keep immersive layouts full-screen.
 - The site footer (logo and tagline, Explore / Follow us / Legal columns) shows on every page except the full-screen feed.
 - Empty states use `<EmptyState>`: an icon in a muted square, a title, one line of text, and one pill button.
-- Dark mode: `next-themes` (`components/providers/theme-provider.tsx`) toggles the `.dark` class, with light, dark and system options. Users switch it in Profile → Settings → Appearance, or in the account menu under Theme. Every colour must come from a token with a `.dark` value.
+- Dark mode: `next-themes` (`components/providers/theme-provider.tsx`) toggles the `.dark` class. The site is **dark by default for everyone**; light and system are opt-in, only from Profile → Settings → Appearance (no theme toggle in headers or menus). Every colour must come from a token with a `.dark` value.
 - Every icon-only button has an `aria-label`. Every image has `alt`. Every video has a `poster`, and `preload="none"` when off-screen.
-- Respect `prefers-reduced-motion`: no autoplay and no smooth scrolling when it's set (`usePrefersReducedMotion`).
+- Respect `prefers-reduced-motion`: no autoplay and no smooth scrolling when it's set (`usePrefersReducedMotion`). Exception, by product decision: home reels always autoplay muted (tap to pause); their top-right button expands into the preview (`RecipeModal`) instead of toggling sound.
 - Mobile-first: check at 375px with no horizontal scroll.
 
 ## Conventions

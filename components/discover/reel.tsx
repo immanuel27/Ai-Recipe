@@ -4,7 +4,8 @@ import * as React from "react"
 import Link from "next/link"
 
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet"
-import { MutedIcon, PlayIcon, SoundIcon } from "@/components/icons"
+import { ExpandIcon, PlayIcon } from "@/components/icons"
+import { RecipeModal } from "@/components/explore/recipe-modal"
 import { RecipeCard } from "@/components/discover/recipe-card"
 import { ReelActions } from "@/components/discover/reel-actions"
 import { CreatorAvatar } from "@/components/shared/creator-avatar"
@@ -33,18 +34,12 @@ export function Reel({
   index,
   active,
   near,
-  muted,
-  reducedMotion,
-  onToggleMute,
   onHide,
 }: {
   entry: ReelEntry
   index: number
   active: boolean
   near: boolean
-  muted: boolean
-  reducedMotion: boolean
-  onToggleMute: () => void
   onHide: () => void
 }) {
   const videoRef = React.useRef<HTMLVideoElement>(null)
@@ -52,6 +47,8 @@ export function Reel({
   const [playing, setPlaying] = React.useState(false)
   const [pop, setPop] = React.useState(0)
   const [recipeOpen, setRecipeOpen] = React.useState(false)
+  // The expand button opens the full preview (as on Explore), with its own sound control
+  const [previewOpen, setPreviewOpen] = React.useState(false)
   // A pause you chose sticks until you tap again or swipe away
   const [userPaused, setUserPaused] = React.useState(false)
   const like = useLike(listing)
@@ -82,28 +79,23 @@ export function Reel({
       : undefined,
   })
 
-  // Only the reel on screen plays. No autoplay with reduced motion. Leaving a reel clears its pause.
+  // Only the reel on screen plays, always muted (a product choice: the feed autoplays even with
+  // reduced motion; tap to pause). Leaving a reel clears its pause; the preview pauses it.
   React.useEffect(() => {
     const v = videoRef.current
     if (!v) return
-    if (active && !reducedMotion && !userPaused) {
+    if (active && !userPaused && !previewOpen) {
       // Set before playing: browsers only autoplay muted video, and React doesn't reliably set it
-      v.muted = muted
+      v.muted = true
       v.play().catch(() => {})
     } else v.pause()
-    // muted is applied here only for the first play; its own effect below handles toggles
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [active, reducedMotion, userPaused])
+  }, [active, userPaused, previewOpen])
 
   const [wasActive, setWasActive] = React.useState(active)
   if (wasActive !== active) {
     setWasActive(active)
     if (!active) setUserPaused(false)
   }
-
-  React.useEffect(() => {
-    if (videoRef.current) videoRef.current.muted = muted
-  }, [muted])
 
   // Left/right arrows page through a photo set on the reel on screen
   React.useEffect(() => {
@@ -151,20 +143,11 @@ export function Reel({
               aria-label={playing ? `Pause ${listing.title}` : `Play ${listing.title}`}
               className="absolute inset-0 cursor-pointer touch-manipulation outline-none focus-visible:ring-3 focus-visible:ring-on-media/60 focus-visible:ring-inset"
             />
-            {!playing && (userPaused || reducedMotion) && (
+            {!playing && userPaused && (
               <span aria-hidden className="glass-button-media pointer-events-none absolute top-1/2 left-1/2 flex size-18 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full text-on-media">
                 <PlayIcon weight="fill" className="size-8" />
               </span>
             )}
-            <button
-              type="button"
-              onClick={onToggleMute}
-              aria-label={muted ? "Unmute" : "Mute"}
-              aria-pressed={!muted}
-              className="absolute top-4 right-4 flex size-10 items-center justify-center rounded-full bg-scrim/40 text-on-media outline-none hover:bg-scrim/60 focus-visible:ring-2 focus-visible:ring-on-media"
-            >
-              {muted ? <MutedIcon aria-hidden weight="fill" className="size-5" /> : <SoundIcon aria-hidden weight="fill" className="size-5" />}
-            </button>
           </>
         ) : (
           <MediaCarousel
@@ -179,6 +162,14 @@ export function Reel({
           />
         )}
         <HeartBursts bursts={bursts} />
+        <button
+          type="button"
+          onClick={() => setPreviewOpen(true)}
+          aria-label={`Open preview of ${listing.title}`}
+          className="absolute top-4 right-4 flex size-10 items-center justify-center rounded-full bg-scrim/40 text-on-media outline-none hover:bg-scrim/60 focus-visible:ring-2 focus-visible:ring-on-media"
+        >
+          <ExpandIcon aria-hidden weight="bold" className="size-5" />
+        </button>
 
         {/* Phones: who made it, what it is, and the way into the recipe */}
         <div className="pointer-events-none absolute inset-x-0 bottom-0 flex flex-col gap-3 bg-linear-to-t from-scrim/85 via-scrim/40 to-transparent p-4 pt-24 pr-20 text-on-media lg:hidden">
@@ -222,6 +213,8 @@ export function Reel({
         onHide={onHide}
         className="hidden self-end pb-2 lg:flex"
       />
+
+      <RecipeModal entry={previewOpen ? { listing, creator } : null} onOpenChange={setPreviewOpen} />
 
       <Sheet open={recipeOpen} onOpenChange={setRecipeOpen}>
         <SheetContent side="bottom" className="max-h-[85dvh] overflow-y-auto rounded-t-3xl p-2 lg:hidden">

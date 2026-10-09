@@ -2,30 +2,22 @@
 
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { useTheme } from "next-themes"
 
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
   DropdownMenuSeparator,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { DarkIcon, DocumentIcon, LogOutIcon, SettingsIcon, UserIcon } from "@/components/icons"
+import { DocumentIcon, LogOutIcon, SettingsIcon, UserIcon } from "@/components/icons"
 import { useAppStore } from "@/components/providers/app-store"
-import { THEME_OPTIONS } from "@/components/shared/theme-options"
 
-/** Profile, appearance and session. Opens from the avatar in the dock. */
+/** Profile, settings and session. Opens from the avatar in the dock. */
 export function AccountMenu({ children }: { children: React.ReactElement }) {
   const { user, signOut } = useAppStore()
   const router = useRouter()
-  const { theme, setTheme } = useTheme()
 
   return (
     <DropdownMenu>
@@ -52,22 +44,6 @@ export function AccountMenu({ children }: { children: React.ReactElement }) {
             </DropdownMenuItem>
           </>
         )}
-        <DropdownMenuSub>
-          <DropdownMenuSubTrigger>
-            <DarkIcon aria-hidden />
-            Appearance
-          </DropdownMenuSubTrigger>
-          <DropdownMenuSubContent>
-            <DropdownMenuRadioGroup value={theme} onValueChange={setTheme}>
-              {THEME_OPTIONS.map(({ value, label, icon: Icon }) => (
-                <DropdownMenuRadioItem key={value} value={value}>
-                  <Icon aria-hidden />
-                  {label}
-                </DropdownMenuRadioItem>
-              ))}
-            </DropdownMenuRadioGroup>
-          </DropdownMenuSubContent>
-        </DropdownMenuSub>
         <DropdownMenuItem asChild>
           <Link href="/credits">
             <DocumentIcon aria-hidden />

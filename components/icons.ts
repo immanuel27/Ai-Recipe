@@ -29,6 +29,7 @@ export {
   Play as PlayIcon,
   Pause as PauseIcon,
   CornersOut as FullscreenIcon,
+  ArrowsOutSimple as ExpandIcon,
   CornersIn as ExitFullscreenIcon,
   FilmStrip as VideoIcon,
   Images as CarouselIcon,

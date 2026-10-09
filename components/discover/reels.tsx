@@ -34,8 +34,6 @@ export function Reels({ items }: { items: ReelEntry[] }) {
   const [active, setActive] = React.useState(0)
   // Reels you said you're not interested in, for this visit
   const [hidden, setHidden] = React.useState<string[]>([])
-  const [muted, setMuted] = React.useState(true)
-  const [announcement, setAnnouncement] = React.useState("")
   const reducedMotion = usePrefersReducedMotion()
   const { resolvedTheme } = useTheme()
   const { following } = useAppStore()
@@ -101,13 +99,6 @@ export function Reels({ items }: { items: ReelEntry[] }) {
     [list.length, reducedMotion]
   )
 
-  const toggleMute = React.useCallback(() => {
-    setMuted((m) => {
-      setAnnouncement(m ? "Sound on" : "Sound off")
-      return !m
-    })
-  }, [])
-
   React.useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (e.metaKey || e.ctrlKey || e.altKey || isTypingTarget(e.target)) return
@@ -117,11 +108,11 @@ export function Reels({ items }: { items: ReelEntry[] }) {
       } else if (PREV_KEYS.includes(e.key)) {
         e.preventDefault()
         goTo(active - 1)
-      } else if (e.key === "m") toggleMute()
+      }
     }
     window.addEventListener("keydown", onKey)
     return () => window.removeEventListener("keydown", onKey)
-  }, [active, goTo, toggleMute])
+  }, [active, goTo])
 
   return (
     <div className="absolute inset-0 flex flex-col">
@@ -141,9 +132,6 @@ export function Reels({ items }: { items: ReelEntry[] }) {
               index={i}
               active={i === active}
               near={Math.abs(i - active) <= 1}
-              muted={muted}
-              reducedMotion={reducedMotion}
-              onToggleMute={toggleMute}
               onHide={() => hide(entry.listing.slug)}
             />
           ))}
@@ -159,9 +147,6 @@ export function Reels({ items }: { items: ReelEntry[] }) {
           </Button>
         </div>
       )}
-      <p className="sr-only" aria-live="polite">
-        {announcement}
-      </p>
     </div>
   )
 }

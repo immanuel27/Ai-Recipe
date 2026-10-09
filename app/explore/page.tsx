@@ -1,7 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
 
-import { ThemeToggle } from "@/components/shell/canvas-header"
 import { Logo } from "@/components/shell/logo"
 import { ExploreChips } from "@/components/explore/explore-chips"
 import { ExploreSidebar } from "@/components/explore/explore-sidebar"
@@ -33,13 +32,10 @@ export default async function ExplorePage(props: PageProps<"/explore">) {
         <div className="flex min-w-0 flex-col gap-8">
           <div className="flex flex-col gap-6">
             <div className="flex flex-col gap-4">
-              {/* One row with the sidebar's logo: title left, theme right (phones get the logo here) */}
+              {/* One row with the sidebar's logo: the title (phones get the logo here) */}
               <div className="grid grid-cols-[1fr_auto] items-center gap-x-4 gap-y-4">
                 <div className="lg:hidden">
                   <Logo />
-                </div>
-                <div className="col-start-2 row-start-1">
-                  <ThemeToggle />
                 </div>
                 <h1 className="col-span-2 type-headline lg:col-span-1 lg:col-start-1 lg:row-start-1">
                   What do you want to make?

@@ -1,6 +1,5 @@
 import {
   CreateIcon,
-  DashboardIcon,
   ExploreIcon,
   HomeIcon,
   SaveIcon,
@@ -23,7 +22,6 @@ export const DOCK_ITEMS: NavItem[] = [
   { href: "/explore", label: "Explore", icon: ExploreIcon },
   { href: "/sell", label: "New recipe", icon: CreateIcon, primary: true },
   { href: "/profile/library", label: "Library", icon: SaveIcon },
-  { href: "/profile/overview", label: "Studio", icon: DashboardIcon, seller: true },
 ]
 
 /** Seller tools live under /profile but belong to Studio */

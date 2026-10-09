@@ -81,9 +81,30 @@ function byRank(listings: Listing[]) {
     .map(([l]) => l)
 }
 
+/** Videos catch the eye, so feeds lead with them: up to this many videos, then one photo or site */
+const VIDEOS_PER_BREAK = 4
+
+/**
+ * Lay a ranked list out video-first: up to VIDEOS_PER_BREAK videos, then the best
+ * photo or website/app, and repeat. Each group keeps its own ranking order (so a
+ * new post's boost still counts); when one group runs out, the rest follow as ranked.
+ */
+export function videosFirst(ranked: Listing[]) {
+  const videos = ranked.filter((l) => l.type === "video")
+  const others = ranked.filter((l) => l.type !== "video")
+  const out: Listing[] = []
+  while (videos.length || others.length) {
+    out.push(...videos.splice(0, VIDEOS_PER_BREAK))
+    const next = others.shift()
+    if (next) out.push(next)
+  }
+  return out
+}
+
+/** The home feed: ranked (trending + new-post boost), laid out video-first */
 export async function getFeedListings() {
   const { listings } = await getCatalog()
-  return byRank(listings)
+  return videosFirst(byRank(listings))
 }
 
 export async function getCreators() {
@@ -195,7 +216,8 @@ export function filterListings(
     case "price-asc":
       return out.sort((a, b) => a.price - b.price)
     default:
-      return byRank(out)
+      // Trending: ranked, and video-first when showing every type
+      return f.type === "all" ? videosFirst(byRank(out)) : byRank(out)
   }
 }
 

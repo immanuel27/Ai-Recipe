@@ -80,9 +80,7 @@ export function ExploreSidebar({ filters, toolCounts }: { filters: ExploreFilter
         className="glass group mt-auto flex flex-col gap-4 rounded-2xl p-4 outline-none transition-colors duration-160 hover:bg-glass/80 focus-visible:ring-2 focus-visible:ring-ring"
       >
         <span className="flex items-center gap-3">
-          <span className="flex size-10 items-center justify-center rounded-xl bg-foreground text-background">
-            <LogoMark className="h-4 w-5" />
-          </span>
+          <LogoMark className="size-10 rounded-xl" />
           <span className="flex flex-col gap-1">
             <span className="font-semibold">For creators</span>
             <span className="type-meta text-muted-foreground">Sell your recipes</span>

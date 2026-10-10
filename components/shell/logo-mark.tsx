@@ -1,12 +1,14 @@
+import { LogoGlyph } from "@/lib/logo-glyph"
 import { cn } from "@/lib/utils"
 
-/** Three slanted stripes. Uses currentColor so it follows the theme. */
+/** The app mark: a cream R with a star, on a violet rounded tile. */
 export function LogoMark({ className }: { className?: string }) {
   return (
-    <svg viewBox="0 0 32 24" aria-hidden className={cn("h-6 w-8", className)}>
-      <path d="M0 2h6l8 20H8z" fill="currentColor" opacity="0.55" />
-      <path d="M9 2h6l8 20h-6z" fill="currentColor" opacity="0.8" />
-      <path d="M18 2h6l8 20h-6z" fill="currentColor" />
-    </svg>
+    <span
+      aria-hidden
+      className={cn("flex size-8 shrink-0 items-center justify-center rounded-lg bg-logo text-logo-foreground", className)}
+    >
+      <LogoGlyph fill="currentColor" width="50%" height="56%" />
+    </span>
   )
 }

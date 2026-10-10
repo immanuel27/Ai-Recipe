@@ -8,6 +8,8 @@ export const BRAND = {
   backgroundDark: "#141210", // .dark --background
   primary: "#e8613c", // --brand (paprika, the single accent)
   onPrimary: "#ffffff",
+  logo: "#6422f5", // --logo
+  logoForeground: "#f0ece0", // --logo-foreground
 }
 
 // Placeholder profile URLs: replace with the real accounts before launch.

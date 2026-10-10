@@ -31,6 +31,8 @@
   --color-sidebar: var(--sidebar);
   --color-brand: var(--brand);
   --color-brand-foreground: var(--brand-foreground);
+  --color-logo: var(--logo);
+  --color-logo-foreground: var(--logo-foreground);
   --color-frame: var(--frame);
   --color-canvas: var(--canvas);
   --color-glass: var(--glass);
@@ -211,6 +213,9 @@
   /* Electric indigo: the single accent. Selection, active states, focus, charts. */
   --brand: oklch(0.52 0.26 270);
   --brand-foreground: oklch(0.99 0 0);
+  /* The logo: a cream R on violet (same in both themes; mirrored in lib/brand.ts) */
+  --logo: #6422f5;
+  --logo-foreground: #f0ece0;
   --link: oklch(0.5 0.24 270);
   --highlight: oklch(0.52 0.26 270);
   --highlight-foreground: oklch(0.99 0 0);
@@ -276,6 +281,8 @@
   --accent-foreground: oklch(0.97 0.004 275);
   --brand: oklch(0.56 0.26 270);
   --brand-foreground: oklch(0.99 0 0);
+  --logo: #6422f5;
+  --logo-foreground: #f0ece0;
   --link: oklch(0.74 0.14 275);
   --highlight: oklch(0.62 0.22 272);
   --highlight-foreground: oklch(0.99 0 0);

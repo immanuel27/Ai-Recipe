@@ -1,11 +1,12 @@
 import { BRAND } from "@/lib/brand"
+import { LogoGlyph } from "@/lib/logo-glyph"
 
 /**
- * App icon artwork for ImageResponse: the logo mark on the primary colour.
- * The mark stays inside the central ~60% so the same image works as maskable.
+ * App icon artwork for ImageResponse: the cream R on the logo violet.
+ * The glyph stays inside the central ~60% so the same image works as maskable.
  */
 export function BrandIcon({ size }: { size: number }) {
-  const mark = size * 0.56
+  const h = Math.round(size * 0.5)
   return (
     <div
       style={{
@@ -14,14 +15,10 @@ export function BrandIcon({ size }: { size: number }) {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        background: BRAND.primary,
+        background: BRAND.logo,
       }}
     >
-      <svg width={mark} height={mark * 0.75} viewBox="0 0 32 24">
-        <path d="M0 2h6l8 20H8z" fill={BRAND.onPrimary} opacity="0.55" />
-        <path d="M9 2h6l8 20h-6z" fill={BRAND.onPrimary} opacity="0.8" />
-        <path d="M18 2h6l8 20h-6z" fill={BRAND.onPrimary} />
-      </svg>
+      <LogoGlyph fill={BRAND.logoForeground} width={Math.round((h * 110) / 122)} height={h} />
     </div>
   )
 }

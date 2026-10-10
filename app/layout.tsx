@@ -25,8 +25,12 @@ const uncut = localFont({
 })
 
 export const metadata: Metadata = {
+  // Absolute URLs for link previews (Open Graph / X)
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://airecipy.com"),
   title: { default: `${BRAND.name}: recipes for AI-made media`, template: `%s · ${BRAND.name}` },
   description: BRAND.description,
+  openGraph: { siteName: BRAND.name, type: "website" },
+  twitter: { card: "summary_large_image" },
   applicationName: BRAND.name,
   appleWebApp: { capable: true, title: BRAND.name, statusBarStyle: "black-translucent" },
 }

@@ -2,7 +2,8 @@ import { unstable_cache } from "next/cache"
 import { cache } from "react"
 
 import { CREATORS } from "@/lib/mock/creators"
-import { LISTINGS } from "@/lib/mock/listings"
+import { PAYMENTS_ENABLED } from "@/lib/flags"
+import { LISTINGS as MOCK_LISTINGS } from "@/lib/mock/listings"
 import { getToolName, listingTools, toolKind } from "@/lib/mock/tools"
 import { supabaseConfigured } from "@/lib/supabase/env"
 import { createPublicClient } from "@/lib/supabase/public"
@@ -25,6 +26,9 @@ import type { Creator, ExploreFilters, Listing } from "@/lib/types"
 // revalidates it via /api/revalidate). Only recipe access is per viewer.
 
 export const CATALOG_TAG = "catalog"
+
+/** Demo data (no Supabase), free while payments are off */
+const LISTINGS = PAYMENTS_ENABLED ? MOCK_LISTINGS : MOCK_LISTINGS.map((l) => ({ ...l, price: 0 }))
 const CATALOG_TTL = 60
 
 const LISTING_COLUMNS =

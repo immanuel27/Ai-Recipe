@@ -107,5 +107,6 @@ A marketplace where creators sell step-by-step recipes for AI-made videos and im
   - It's stored privately in `listing_proofs` (RLS: the creator and buyers only) and shown to buyers as "See the original on <tool>".
   - The team verifies posts by setting `listings.verified_at` in Supabase (queries in `supabase/migrations/20261009000001_website_recipes_and_proof.sql`), which shows `<VerifiedBadge>`. Creators can't set it, and changing the proof link clears it.
   - Website posts may have a public `liveUrl` ("Visit the live site").
+- **Payments are off for now** (`PAYMENTS_ENABLED = false` in `lib/flags.ts`): every recipe is free. Prices are treated as 0 in `listingFromRow()` and the demo data, every listing's `price_cents` is 0 in the database (old prices kept in `pricing.previousPrice`, see `supabase/migrations/20261010000003_free_for_now.sql` for the restore query), and price, checkout, payout, earnings and sales UI is hidden behind the flag. Seller setup asks only for a proof-of-work link. Flip the flag (and restore prices) to bring payments back.
 - Prices are integers in cents. Format with `formatPrice` from `lib/format.ts`. The platform fee is 20% (`PLATFORM_FEE` in `lib/format.ts`).
 - Next 16: `params` and `searchParams` are Promises. Read the guides in `node_modules/next/dist/docs/` before using unfamiliar APIs.

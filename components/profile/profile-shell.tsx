@@ -22,17 +22,19 @@ import { useSellerData } from "@/components/dashboard/use-seller-data"
 import { EmptyState } from "@/components/shared/empty-state"
 import { PageHeader } from "@/components/shell/page-container"
 import { useRequireUser } from "@/hooks/use-require-user"
+import { PAYMENTS_ENABLED } from "@/lib/flags"
 import { cn } from "@/lib/utils"
 
 const NAV = [
   { href: "/profile", label: "Profile", icon: UserIcon },
   { href: "/profile/library", label: "Library", icon: LibraryBigIcon },
   { href: "/profile/settings", label: "Settings", icon: SettingsIcon },
-  { href: "/profile/overview", label: "Overview", icon: LayoutGridIcon, seller: true },
+  { href: "/profile/overview", label: "Overview", icon: LayoutGridIcon, seller: true, money: true },
   { href: "/profile/listings", label: "Listings", icon: ListIcon, seller: true },
-  { href: "/profile/sales", label: "Sales", icon: ReceiptIcon, seller: true },
-  { href: "/profile/payouts", label: "Payouts", icon: CircleDollarSignIcon, seller: true },
-]
+  { href: "/profile/sales", label: "Sales", icon: ReceiptIcon, seller: true, money: true },
+  { href: "/profile/payouts", label: "Payouts", icon: CircleDollarSignIcon, seller: true, money: true },
+  // Earnings, sales and payouts are hidden while payments are off
+].filter((n) => PAYMENTS_ENABLED || !n.money)
 
 export function ProfileShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
@@ -51,7 +53,11 @@ export function ProfileShell({ children }: { children: React.ReactNode }) {
       <EmptyState
         icon={StoreIcon}
         title="Become a seller"
-        description="Set up payouts once, then publish your first recipe."
+        description={
+          PAYMENTS_ENABLED
+            ? "Set up payouts once, then publish your first recipe."
+            : "Share a link to your work once, then publish your first recipe."
+        }
         action={{ label: "Start selling", href: "/sell" }}
         className="mx-0 mt-4"
       />

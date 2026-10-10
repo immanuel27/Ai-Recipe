@@ -1,5 +1,6 @@
 import { z } from "zod"
 
+import { PAYMENTS_ENABLED } from "@/lib/flags"
 import { TOOLS, isProofLinkForAny, listingTools, parseHttpsUrl, toolKind, toolsForPostType } from "@/lib/mock/tools"
 import type { Listing, PostType, ToolId } from "@/lib/types"
 
@@ -112,7 +113,8 @@ export const listingSchema = z
     path: ["liveUrl"],
     message: "Paste the full link, starting with https://",
   })
-  .refine((v) => v.pricingMode === "single" || v.bundleSlugs.length > 0, {
+  // (Pricing is hidden while payments are off, so it can't block publishing then)
+  .refine((v) => !PAYMENTS_ENABLED || v.pricingMode === "single" || v.bundleSlugs.length > 0, {
     path: ["bundleSlugs"],
     message: "Pick at least one other recipe for the bundle.",
   })

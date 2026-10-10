@@ -2,8 +2,8 @@
 // ImageResponse icons). Keep in sync with :root tokens in app/globals.css.
 export const BRAND = {
   name: "Ai Recipy",
-  tagline: "A hub for AI creators: buy and sell the recipes behind amazing shots.",
-  description: "Buy the step-by-step recipes behind AI-made videos, images and websites.",
+  tagline: "A hub for AI creators: share and discover the recipes behind amazing shots.",
+  description: "Get the step-by-step recipes behind AI-made videos, images and websites.",
   background: "#faf8f5", // --background
   backgroundDark: "#141210", // .dark --background
   primary: "#e8613c", // --brand (paprika, the single accent)

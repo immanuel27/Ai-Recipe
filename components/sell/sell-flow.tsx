@@ -5,6 +5,7 @@ import { CreateListingForm } from "@/components/sell/create-listing-form"
 import { SellerSetup } from "@/components/sell/seller-setup"
 import { PageHeader } from "@/components/shell/page-container"
 import { useRequireUser } from "@/hooks/use-require-user"
+import { PAYMENTS_ENABLED } from "@/lib/flags"
 
 export function SellFlow() {
   const { ready, user } = useRequireUser()
@@ -22,7 +23,10 @@ export function SellFlow() {
     return (
       <>
         <div className="mx-auto w-full max-w-md">
-          <PageHeader title="Start selling" description="A one-time setup before your first listing." />
+          <PageHeader
+            title={PAYMENTS_ENABLED ? "Start selling" : "Start posting"}
+            description="A one-time setup before your first recipe."
+          />
         </div>
         <SellerSetup />
       </>

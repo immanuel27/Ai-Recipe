@@ -20,6 +20,7 @@ import { PricingFields } from "@/components/sell/steps/pricing-step"
 import { ToolLogo } from "@/components/shared/tool-logo"
 import { getTool, isProofLinkForAny, toolsForPostType } from "@/lib/mock/tools"
 import { cn } from "@/lib/utils"
+import { PAYMENTS_ENABLED } from "@/lib/flags"
 
 /** Step 2: cover (or the site's link and preview) on the left, post details on the right. */
 export function DetailsStep({ footer }: { footer: React.ReactNode }) {
@@ -108,7 +109,7 @@ export function DetailsStep({ footer }: { footer: React.ReactNode }) {
               />
               <FieldDescription id="proofUrl-hint">
                 {proofHint ? `${proofHint} ` : "The share link of your generation, chat or project. "}
-                Kept private: only our team checks it, and buyers see it after they buy. Checked posts
+                Kept private: only our team checks it, and people who unlock your recipe see it. Checked posts
                 get a Verified badge.
               </FieldDescription>
               <FieldError errors={[errors.proofUrl]} />
@@ -139,14 +140,15 @@ export function DetailsStep({ footer }: { footer: React.ReactNode }) {
               <Textarea
                 id="description"
                 rows={3}
-                placeholder="What makes your recipe worth buying?"
+                placeholder="What makes your recipe worth trying?"
                 aria-invalid={!!errors.description}
                 {...register("description")}
               />
               <FieldError errors={[errors.description]} />
             </Field>
 
-            <PricingFields />
+            {/* Payments are off for now: every recipe is free */}
+          {PAYMENTS_ENABLED && <PricingFields />}
 
             <Controller
               control={control}

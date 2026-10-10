@@ -172,7 +172,7 @@ export function SignInCard() {
             ? "This is how buyers and creators will see you."
             : shownStep === "sent"
               ? `We sent a sign-in link to ${email}. Open it on this device to continue.`
-            : "Buy recipes, save favourites and start selling."}
+            : "Get recipes, save favourites and share your own."}
         </CardDescription>
       </CardHeader>
 

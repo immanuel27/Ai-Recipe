@@ -13,6 +13,7 @@ import type { Creator, Listing } from "@/lib/types"
 import { VerifiedBadge } from "@/components/shared/verified-badge"
 import { DeleteIcon, EditIcon, OpenIcon, WebsiteIcon } from "@/components/icons"
 import { getToolName, listingTools } from "@/lib/mock/tools"
+import { PAYMENTS_ENABLED } from "@/lib/flags"
 
 export function PurchaseCard({
   listing,
@@ -81,12 +82,16 @@ export function PurchaseCard({
         </Link>
 
         <div className="flex items-end justify-between gap-4">
-          <div className="flex flex-col gap-1">
-            <span className="label-caps">Price</span>
-            <span className="text-5xl font-bold tracking-tight tabular-nums">
-              {formatPrice(listing.price)}
-            </span>
-          </div>
+          {PAYMENTS_ENABLED ? (
+            <div className="flex flex-col gap-1">
+              <span className="label-caps">Price</span>
+              <span className="text-5xl font-bold tracking-tight tabular-nums">
+                {formatPrice(listing.price)}
+              </span>
+            </div>
+          ) : (
+            <span className="label-caps">Free recipe</span>
+          )}
           {unlocked ? (
             <Badge className="mb-2 bg-success/15 text-success">
               <CheckIcon aria-hidden />
@@ -95,7 +100,7 @@ export function PurchaseCard({
           ) : (
             listing.stats.sales > 0 && (
               <span className="mb-2 text-sm text-muted-foreground">
-                {formatCompact(listing.stats.sales)} sold
+                {formatCompact(listing.stats.sales)} {PAYMENTS_ENABLED ? "sold" : "unlocked"}
               </span>
             )
           )}

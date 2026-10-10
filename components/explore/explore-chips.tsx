@@ -12,6 +12,7 @@ import { CaretDownIcon, CheckIcon } from "@/components/icons"
 import { SORT_OPTIONS, exploreHref } from "@/lib/explore-params"
 import type { ExploreFilters } from "@/lib/types"
 import { cn } from "@/lib/utils"
+import { PAYMENTS_ENABLED } from "@/lib/flags"
 
 const TABS = [
   { value: "video", label: "Videos" },
@@ -79,7 +80,7 @@ export function ExploreChips({
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" sideOffset={8} className="w-56">
-            {SORT_OPTIONS.map((o) => (
+            {SORT_OPTIONS.filter((o) => PAYMENTS_ENABLED || o.value !== "price-asc").map((o) => (
               <DropdownMenuItem key={o.value} asChild>
                 <Link href={exploreHref({ ...filters, sort: o.value, page: 1 })} scroll={false}>
                   {o.label}

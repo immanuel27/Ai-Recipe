@@ -8,6 +8,7 @@ import { AppearanceCard } from "@/components/dashboard/appearance-card"
 import { InsetPanel, Stat } from "@/components/shared/inset-panel"
 import { useAppStore } from "@/components/providers/app-store"
 import { PAYOUT_METHODS } from "@/lib/countries"
+import { PAYMENTS_ENABLED } from "@/lib/flags"
 
 export function SettingsView() {
   const { user, signOut } = useAppStore()
@@ -35,18 +36,20 @@ export function SettingsView() {
           </InsetPanel>
           {seller ? (
             <>
-              <InsetPanel>
-                <Stat
-                  label="Payout method"
-                  value={
-                    <span className="text-lg">
-                      {PAYOUT_METHODS.find((m) => m.value === seller.payoutMethod)?.label ??
-                        seller.payoutMethod}
-                    </span>
-                  }
-                  hint={seller.country}
-                />
-              </InsetPanel>
+              {PAYMENTS_ENABLED && (
+                <InsetPanel>
+                  <Stat
+                    label="Payout method"
+                    value={
+                      <span className="text-lg">
+                        {PAYOUT_METHODS.find((m) => m.value === seller.payoutMethod)?.label ??
+                          seller.payoutMethod}
+                      </span>
+                    }
+                    hint={seller.country}
+                  />
+                </InsetPanel>
+              )}
               <InsetPanel>
                 <Stat
                   label="Proof of work"

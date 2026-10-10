@@ -9,6 +9,7 @@ import { formatPrice, PLATFORM_FEE } from "@/lib/format"
 import { TOOLS } from "@/lib/mock/tools"
 import type { ExploreFilters } from "@/lib/types"
 import { cn } from "@/lib/utils"
+import { PAYMENTS_ENABLED } from "@/lib/flags"
 
 function Item({ href, active, children }: { href: string; active: boolean; children: React.ReactNode }) {
   return (
@@ -56,12 +57,17 @@ export function ExploreSidebar({ filters, toolCounts }: { filters: ExploreFilter
         <Item href={exploreHref({ type: "website" })} active={onlyType("website")}>
           Websites
         </Item>
-        <Item href={exploreHref({ type: "all", price: "free" })} active={filters.price === "free"}>
-          Free to try
-        </Item>
-        <Item href={exploreHref({ type: "all", price: "under-10" })} active={filters.price === "under-10"}>
-          Under $10
-        </Item>
+        {/* Everything is free while payments are off */}
+        {PAYMENTS_ENABLED && (
+          <>
+            <Item href={exploreHref({ type: "all", price: "free" })} active={filters.price === "free"}>
+              Free to try
+            </Item>
+            <Item href={exploreHref({ type: "all", price: "under-10" })} active={filters.price === "under-10"}>
+              Under $10
+            </Item>
+          </>
+        )}
       </Group>
 
       <Group label="Tools">
@@ -83,15 +89,23 @@ export function ExploreSidebar({ filters, toolCounts }: { filters: ExploreFilter
           <LogoMark className="size-10 rounded-xl" />
           <span className="flex flex-col gap-1">
             <span className="font-semibold">For creators</span>
-            <span className="type-meta text-muted-foreground">Sell your recipes</span>
+            <span className="type-meta text-muted-foreground">
+              {PAYMENTS_ENABLED ? "Sell your recipes" : "Share your recipes"}
+            </span>
           </span>
         </span>
         <span className="type-body text-muted-foreground">
-          Turn the prompts behind your best shot into income. You keep {Math.round((1 - PLATFORM_FEE) * 100)}% of
-          every sale, from {formatPrice(400)}.
+          {PAYMENTS_ENABLED ? (
+            <>
+              Turn the prompts behind your best shot into income. You keep {Math.round((1 - PLATFORM_FEE) * 100)}% of
+              every sale, from {formatPrice(400)}.
+            </>
+          ) : (
+            "Share the prompts behind your best shot and get your work seen."
+          )}
         </span>
         <span className="flex items-center gap-2 type-body font-semibold">
-          Start selling
+          {PAYMENTS_ENABLED ? "Start selling" : "Post a recipe"}
           <ForwardIcon aria-hidden className="size-4 transition-transform duration-160 group-hover:translate-x-1" />
         </span>
       </Link>

@@ -17,6 +17,7 @@ import { formatPrice } from "@/lib/format"
 import { profileHref } from "@/lib/profile"
 import type { Creator, Listing } from "@/lib/types"
 import { VerifiedBadge } from "@/components/shared/verified-badge"
+import { PAYMENTS_ENABLED } from "@/lib/flags"
 
 export interface ReelEntry {
   listing: Listing
@@ -226,7 +227,7 @@ export function Reel({
             className="pointer-events-auto flex h-10 items-center gap-2 self-start rounded-full bg-on-media px-4 font-semibold text-scrim outline-none focus-visible:ring-2 focus-visible:ring-on-media"
           >
             See Recipe
-            <span className="tabular-nums opacity-60">{formatPrice(listing.price)}</span>
+            {PAYMENTS_ENABLED && <span className="tabular-nums opacity-60">{formatPrice(listing.price)}</span>}
           </button>
         </div>
         <ReelActions

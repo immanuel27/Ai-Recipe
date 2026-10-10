@@ -22,6 +22,7 @@ import { StepHeader } from "@/components/sell/step-header"
 import { useAppStore } from "@/components/providers/app-store"
 import { CountryFlag } from "@/components/shared/country-flag"
 import { COUNTRIES, PAYOUT_METHODS } from "@/lib/countries"
+import { PAYMENTS_ENABLED } from "@/lib/flags"
 
 const schema = z.object({
   payoutMethod: z.string().min(1, "Choose how you'd like to be paid."),
@@ -48,15 +49,20 @@ const STEPS: { title: string; description: string; fields: (keyof Values)[] }[] 
   },
 ]
 
+// While payments are off there's nothing to pay out, so only the proof-of-work step remains
+const ACTIVE_STEPS = PAYMENTS_ENABLED ? STEPS : STEPS.filter((s) => s.fields.includes("proofOfWorkUrl"))
+
 export function SellerSetup() {
   const { becomeSeller } = useAppStore()
   const [step, setStep] = React.useState(0)
   const form = useForm<Values>({
     resolver: zodResolver(schema),
-    defaultValues: { payoutMethod: "", country: "", proofOfWorkUrl: "" },
+    defaultValues: PAYMENTS_ENABLED
+      ? { payoutMethod: "", country: "", proofOfWorkUrl: "" }
+      : { payoutMethod: "none", country: "none", proofOfWorkUrl: "" },
   })
-  const current = STEPS[step]!
-  const last = step === STEPS.length - 1
+  const current = ACTIVE_STEPS[step]!
+  const last = step === ACTIVE_STEPS.length - 1
 
   async function next() {
     const ok = await form.trigger(current.fields)
@@ -64,7 +70,7 @@ export function SellerSetup() {
     if (!last) return setStep(step + 1)
     form.handleSubmit((values) => {
       becomeSeller(values)
-      toast.success("You're set up to sell")
+      toast.success(PAYMENTS_ENABLED ? "You're set up to sell" : "You're set up to post")
     })()
   }
 
@@ -72,7 +78,7 @@ export function SellerSetup() {
     <Card className="mx-auto w-full max-w-md">
       <StepHeader
         step={step + 1}
-        total={STEPS.length}
+        total={ACTIVE_STEPS.length}
         title={current.title}
         description={current.description}
         onBack={step > 0 ? () => setStep(step - 1) : undefined}
@@ -86,7 +92,7 @@ export function SellerSetup() {
         }}
       >
         <CardContent>
-          {step === 0 && (
+          {current.fields.includes("payoutMethod") && (
             <Controller
               control={form.control}
               name="payoutMethod"
@@ -115,7 +121,7 @@ export function SellerSetup() {
               )}
             />
           )}
-          {step === 1 && (
+          {current.fields.includes("country") && (
             <Controller
               control={form.control}
               name="country"
@@ -144,7 +150,7 @@ export function SellerSetup() {
               )}
             />
           )}
-          {step === 2 && (
+          {current.fields.includes("proofOfWorkUrl") && (
             <Field data-invalid={!!form.formState.errors.proofOfWorkUrl}>
               <FieldLabel htmlFor="proofOfWorkUrl">Proof-of-work link</FieldLabel>
               <Input

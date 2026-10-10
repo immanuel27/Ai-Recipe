@@ -10,6 +10,7 @@ import { PostsGrid } from "@/components/profile/posts-grid"
 import { ProfileHeader } from "@/components/profile/profile-header"
 import { creatorFromUser, useAppStore, userCreatorId } from "@/components/providers/app-store"
 import { formatCompact } from "@/lib/format"
+import { PAYMENTS_ENABLED } from "@/lib/flags"
 
 /** Public view of a profile created in this browser (mock auth): only your own exists. */
 export function LocalProfile({ username }: { username: string }) {
@@ -51,7 +52,7 @@ export function LocalProfile({ username }: { username: string }) {
         stats={[
           { label: "Posts", value: posts.length },
           { label: "Likes", value: formatCompact(likes) },
-          { label: "Sold", value: formatCompact(posts.reduce((s, l) => s + l.stats.sales, 0)) },
+          { label: PAYMENTS_ENABLED ? "Sold" : "Unlocks", value: formatCompact(posts.reduce((s, l) => s + l.stats.sales, 0)) },
         ]}
         action={
           <Button asChild size="pill" variant="outline" className="w-full">

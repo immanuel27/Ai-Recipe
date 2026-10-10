@@ -14,10 +14,11 @@ import { getToolName, listingTools } from "@/lib/mock/tools"
 import { profileHref } from "@/lib/profile"
 import type { Creator, Listing } from "@/lib/types"
 import { VerifiedBadge } from "@/components/shared/verified-badge"
+import { PAYMENTS_ENABLED } from "@/lib/flags"
 
 /**
  * One shot at its true shape. Videos loop silently while on screen; hover
- * reveals what it is, the tool and the price. The whole tile opens the recipe.
+ * reveals what it is and the tools (and the price, when payments are on). The whole tile opens the recipe.
  */
 export function MasonryTile({
   listing,
@@ -101,7 +102,7 @@ export function MasonryTile({
         <span className="glass-chip pointer-events-none absolute top-3 left-3 flex -translate-y-1 items-center gap-2 rounded-full px-3 py-1 type-meta font-semibold text-on-media opacity-0 transition duration-240 ease-enter group-focus-within:translate-y-0 group-focus-within:opacity-100 group-hover:translate-y-0 group-hover:opacity-100">
           <ToolLogo tool={listing.tool} />
           {listingTools(listing).map(getToolName).join(" · ")}
-          <span className="tabular-nums opacity-80">{formatPrice(listing.price)}</span>
+          {PAYMENTS_ENABLED && <span className="tabular-nums opacity-80">{formatPrice(listing.price)}</span>}
         </span>
 
         {/* The whole tile opens the recipe */}

@@ -15,6 +15,7 @@ import { profileHref } from "@/lib/profile"
 import type { Creator, Listing } from "@/lib/types"
 import { cn } from "@/lib/utils"
 import { VerifiedBadge } from "@/components/shared/verified-badge"
+import { PAYMENTS_ENABLED } from "@/lib/flags"
 
 export function ListingCard({
   listing,
@@ -127,9 +128,11 @@ export function ListingCard({
               </Link>
             )}
           </div>
-          <span className="shrink-0 text-3xl font-bold tracking-tight text-primary tabular-nums">
-            {formatPrice(listing.price)}
-          </span>
+          {PAYMENTS_ENABLED && (
+            <span className="shrink-0 text-3xl font-bold tracking-tight text-primary tabular-nums">
+              {formatPrice(listing.price)}
+            </span>
+          )}
         </div>
       </div>
     </Card>

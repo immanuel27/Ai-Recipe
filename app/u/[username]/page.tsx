@@ -8,6 +8,7 @@ import { ShareProfileButton } from "@/components/profile/share-profile-button"
 import { PageContainer } from "@/components/shell/page-container"
 import { getCreatorByUsername, getCreatorListings } from "@/lib/data"
 import { formatCompact } from "@/lib/format"
+import { PAYMENTS_ENABLED } from "@/lib/flags"
 
 export async function generateMetadata(props: PageProps<"/u/[username]">): Promise<Metadata> {
   const { username } = await props.params
@@ -44,7 +45,7 @@ export default async function PublicProfilePage(props: PageProps<"/u/[username]"
         stats={[
           { label: "Posts", value: posts.length },
           { label: "Likes", value: formatCompact(likes) },
-          { label: "Sold", value: formatCompact(sales) },
+          { label: PAYMENTS_ENABLED ? "Sold" : "Unlocks", value: formatCompact(sales) },
         ]}
         action={<ShareProfileButton username={creator.username} name={creator.displayName} />}
       />

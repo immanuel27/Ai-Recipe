@@ -20,7 +20,7 @@ export function LibraryView() {
       empty: {
         icon: ShoppingBagIcon,
         title: "No recipes yet",
-        description: "Recipes you buy or get for free live here forever.",
+        description: "Recipes you unlock live here forever.",
         action: { label: "Explore recipes", href: "/explore" },
       },
     },

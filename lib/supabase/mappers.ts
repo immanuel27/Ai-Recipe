@@ -1,4 +1,5 @@
 import type { AiTag } from "@/lib/ai-provenance"
+import { PAYMENTS_ENABLED } from "@/lib/flags"
 import type { Creator, Listing, MediaCredit, Recipe, ToolId } from "@/lib/types"
 
 // Convert Supabase rows to the app's types (and back). Safe on server and client.
@@ -126,7 +127,8 @@ export function listingFromRow(row: ListingRow, recipe?: RecipeRow): Listing {
     tools: row.tools?.length ? (row.tools as ToolId[]) : undefined,
     toolVersion: row.tool_version,
     tags: row.tags ?? [],
-    price: row.price_cents,
+    // Payments are off for now: everything is free
+    price: PAYMENTS_ENABLED ? row.price_cents : 0,
     pricing: row.pricing ?? { mode: "single" },
     isAdult: row.is_adult || undefined,
     liveUrl: row.live_url ?? undefined,

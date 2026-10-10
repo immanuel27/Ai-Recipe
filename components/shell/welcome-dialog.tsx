@@ -30,7 +30,7 @@ const STEPS = [
   {
     icon: UploadIcon,
     title: "Share yours",
-    text: "Post your own video, image or website recipes and earn from them.",
+    text: "Post your own video, image or website recipes and share them.",
   },
 ]
 

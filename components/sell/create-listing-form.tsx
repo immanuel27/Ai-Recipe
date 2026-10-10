@@ -27,6 +27,7 @@ import { supabaseConfigured } from "@/lib/supabase/env"
 import { publishListing, updateListing } from "@/lib/supabase/publish"
 import type { Listing } from "@/lib/types"
 import { cn } from "@/lib/utils"
+import { PAYMENTS_ENABLED } from "@/lib/flags"
 
 const STEPS = [
   { id: "type", title: "What are you posting?", description: "Pick one. You can change it later." },
@@ -34,7 +35,7 @@ const STEPS = [
   {
     id: "recipe",
     title: "Recipe",
-    description: "What buyers unlock. Only the prompts are required.",
+    description: PAYMENTS_ENABLED ? "What buyers unlock. Only the prompts are required." : "What people unlock. Only the prompts are required.",
   },
 ] as const
 
@@ -135,11 +136,12 @@ export function CreateListingForm({ editing }: { editing?: { listing: Listing; p
       tools: values.tools,
       toolVersion: "",
       tags: values.tags,
-      price: Math.round(values.price * 100),
-      pricing: {
-        mode: values.pricingMode,
-        bundleSlugs: values.pricingMode === "bundle" ? values.bundleSlugs : undefined,
-      },
+      // Payments are off for now: every recipe is free
+      price: PAYMENTS_ENABLED ? Math.round(values.price * 100) : 0,
+      pricing:
+        PAYMENTS_ENABLED && values.pricingMode === "bundle"
+          ? { mode: "bundle", bundleSlugs: values.bundleSlugs }
+          : { mode: "single" },
       createdAt: original?.createdAt ?? new Date().toISOString(),
       stats: original?.stats ?? { views: 0, sales: 0, saves: 0, likes: 0 },
       trendingScore: original?.trendingScore ?? 0,

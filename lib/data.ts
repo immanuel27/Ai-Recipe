@@ -65,16 +65,19 @@ async function fetchCatalog() {
   }
 }
 
-/** New posts start at the top of Trending, then settle into their own score over this many hours */
-const FRESH_HOURS = 72
-/** A brand-new post ranks this high (demo posts score up to ~100) */
-const FRESH_BOOST = 100
+/** New posts stay at the top, newest first, for this many hours */
+const NEW_HOURS = 48
+/** Far above any trending score, so new posts always lead */
+const NEW_BASE = 1_000_000
 
-/** Trending score plus a boost for new posts that fades out over FRESH_HOURS, so new creators get seen. */
+/**
+ * Feed rank. Posts from the last NEW_HOURS come first, newest at the top, so a
+ * new post is the first thing people see; older posts rank by trending score.
+ */
 export function rankScore(listing: Listing, now = Date.now()) {
   const ageHours = (now - new Date(listing.createdAt).getTime()) / 3_600_000
-  const fresh = Number.isFinite(ageHours) ? Math.max(0, 1 - Math.max(0, ageHours) / FRESH_HOURS) : 0
-  return listing.trendingScore + FRESH_BOOST * fresh
+  if (Number.isFinite(ageHours) && ageHours < NEW_HOURS) return NEW_BASE - Math.max(0, ageHours)
+  return listing.trendingScore
 }
 
 function byRank(listings: Listing[]) {

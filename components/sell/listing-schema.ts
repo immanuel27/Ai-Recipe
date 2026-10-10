@@ -8,6 +8,11 @@ export const MAX_IMAGES = 8
 
 const TOOL_IDS = TOOLS.map((t) => t.id) as [ToolId, ...ToolId[]]
 
+/** A new upload whose file carried no AI tag: the proof link is required instead */
+export function needsProofLink(v: { postType: string; media: { url: string; aiTag?: unknown } }) {
+  return v.postType !== "website" && !!v.media.url && !v.media.aiTag && !/^https?:/.test(v.media.url)
+}
+
 export const listingSchema = z
   .object({
     /** Step 1: videos, photos, or websites & apps */
@@ -83,11 +88,11 @@ export const listingSchema = z
     path: ["liveUrl"],
     message: "Get a preview of your site first.",
   })
-  // New AI media must carry an AI tag (already-published media was checked when posted);
-  // websites have no file, so their proof link stands in for it
-  .refine((v) => v.postType === "website" || !v.media.url || !!v.media.aiTag || /^https?:/.test(v.media.url), {
-    path: ["media", "url"],
-    message: "This file has no AI tag. Upload the original export from your AI tool.",
+  // New media without an AI tag in the file (many tools don't embed one) needs the proof
+  // link instead; already-published media was checked when posted
+  .refine((v) => !needsProofLink(v) || !!v.proofUrl, {
+    path: ["proofUrl"],
+    message: "Your file has no AI tag, so paste the share link from your AI tool to prove it's AI-made.",
   })
   .refine((v) => {
     const allowed = new Set(toolsForPostType(v.postType).map((t) => t.id))

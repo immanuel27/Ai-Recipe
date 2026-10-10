@@ -97,9 +97,9 @@ A marketplace where creators sell step-by-step recipes for AI-made videos and im
   - For everyone: Profile (header plus your posts), Library (purchased, saved and liked) and Settings.
   - Seller tools under a "Selling" label: Overview, Listings, Sales and Payouts.
   - Public creator profiles are at `/u/[username]` (`profileHref()` in `lib/profile.ts`), and creator names across the app link there.
-- **Uploads must be made with AI.** Every uploaded image or video (the cover and failed-attempt images) is checked with `detectAiTag()` in `lib/ai-provenance.ts` before it's accepted.
+- **Uploads must be made with AI.** Every uploaded cover image or video is checked with `detectAiTag()` in `lib/ai-provenance.ts`. Many tools (including some Higgsfield exports) don't embed a tag, so untagged files are accepted but then **the proof link is required** (`needsProofLink()` in `listing-schema.ts`); tagged files keep the proof link optional. Failed-attempt images aren't checked.
   - The check reads the original file's provenance metadata: C2PA Content Credentials or an IPTC digital source type of trained algorithmic media, or generator metadata (Stable Diffusion or ComfyUI PNG data, or a known AI tool named in a software/creator-tool field).
-  - Files without a tag get a clear error. Accepted posts store `Listing.aiTag`, but no "Made with AI" label is shown: the only badge on posts is `<VerifiedBadge>` (team-checked proof link).
+  - Files without a tag show a note asking for the proof link. Posts store `Listing.aiTag` when found, but no "Made with AI" label is shown: the only badge on posts is `<VerifiedBadge>` (team-checked proof link).
   - Run the check on the original `File`, before any canvas re-encode, which strips metadata.
   - This is client-side only; production must also verify C2PA signatures on the server.
 - **Website recipes and proof links.** Tools have a `kind` (`media` or `website`, in `lib/mock/tools.ts`). Websites & apps posts have **no upload**: the creator pastes the live link and `captureWebsite()` (`lib/screenshot.ts`, Microlink from the browser, free tier ~25/day per visitor, no key) captures 1280×1200 (the hero and about half of the next section) as the cover. They skip the AI-tag check and need a proof link, unless the live link itself is one (e.g. `*.lovable.app`). Explore has a Websites type.

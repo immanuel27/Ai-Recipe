@@ -1,7 +1,6 @@
 "use client"
 
 import * as React from "react"
-import { toast } from "sonner"
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form"
 
 import { Field, FieldError, FieldLabel } from "@/components/ui/field"
@@ -19,7 +18,6 @@ import {
   type IconType,
 } from "@/components/icons"
 import type { ListingFormValues } from "@/components/sell/listing-schema"
-import { detectAiTag, missingAiTagMessage } from "@/lib/ai-provenance"
 import { imageToDataUrl } from "@/lib/media"
 import { cn } from "@/lib/utils"
 
@@ -318,17 +316,12 @@ function FailuresPart() {
   const { control, register, setValue, formState } = useFormContext<ListingFormValues>()
   const { fields, append, remove } = useFieldArray({ control, name: "failures" })
   const values = useWatch({ control, name: "failures" })
-  const postType = useWatch({ control, name: "postType" })
   const errors = formState.errors.failures
 
   async function onImage(i: number, file: File | undefined) {
     if (!file || !file.type.startsWith("image/")) return
-    // Failed attempts are AI generations too: same AI-tag rule as the cover
-    // (website posts show screenshots, which can't carry one)
-    if (postType !== "website" && !(await detectAiTag(file))) {
-      toast.error(missingAiTagMessage(file.name))
-      return
-    }
+    // Failed attempts are shown as-is: many AI tools don't embed an AI tag, and the
+    // post's cover (or proof link) already shows the work is AI-made
     const url = await imageToDataUrl(file, 480, 0.75)
     setValue(`failures.${i}.imageUrl`, url)
   }

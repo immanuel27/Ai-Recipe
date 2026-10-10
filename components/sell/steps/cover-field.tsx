@@ -26,11 +26,14 @@ import {
 import { useAppStore } from "@/components/providers/app-store"
 import { usePrefersReducedMotion } from "@/hooks/use-prefers-reduced-motion"
 import { initials } from "@/lib/format"
-import { detectAiTag, missingAiTagMessage, type AiTag } from "@/lib/ai-provenance"
+import { detectAiTag, type AiTag } from "@/lib/ai-provenance"
 import { captureVideoPoster, imageToDataUrl } from "@/lib/media"
 import { parseHttpsUrl } from "@/lib/mock/tools"
 import { ScreenshotError, captureWebsite } from "@/lib/screenshot"
 import { cn } from "@/lib/utils"
+
+const NO_TAG_NOTE =
+  "No AI tag in this file (many tools don't add one). Add your tool's share link as proof before publishing."
 
 /** Supabase's free plan caps each upload at 50 MB */
 const MAX_VIDEO_MB = 50
@@ -105,14 +108,15 @@ function MediaCover({ postType }: { postType: "video" | "photo" }) {
       if (!photos.length) {
         const file = videos[0]!
         if (file.size > MAX_VIDEO_MB * 1024 * 1024) return setLocalError(`Videos up to ${MAX_VIDEO_MB} MB.`)
-        // Only AI-made media: the original file must carry an AI tag
-        const aiTag = await detectAiTag(file)
-        if (!aiTag) return setLocalError(missingAiTagMessage(file.name))
+        // AI-made media: files with an AI tag are confirmed straight away; files without one
+        // (many tools don't embed it) are accepted, and the proof link becomes required
+        const aiTag = (await detectAiTag(file)) ?? undefined
         // Mock storage: the video lives in memory for this session; the poster is persisted.
         const url = URL.createObjectURL(file)
         const posterUrl = await captureVideoPoster(url)
         setValue("media", { url, posterUrl, type: "video", images: [], aiTag }, { shouldValidate: true })
-        toast.success(`AI tag found: ${aiTag.detail}`)
+        if (aiTag) toast.success(`AI tag found: ${aiTag.detail}`)
+        else toast(NO_TAG_NOTE)
         if (videos.length > 1) toast("Only one video per post: we used the first one.")
         return
       }
@@ -123,26 +127,14 @@ function MediaCover({ postType }: { postType: "video" | "photo" }) {
       const room = MAX_IMAGES - images.length
       if (room <= 0) return setLocalError(`Up to ${MAX_IMAGES} images per post.`)
       if (ok.length > room) toast(`Up to ${MAX_IMAGES} images: added the first ${room}.`)
-      // Only AI-made media: check every original file for its AI tag before re-encoding
-      const checked = await Promise.all(
-        ok.slice(0, room).map(async (file) => ({ file, aiTag: await detectAiTag(file) }))
-      )
-      const tagged = checked.filter((c) => c.aiTag)
-      const untagged = checked.filter((c) => !c.aiTag)
-      if (!tagged.length) {
-        return setLocalError(
-          untagged.length === 1
-            ? missingAiTagMessage(untagged[0]!.file.name)
-            : `None of these ${untagged.length} files has an AI tag. Ai Recipy only accepts images and videos made with AI. Upload the original files exported from your AI tool (screenshots and edited copies lose the tag).`
-        )
-      }
-      if (untagged.length) {
-        toast.error(
-          `Skipped ${untagged.length} without an AI tag: ${untagged.map((c) => c.file.name).join(", ")}`
-        )
-      }
-      const urls = await Promise.all(tagged.map((c) => imageToDataUrl(c.file, 1080, 0.8)))
-      setImages([...images, ...urls], media.aiTag ?? tagged[0]!.aiTag!)
+      // Check each original for its AI tag before re-encoding (which strips metadata).
+      // Untagged images are accepted too; then the proof link is required.
+      const files = ok.slice(0, room)
+      const tags = await Promise.all(files.map((file) => detectAiTag(file)))
+      const firstTag = tags.find((t) => t) ?? undefined
+      if (!firstTag && !media.aiTag) toast(NO_TAG_NOTE)
+      const urls = await Promise.all(files.map((file) => imageToDataUrl(file, 1080, 0.8)))
+      setImages([...images, ...urls], media.aiTag ?? firstTag)
       setSelected(images.length) // show the first new image
     } catch {
       setLocalError("We couldn't read that file. Try another one.")
@@ -262,8 +254,8 @@ function MediaCover({ postType }: { postType: "video" | "photo" }) {
             </Button>
             <p className="max-w-64 text-sm text-muted-foreground">
               {wantsVideo
-                ? `One video up to ${MAX_VIDEO_MB} MB, made with AI. Upload the original export from your AI tool: we check it for its AI tag. Or drag it here.`
-                : `Up to ${MAX_IMAGES} images made with AI. Upload the original exports from your AI tool: we check each one for its AI tag. Or drag them here.`}
+                ? `One video up to ${MAX_VIDEO_MB} MB, made with AI. Upload the original export from your AI tool. Or drag it here.`
+                : `Up to ${MAX_IMAGES} images made with AI. Upload the original exports from your AI tool. Or drag them here.`}
             </p>
           </>
         )}

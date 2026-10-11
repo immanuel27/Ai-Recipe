@@ -181,13 +181,17 @@ export function SignInCard() {
 
       {shownStep === "method" && (
         <CardFooter className="flex-col items-stretch gap-3">
-          {/* Google is the fast path; email waits for a proper mail service (lib/flags.ts) */}
-          <Button size="pill" variant={showEmail ? "outline" : "default"} className="w-full" onClick={continueWithGoogle}>
+          {/* Google is the fast path, so it's the prominent one (brand colour); email is secondary */}
+          <Button size="pill" className="w-full bg-brand text-brand-foreground hover:bg-brand/85" onClick={continueWithGoogle}>
             <GoogleGlyph />
             Continue with Google
           </Button>
           {showEmail && (
-            <Button size="pill" className="w-full" onClick={() => setStep("email")}>
+            <Button
+              size="pill"
+              className="w-full bg-foreground text-background hover:bg-foreground/90"
+              onClick={() => setStep("email")}
+            >
               <MailIcon aria-hidden />
               Continue with email
             </Button>

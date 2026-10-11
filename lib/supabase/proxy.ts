@@ -3,10 +3,13 @@ import { NextResponse, type NextRequest } from "next/server"
 
 import { SUPABASE_KEY, SUPABASE_URL, supabaseConfigured } from "@/lib/supabase/env"
 
-/** Refreshes the auth session cookie on every request (Supabase SSR pattern). */
-export async function updateSession(request: NextRequest) {
+/**
+ * Refreshes the auth session cookie on every request (Supabase SSR pattern).
+ * `signedIn` is null when Supabase isn't configured (demo mode: no sign-in wall).
+ */
+export async function updateSession(request: NextRequest): Promise<{ response: NextResponse; signedIn: boolean | null }> {
   let response = NextResponse.next({ request })
-  if (!supabaseConfigured) return response
+  if (!supabaseConfigured) return { response, signedIn: null }
 
   const supabase = createServerClient(SUPABASE_URL!, SUPABASE_KEY!, {
     cookies: {
@@ -23,6 +26,6 @@ export async function updateSession(request: NextRequest) {
   })
 
   // Don't run code between creating the client and getClaims(): it refreshes the session
-  await supabase.auth.getClaims()
-  return response
+  const { data } = await supabase.auth.getClaims()
+  return { response, signedIn: !!data?.claims }
 }

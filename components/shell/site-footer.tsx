@@ -44,9 +44,17 @@ export function SiteLinks({ className, align = "start" }: { className?: string; 
         <ul className="flex items-center gap-3">
           {SOCIAL.map(({ label, href, icon: Icon }) => (
             <li key={label}>
-              <a href={href} target="_blank" rel="noreferrer" aria-label={label} className={cn(link, "flex")}>
-                <Icon aria-hidden className="size-4" />
-              </a>
+              {href ? (
+                <a href={href} target="_blank" rel="noreferrer" aria-label={`Ai Recipy on ${label}`} className={cn(link, "flex")}>
+                  <Icon aria-hidden className="size-4" />
+                </a>
+              ) : (
+                // Not set up yet: shown, but not a link
+                <span title={`${label}: coming soon`} className="flex opacity-40">
+                  <Icon aria-hidden className="size-4" />
+                  <span className="sr-only">{label} (coming soon)</span>
+                </span>
+              )}
             </li>
           ))}
         </ul>

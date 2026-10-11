@@ -21,6 +21,7 @@ import { createProfile } from "@/lib/supabase/account"
 import { createClient } from "@/lib/supabase/client"
 import { SUPABASE_KEY, SUPABASE_URL, supabaseConfigured } from "@/lib/supabase/env"
 import type { SessionUser } from "@/lib/types"
+import { EMAIL_SIGNIN_ENABLED } from "@/lib/flags"
 
 type Step = "method" | "email" | "sent" | "username"
 
@@ -37,6 +38,8 @@ export function SignInCard() {
   const params = useSearchParams()
   const { signIn, authIdentity, user, hydrated } = useAppStore()
   const signup = params.get("mode") === "signup"
+  // Demo mode keeps both buttons; with Supabase, email shows only once it's enabled
+  const showEmail = !supabaseConfigured || EMAIL_SIGNIN_ENABLED
   const [step, setStep] = React.useState<Step>("method")
   const [provider, setProvider] = React.useState<SessionUser["provider"]>("email")
   const [email, setEmail] = React.useState("")
@@ -178,19 +181,24 @@ export function SignInCard() {
 
       {shownStep === "method" && (
         <CardFooter className="flex-col items-stretch gap-3">
-          <Button size="pill" variant="outline" className="w-full" onClick={continueWithGoogle}>
+          {/* Google is the fast path; email waits for a proper mail service (lib/flags.ts) */}
+          <Button size="pill" variant={showEmail ? "outline" : "default"} className="w-full" onClick={continueWithGoogle}>
             <GoogleGlyph />
             Continue with Google
           </Button>
-          <Button size="pill" className="w-full" onClick={() => setStep("email")}>
-            <MailIcon aria-hidden />
-            Continue with email
-          </Button>
+          {showEmail && (
+            <Button size="pill" className="w-full" onClick={() => setStep("email")}>
+              <MailIcon aria-hidden />
+              Continue with email
+            </Button>
+          )}
           {error && <FieldError className="text-center">{error}</FieldError>}
           <p className="pt-1 text-center text-xs text-muted-foreground">
-            {supabaseConfigured
-              ? "We'll email you a link: no password needed."
-              : "Demo sign-in. Nothing leaves your browser."}
+            {!supabaseConfigured
+              ? "Demo sign-in. Nothing leaves your browser."
+              : showEmail
+                ? "We'll email you a link: no password needed."
+                : "One tap with your Google account. No password needed."}
           </p>
         </CardFooter>
       )}

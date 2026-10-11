@@ -12,10 +12,10 @@ export const BRAND = {
   logoForeground: "#f0ece0", // --logo-foreground
 }
 
-// Placeholder profile URLs: replace with the real accounts before launch.
-export const SOCIAL_LINKS = {
-  facebook: "https://facebook.com",
-  instagram: "https://instagram.com",
-  x: "https://x.com",
-  linkedin: "https://linkedin.com",
+// Social profiles in the footer. Null = not set up yet (the icon shows but doesn't link).
+export const SOCIAL_LINKS: Record<"facebook" | "instagram" | "x" | "linkedin", string | null> = {
+  facebook: null,
+  instagram: null,
+  x: "https://x.com/AiRecipy",
+  linkedin: null,
 }

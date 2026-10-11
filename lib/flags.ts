@@ -6,8 +6,8 @@
 export const PAYMENTS_ENABLED = false
 
 /**
- * Email (magic link) sign-in is hidden for now: Supabase's built-in mailer is
- * rate-limited, so everyone signs up with Google. Turn on once custom SMTP
- * (e.g. Resend) is set up in Supabase.
+ * Email (magic link) sign-in, shown next to Google. Supabase's built-in mailer is
+ * heavily rate-limited, so set up custom SMTP (e.g. Resend) in Supabase for it to
+ * work reliably at scale. Set to false to show Google only.
  */
-export const EMAIL_SIGNIN_ENABLED = false
+export const EMAIL_SIGNIN_ENABLED = true

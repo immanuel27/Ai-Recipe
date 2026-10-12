@@ -1,9 +1,7 @@
 "use client"
 
-import { toast } from "sonner"
 
 import {
-  CopyIcon,
   DocumentIcon,
   EditStackIcon,
   ImageMissingIcon,
@@ -12,21 +10,13 @@ import {
   RecipeSettingsIcon,
 } from "@/components/icons"
 import { RecipeStep, TeaserSnippet } from "@/components/shared/recipe-steps"
+import { CopyButton } from "@/components/shared/copy-button"
 import { ToolBadge } from "@/components/shared/tool-badge"
 import { formatPrice } from "@/lib/format"
 import type { Listing } from "@/lib/types"
 import { listingTools } from "@/lib/mock/tools"
 
 const chip = "flex items-center gap-2 rounded-lg bg-dock px-3 py-2 type-meta"
-
-async function copy(text: string, label: string) {
-  try {
-    await navigator.clipboard.writeText(text)
-    toast.success(`${label} copied`)
-  } catch {
-    toast.error("Couldn't copy. Select the text and copy it instead.")
-  }
-}
 
 /**
  * The recipe, part by part. Locked: what each part holds, with a taste of
@@ -68,15 +58,7 @@ export function WhatsInside({
                 <li key={p.label} className="flex flex-col gap-2 py-4 first:pt-0 last:pb-0">
                   <div className="flex items-center justify-between gap-4">
                     <span className="type-meta font-semibold text-muted-foreground">{p.label}</span>
-                    <button
-                      type="button"
-                      onClick={() => copy(p.text, "Prompt")}
-                      aria-label={`Copy prompt: ${p.label}`}
-                      className="glass-button flex h-8 items-center gap-2 rounded-full px-3 type-meta font-semibold"
-                    >
-                      <CopyIcon aria-hidden className="size-4" />
-                      Copy
-                    </button>
+                    <CopyButton text={p.text} label={`Prompt: ${p.label}`} />
                   </div>
                   <p className="type-body leading-6 break-words">{p.text}</p>
                 </li>

@@ -43,7 +43,7 @@ export async function loadAccount(): Promise<Account | null> {
   const [profileRes, purchasesRes, savesRes, likesRes] = await Promise.all([
     supabase
       .from("profiles")
-      .select("id, username, display_name, bio, is_seller, seller_settings(payout_method, country, proof_of_work_url, payout_currency, payout_threshold)")
+      .select("id, username, display_name, bio, avatar_url, is_seller, seller_settings(payout_method, country, proof_of_work_url, payout_currency, payout_threshold)")
       .eq("auth_user_id", authUser.id)
       .maybeSingle(),
     supabase.from("purchases").select("listings(slug)").order("created_at"),
@@ -56,6 +56,7 @@ export async function loadAccount(): Promise<Account | null> {
         id: string
         username: string
         display_name: string
+        avatar_url: string | null
         bio: string
         is_seller: boolean
         seller_settings: {
@@ -92,6 +93,7 @@ export async function loadAccount(): Promise<Account | null> {
           profileId: p.id,
           displayName: p.display_name !== p.username ? p.display_name : undefined,
           bio: p.bio || undefined,
+          avatarUrl: p.avatar_url || undefined,
           email: identity.email,
           provider: identity.provider,
           isSeller: p.is_seller,
@@ -162,12 +164,23 @@ export const remote = {
       : await table.delete().eq("listing_id", id)
     if (error) throw error
   },
-  async updateProfile(profileId: string, profile: { displayName?: string; bio?: string; username: string }) {
+  async updateProfile(
+    profileId: string,
+    profile: { displayName?: string; bio?: string; avatarUrl?: string; username: string },
+    changeAvatar = false
+  ) {
     const { error } = await createClient()
       .from("profiles")
-      .update({ display_name: profile.displayName || profile.username, bio: profile.bio ?? "" })
+      .update({
+        display_name: profile.displayName || profile.username,
+        bio: profile.bio ?? "",
+        // Only touch the photo when it was changed or removed
+        ...(changeAvatar ? { avatar_url: profile.avatarUrl ?? null } : {}),
+      })
       .eq("id", profileId)
     if (error) throw error
+    // Names and photos show in feeds and profiles, which are cached: refresh them
+    await fetch("/api/revalidate", { method: "POST" }).catch(() => {})
   },
   async becomeSeller(profileId: string, seller: NonNullable<SessionUser["seller"]>) {
     const supabase = createClient()

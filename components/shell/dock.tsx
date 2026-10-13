@@ -85,7 +85,7 @@ export function Dock() {
                 aria-label="Account menu"
                 className="flex items-center gap-3 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
-                <UserAvatar username={user.username} className="size-10 sm:size-12" />
+                <UserAvatar username={user.username} avatarUrl={user.avatarUrl} className="size-10 sm:size-12" />
                 <span className="hidden max-w-32 truncate font-semibold lg:block">
                   {user.displayName ?? user.username}
                 </span>

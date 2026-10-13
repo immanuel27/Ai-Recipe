@@ -23,6 +23,7 @@ export function OwnProfileView() {
         displayName={creator.displayName}
         username={user.username}
         bio={user.bio}
+        avatarUrl={user.avatarUrl}
         stats={[
           { label: "Posts", value: posts.length },
           { label: "Likes", value: formatCompact(likes) },

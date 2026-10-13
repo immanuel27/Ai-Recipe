@@ -12,7 +12,7 @@ export function CreatorAvatar({
 }) {
   return (
     <Avatar className={cn("bg-muted", className)}>
-      {creator.avatarUrl && <AvatarImage src={creator.avatarUrl} alt="" />}
+      {creator.avatarUrl && <AvatarImage src={creator.avatarUrl} alt="" className="object-cover" />}
       <AvatarFallback>{initials(creator.displayName)}</AvatarFallback>
     </Avatar>
   )

@@ -25,7 +25,7 @@ export function ProfileHeader({
       <CardContent className="flex flex-col gap-6">
         <div className="flex flex-col items-center gap-4 text-center sm:flex-row sm:items-center sm:text-left">
           <Avatar className="size-24 text-2xl ring-4 ring-background">
-            {avatarUrl && <AvatarImage src={avatarUrl} alt="" />}
+            {avatarUrl && <AvatarImage src={avatarUrl} alt="" className="object-cover" />}
             <AvatarFallback className="bg-primary font-bold text-primary-foreground">
               {initials(displayName)}
             </AvatarFallback>

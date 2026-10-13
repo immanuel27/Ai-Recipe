@@ -46,7 +46,8 @@ interface StoreActions {
   signIn: (user: SessionUser) => void
   signOut: () => void
   becomeSeller: (seller: NonNullable<SessionUser["seller"]>) => void
-  updateProfile: (profile: Pick<SessionUser, "displayName" | "bio">) => void
+  /** Save name and bio; pass `avatarUrl` (or undefined to remove it) only when the photo changed */
+  updateProfile: (profile: Pick<SessionUser, "displayName" | "bio" | "avatarUrl">, changeAvatar?: boolean) => void
   purchase: (slug: string) => void
   toggleSave: (slug: string) => boolean
   toggleLike: (slug: string) => boolean
@@ -153,10 +154,14 @@ const actions: StoreActions = {
     setState((s) => (s.user ? { ...s, user: { ...s.user, isSeller: true, seller } } : s))
     sync((id) => remote.becomeSeller(id, seller))
   },
-  updateProfile: (profile) => {
-    setState((s) => (s.user ? { ...s, user: { ...s.user, ...profile } } : s))
+  updateProfile: (profile, changeAvatar = false) => {
+    setState((s) => {
+      if (!s.user) return s
+      const next = { ...s.user, displayName: profile.displayName, bio: profile.bio }
+      return { ...s, user: changeAvatar ? { ...next, avatarUrl: profile.avatarUrl } : next }
+    })
     const user = data.user
-    if (user) sync((id) => remote.updateProfile(id, { ...profile, username: user.username }))
+    if (user) sync((id) => remote.updateProfile(id, { ...profile, username: user.username }, changeAvatar))
   },
   purchase: (slug) => {
     setState((s) => (s.purchased.includes(slug) ? s : { ...s, purchased: [...s.purchased, slug] }))
@@ -247,5 +252,6 @@ export function creatorFromUser(user: SessionUser): Creator {
     username: user.username,
     displayName: user.displayName || user.username,
     bio: user.bio ?? "",
+    avatarUrl: user.avatarUrl,
   }
 }

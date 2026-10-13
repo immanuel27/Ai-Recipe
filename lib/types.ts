@@ -167,6 +167,8 @@ export interface SessionUser {
   profileId?: string
   displayName?: string
   bio?: string
+  /** Profile picture (Supabase Storage URL) */
+  avatarUrl?: string
   email: string
   provider: "google" | "email"
   isSeller: boolean

@@ -3,7 +3,6 @@
 import * as React from "react"
 import Link from "next/link"
 
-import { toast } from "sonner"
 
 import {
   DropdownMenu,
@@ -14,7 +13,6 @@ import {
 } from "@/components/ui/dropdown-menu"
 import {
   CheckIcon,
-  CopyIcon,
   HideIcon,
   LikeIcon,
   LinkIcon,
@@ -60,23 +58,13 @@ export function ReelActions({
   onHide: () => void
   className?: string
 }) {
-  const { user, hydrated, saved, purchased, toggleSave, following, toggleFollow } = useAppStore()
+  const { user, hydrated, saved, toggleSave, following, toggleFollow } = useAppStore()
   const like = useLike(listing)
   const isSaved = saved.includes(listing.slug)
   const isFollowing = following.includes(creator.id)
   const isOwner = !!user && listing.creatorId === userCreatorId(user.username)
-  const owned = isOwner || purchased.includes(listing.slug)
   const tool = getTool(listing.tool)
 
-  async function copyPrompt() {
-    const text = listing.recipe.prompts.map((p) => `${p.label}\n${p.text}`).join("\n\n")
-    try {
-      await navigator.clipboard.writeText(text)
-      toast.success(listing.recipe.prompts.length > 1 ? "Prompts copied" : "Prompt copied")
-    } catch {
-      toast.error("Couldn't copy. Open the recipe page and copy it from there.")
-    }
-  }
   const onMedia = variant === "media"
 
   const round = cn(
@@ -160,12 +148,6 @@ export function ReelActions({
             </Link>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          {owned && (
-            <DropdownMenuItem onSelect={copyPrompt}>
-              <CopyIcon aria-hidden />
-              {listing.recipe.prompts.length > 1 ? "Copy prompts" : "Copy prompt"}
-            </DropdownMenuItem>
-          )}
           {tool && (
             <DropdownMenuItem asChild>
               <a href={tool.url} target="_blank" rel="noreferrer">

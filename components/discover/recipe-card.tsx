@@ -17,7 +17,6 @@ import { useOwnedRecipe } from "@/components/shared/use-owned-recipe"
 import { useAppStore, userCreatorId } from "@/components/providers/app-store"
 import { MediaImage } from "@/components/shared/media-image"
 import { RecipeStep as Step, TeaserSnippet } from "@/components/shared/recipe-steps"
-import { CopyButton } from "@/components/shared/copy-button"
 import { ToolBadge } from "@/components/shared/tool-badge"
 import { formatCompact, formatPrice } from "@/lib/format"
 import type { Listing } from "@/lib/types"
@@ -67,17 +66,15 @@ export function RecipeCard({ listing: baseListing, className }: { listing: Listi
       <ol className="-mx-2 flex min-h-0 flex-col gap-5 overflow-y-auto px-2">
         <Step n={1} icon={PromptsIcon} label="Prompts" count={prompts.length}>
           {owned ? (
-            <ul className="flex flex-col gap-3">
+            // A preview only: prompts are copied on the recipe page (keeps people on the post)
+            <ul className="flex select-none flex-col gap-3">
               {prompts.map((p) => (
-                <li key={p.label} className="flex flex-col gap-1.5">
-                  <div className="flex items-center justify-between gap-3">
-                    <span className="truncate type-meta font-semibold">{p.label}</span>
-                    {/* Copies the whole prompt, even though it's shortened here */}
-                    <CopyButton text={p.text} label={`Prompt: ${p.label}`} />
-                  </div>
-                  <p className="line-clamp-3 type-meta text-muted-foreground">{p.text}</p>
+                <li key={p.label} className="flex flex-col gap-1">
+                  <span className="truncate type-meta font-semibold">{p.label}</span>
+                  <p className="line-clamp-2 type-meta text-muted-foreground">{p.text}</p>
                 </li>
               ))}
+              <li className="type-meta text-muted-foreground">Open the full recipe to copy the prompts.</li>
             </ul>
           ) : (
             <TeaserSnippet text={prompts[0]?.text ?? ""} />

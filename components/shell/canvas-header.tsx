@@ -1,9 +1,7 @@
 "use client"
 
-import Link from "next/link"
 
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
-import { SearchIcon } from "@/components/icons"
+import { NotificationBell } from "@/components/notifications/notification-bell"
 import { Logo } from "@/components/shell/logo"
 import { cn } from "@/lib/utils"
 
@@ -48,14 +46,14 @@ export function ScopeTabs({
   )
 }
 
-/** The top of the canvas: logo, optional centre scope and search. Theme lives in Settings. */
+/** The top of the canvas: logo, optional centre scope and the notification bell. Theme lives in Settings. */
 export function CanvasHeader({
   center,
   showSearch = true,
   className,
 }: {
   center?: React.ReactNode
-  /** Pages with their own search field hide the shortcut */
+  /** Show the notification bell (it replaced the search shortcut; Explore has search) */
   showSearch?: boolean
   className?: string
 }) {
@@ -64,16 +62,7 @@ export function CanvasHeader({
       <Logo />
       <div className="col-start-2 hidden md:block">{center}</div>
       <div className="col-start-3 flex items-center justify-end gap-2">
-        {showSearch && (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Link href="/explore" aria-label="Search" className={round}>
-                <SearchIcon aria-hidden className="size-5" />
-              </Link>
-            </TooltipTrigger>
-            <TooltipContent>Search</TooltipContent>
-          </Tooltip>
-        )}
+        {showSearch && <NotificationBell className={round} />}
       </div>
       {center && <div className="col-span-3 md:hidden">{center}</div>}
     </header>

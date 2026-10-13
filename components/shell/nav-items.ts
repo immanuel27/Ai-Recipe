@@ -49,6 +49,7 @@ export function pageTitle(pathname: string) {
   if (pathname.startsWith("/r/")) return "Recipe"
   if (pathname.startsWith("/u/")) return "Creator"
   if (pathname.startsWith("/signin")) return "Log in"
+  if (pathname.startsWith("/notifications")) return "Notifications"
   if (pathname.startsWith("/credits")) return "Credits"
   if (pathname.startsWith("/privacy")) return "Privacy"
   if (pathname.startsWith("/terms")) return "Terms"

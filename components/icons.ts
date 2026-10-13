@@ -40,6 +40,7 @@ export {
   Plus as PlusIcon,
   X as CloseIcon,
   Check as CheckIcon,
+  Bell as NotificationsIcon,
   CaretDown as CaretDownIcon,
   CaretUp as CaretUpIcon,
   CaretLeft as CaretLeftIcon,

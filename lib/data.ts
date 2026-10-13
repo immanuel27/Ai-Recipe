@@ -66,7 +66,7 @@ async function fetchCatalog() {
 }
 
 /** New posts stay at the top, newest first, for this many hours */
-const NEW_HOURS = 48
+const NEW_HOURS = 96
 /** Far above any trending score, so new posts always lead */
 const NEW_BASE = 1_000_000
 

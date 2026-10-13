@@ -176,6 +176,7 @@ export function Reels({ items }: { items: ReelEntry[] }) {
               index={i}
               active={i === active}
               near={Math.abs(i - active) <= 1}
+              full={Math.abs(i - active) <= 2}
               soundOn={soundOn}
               soundBlocked={soundBlocked}
               onSoundBlocked={() => setSoundBlocked(true)}

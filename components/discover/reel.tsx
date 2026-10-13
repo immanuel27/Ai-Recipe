@@ -24,12 +24,44 @@ export interface ReelEntry {
   creator: Creator
 }
 
+type ReelProps = {
+  entry: ReelEntry
+  index: number
+  active: boolean
+  near: boolean
+  /** Render the full reel; far-off reels are empty frames of the same size (keeps the page light) */
+  full: boolean
+  /** Sound wanted (on by default) */
+  soundOn: boolean
+  /** The browser refused sound until the visitor taps: playing muted for now */
+  soundBlocked: boolean
+  onSoundBlocked: () => void
+  onHide: () => void
+}
+
 /**
  * One reel: the recipe you'd buy on the left, the shot in the middle, who made
  * it and what you can do on the right. Phones get the shot full-height with
- * the actions over it and the recipe in a sheet.
+ * the actions over it and the recipe in a sheet. The frame (the <article>) is
+ * always there so scroll-snapping and the "which reel is on screen" observer
+ * keep working; its contents only render near the reel on screen.
  */
-export function Reel({
+export function Reel(props: ReelProps) {
+  const { entry, index, active, full } = props
+  return (
+    <article
+      data-reel
+      data-index={index}
+      data-active={active || undefined}
+      aria-label={entry.listing.title}
+      className="flex h-[calc(100dvh-var(--spacing-dock-bar))] snap-start snap-always items-center justify-center gap-8 md:h-full md:px-10 md:pt-4 md:pb-6 xl:gap-12"
+    >
+      {full && <ReelBody {...props} />}
+    </article>
+  )
+}
+
+function ReelBody({
   entry: { listing, creator },
   index,
   active,
@@ -38,18 +70,7 @@ export function Reel({
   soundBlocked,
   onSoundBlocked,
   onHide,
-}: {
-  entry: ReelEntry
-  index: number
-  active: boolean
-  near: boolean
-  /** Sound wanted (on by default) */
-  soundOn: boolean
-  /** The browser refused sound until the visitor taps: playing muted for now */
-  soundBlocked: boolean
-  onSoundBlocked: () => void
-  onHide: () => void
-}) {
+}: ReelProps) {
   const videoRef = React.useRef<HTMLVideoElement>(null)
   const carouselRef = React.useRef<MediaCarouselHandle>(null)
   const [playing, setPlaying] = React.useState(false)
@@ -146,13 +167,7 @@ export function Reel({
   }, [active, isVideo])
 
   return (
-    <article
-      data-reel
-      data-index={index}
-      data-active={active || undefined}
-      aria-label={listing.title}
-      className="flex h-[calc(100dvh-var(--spacing-dock-bar))] snap-start snap-always items-center justify-center gap-8 md:h-full md:px-10 md:pt-4 md:pb-6 xl:gap-12"
-    >
+    <>
       <RecipeCard listing={listing} className="hidden max-h-full w-80 shrink-0 lg:flex xl:w-88" />
 
       {/* Phones: the reel fills the whole screen width; tablets and up: a framed 9:16 card */}
@@ -260,6 +275,6 @@ export function Reel({
           <RecipeCard listing={listing} className="border-0 bg-transparent backdrop-blur-none" />
         </SheetContent>
       </Sheet>
-    </article>
+    </>
   )
 }

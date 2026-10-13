@@ -19,7 +19,7 @@ export const TOOLS: Tool[] = [
     kind: "media",
     mediaTypes: ["video", "image"],
     url: "https://higgsfield.ai",
-    proofLinks: ["higgsfield.ai/s/", "higgsfield.ai/share/"],
+    proofLinks: ["higgsfield.ai/", "*.higgsfield.ai/"],
     proofHint: "Share → Copy link on the generation, e.g. higgsfield.ai/s/…",
   },
   { id: "runway", name: "Runway", kind: "media", mediaTypes: ["video", "image"], url: "https://runwayml.com" },
@@ -29,7 +29,7 @@ export const TOOLS: Tool[] = [
     kind: "media",
     mediaTypes: ["image", "video"],
     url: "https://www.midjourney.com",
-    proofLinks: ["midjourney.com/jobs/", "*.midjourney.com/jobs/"],
+    proofLinks: ["midjourney.com/", "*.midjourney.com/"],
     proofHint: "The job link, e.g. midjourney.com/jobs/…",
   },
   { id: "flux", name: "Flux", kind: "media", mediaTypes: ["image"], url: "https://bfl.ai" },
@@ -44,7 +44,7 @@ export const TOOLS: Tool[] = [
     mediaTypes: ["image", "video"],
     logo: "/logos/openai.webp",
     url: "https://chatgpt.com",
-    proofLinks: ["chatgpt.com/share/", "chat.openai.com/share/"],
+    proofLinks: ["chatgpt.com/share/", "chatgpt.com/canvas/shared/", "chat.openai.com/share/", "*.chatgpt.site/"],
     proofHint: "Share the chat and paste its link, e.g. chatgpt.com/share/…",
   },
   {
@@ -62,7 +62,7 @@ export const TOOLS: Tool[] = [
     kind: "website",
     mediaTypes: ["image", "video"],
     url: "https://lovable.dev",
-    proofLinks: ["lovable.dev/projects/", "*.lovable.app/"],
+    proofLinks: ["lovable.dev/", "*.lovable.app/", "*.lovableproject.com/"],
     proofHint: "Your public project link (lovable.dev/projects/…) or the published app.",
   },
   {
@@ -71,7 +71,7 @@ export const TOOLS: Tool[] = [
     kind: "website",
     mediaTypes: ["image", "video"],
     url: "https://www.figma.com/make/",
-    proofLinks: ["figma.com/make/", "*.figma.com/make/", "*.figma.site/"],
+    proofLinks: ["figma.com/make/", "figma.com/proto/", "*.figma.com/make/", "*.figma.site/"],
     proofHint: "The Make file's share link (figma.com/make/…) with viewing turned on.",
   },
   {
@@ -80,8 +80,8 @@ export const TOOLS: Tool[] = [
     kind: "website",
     mediaTypes: ["image", "video"],
     url: "https://www.framer.com",
-    proofLinks: ["framer.com/", "*.framer.com/", "*.framer.website/", "*.framer.app/", "*.framer.ai/"],
-    proofHint: "A remix link to the project, or the published framer.website address.",
+    proofLinks: ["framer.com/", "*.framer.com/", "framer.link/", "*.framer.website/", "*.framer.app/", "*.framer.ai/", "*.framer.media/"],
+    proofHint: "Your Framer share or remix link (framer.link/…), or the published framer.website address.",
   },
 ]
 

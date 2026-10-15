@@ -4,6 +4,7 @@ import localFont from "next/font/local"
 import { Toaster } from "@/components/ui/sonner"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { AccountSync } from "@/components/providers/account-sync"
+import { PresencePing } from "@/components/providers/presence-ping"
 import { ThemeProvider } from "@/components/providers/theme-provider"
 import { CanvasScroll } from "@/components/shell/canvas-scroll"
 import { Dock } from "@/components/shell/dock"
@@ -80,6 +81,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             <Toaster position="top-center" />
             <WelcomeDialog />
             <AccountSync />
+            <PresencePing />
           </TooltipProvider>
         </ThemeProvider>
       </body>

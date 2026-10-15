@@ -117,7 +117,7 @@ export function PurchaseCard({
           </Button>
         )}
         <p className="text-center text-xs text-muted-foreground">
-          Includes prompts, settings, assets, edit stack and failed attempts.
+          Includes prompts, the AI model, reference files, edit stack and failed attempts.
         </p>
         {isOwner && !listing.archived && (
           <div className="flex gap-2 border-t pt-3">

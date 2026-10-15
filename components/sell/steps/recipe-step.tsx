@@ -34,24 +34,8 @@ export function RecipeStep() {
       <Strength />
       <ol className="flex flex-col gap-8">
         <PromptsPart />
-        <PairPart
-          n={2}
-          icon={RecipeSettingsIcon}
-          title="Settings and seeds"
-          why="Seeds and settings let buyers match your look exactly."
-          name="settings"
-          first={{ key: "key", label: "Setting", placeholder: "Seed" }}
-          second={{ key: "value", label: "Value", placeholder: "449120" }}
-        />
-        <PairPart
-          n={3}
-          icon={DocumentIcon}
-          title="Reference assets"
-          why="Reference images, style refs, masks or LUTs you used."
-          name="assets"
-          first={{ key: "name", label: "Asset", placeholder: "Subject reference sheet" }}
-          second={{ key: "note", label: "Note (optional)", placeholder: "3 angles, used as subject ref" }}
-        />
+        <ModelPart />
+        <AssetsPart />
         <PairPart
           n={4}
           icon={EditStackIcon}
@@ -70,13 +54,13 @@ export function RecipeStep() {
 /** How much of the recipe buyers will get, with the one nudge that matters most. */
 function Strength() {
   const { control } = useFormContext<ListingFormValues>()
-  const [prompts, settings, assets, editSteps, failures] = useWatch({
+  const [prompts, model, assets, editSteps, failures] = useWatch({
     control,
-    name: ["prompts", "settings", "assets", "editSteps", "failures"],
+    name: ["prompts", "model", "assets", "editSteps", "failures"],
   })
   const parts = [
-    (prompts ?? []).some((p) => p.text.trim().length >= 10),
-    (settings ?? []).length > 0,
+    (prompts ?? []).some((p) => !!p.fileUrl || p.text.trim().length >= 10),
+    !!model?.trim(),
     (assets ?? []).length > 0,
     (editSteps ?? []).length > 0,
     (failures ?? []).length > 0,
@@ -124,8 +108,8 @@ function Part({
   count: number
   optional?: boolean
   last?: boolean
-  addLabel: string
-  onAdd: () => void
+  addLabel?: string
+  onAdd?: () => void
   children?: React.ReactNode
 }) {
   return (
@@ -153,7 +137,7 @@ function Part({
             </h3>
             {count === 0 && <p className="type-body text-muted-foreground">{why}</p>}
           </div>
-          <button
+          {onAdd && <button
             type="button"
             onClick={onAdd}
             aria-label={addLabel}
@@ -161,7 +145,7 @@ function Part({
           >
             <PlusIcon aria-hidden weight="bold" className="size-4" />
             Add
-          </button>
+          </button>}
         </div>
         {children}
       </div>
@@ -183,20 +167,37 @@ function RemoveButton({ label, onClick }: { label: string; onClick: () => void }
 }
 
 function PromptsPart() {
-  const { control, register, formState } = useFormContext<ListingFormValues>()
+  const { control, register, setValue, formState } = useFormContext<ListingFormValues>()
   const { fields, append, remove } = useFieldArray({ control, name: "prompts" })
+  const values = useWatch({ control, name: "prompts" })
   const errors = formState.errors.prompts
+  const [fileError, setFileError] = React.useState<{ i: number; message: string } | null>(null)
+
+  function onPdf(i: number, file: File | undefined) {
+    if (!file) return
+    if (file.type !== "application/pdf") return setFileError({ i, message: "Attach a PDF file." })
+    if (file.size > MAX_PDF_MB * 1024 * 1024) return setFileError({ i, message: `PDFs up to ${MAX_PDF_MB} MB.` })
+    setFileError(null)
+    // Kept for this visit, uploaded on publish
+    setValue(`prompts.${i}.fileUrl`, URL.createObjectURL(file), { shouldValidate: true })
+    setValue(`prompts.${i}.fileName`, file.name)
+  }
+
+  function clearPdf(i: number) {
+    setValue(`prompts.${i}.fileUrl`, "", { shouldValidate: true })
+    setValue(`prompts.${i}.fileName`, "")
+  }
 
   return (
     <Part
       n={1}
       icon={PromptsIcon}
       title="Prompts"
-      why="Every prompt you used, word for word."
+      why="Every prompt you used, word for word. Long, detailed ones can go in a PDF."
       count={fields.length}
       optional={false}
       addLabel="Add a prompt"
-      onAdd={() => append({ label: `Prompt ${fields.length + 1}`, text: "" })}
+      onAdd={() => append({ label: `Prompt ${fields.length + 1}`, text: "", fileUrl: "", fileName: "" })}
     >
       <ul className="flex flex-col gap-3">
         {fields.map((f, i) => (
@@ -219,13 +220,45 @@ function PromptsPart() {
               <Textarea
                 id={`prompts.${i}.text`}
                 rows={4}
-                placeholder="Paste the full prompt, exactly as you ran it"
+                placeholder={
+                  values?.[i]?.fileUrl
+                    ? "Optional: a short version, or notes on the PDF"
+                    : "Paste the full prompt, exactly as you ran it"
+                }
                 className={field}
                 aria-invalid={!!errors?.[i]?.text}
                 {...register(`prompts.${i}.text`)}
               />
               <FieldError errors={[errors?.[i]?.text]} />
             </Field>
+            {values?.[i]?.fileUrl ? (
+              <div className="flex items-center gap-3 rounded-xl bg-background/60 p-3 ring-1 ring-foreground/10">
+                <DocumentIcon aria-hidden className="size-5 shrink-0 text-muted-foreground" />
+                <span className="min-w-0 flex-1 truncate type-body font-semibold">{values[i]!.fileName || "Prompt.pdf"}</span>
+                <RemoveButton label={`Remove the PDF from prompt ${i + 1}`} onClick={() => clearPdf(i)} />
+              </div>
+            ) : (
+              <div>
+                <input
+                  id={`prompts.${i}.file`}
+                  type="file"
+                  accept="application/pdf"
+                  className="peer sr-only"
+                  onChange={(e) => {
+                    onPdf(i, e.target.files?.[0])
+                    e.target.value = ""
+                  }}
+                />
+                <label
+                  htmlFor={`prompts.${i}.file`}
+                  className="glass-button inline-flex h-9 cursor-pointer items-center gap-2 rounded-full px-4 type-body font-semibold peer-focus-visible:ring-2 peer-focus-visible:ring-ring"
+                >
+                  <UploadIcon aria-hidden className="size-4" />
+                  Attach a PDF
+                </label>
+              </div>
+            )}
+            {fileError?.i === i && <p className="type-meta text-destructive">{fileError.message}</p>}
           </li>
         ))}
       </ul>
@@ -234,7 +267,132 @@ function PromptsPart() {
   )
 }
 
-type PairName = "settings" | "assets" | "editSteps"
+const MAX_PDF_MB = 20
+const MAX_ASSET_MB = 15
+
+function ModelPart() {
+  const { register, formState } = useFormContext<ListingFormValues>()
+  const error = formState.errors.model
+
+  return (
+    <Part
+      n={2}
+      icon={RecipeSettingsIcon}
+      title="AI model"
+      why="The exact model, so buyers get the same look."
+      count={0}
+    >
+      <Field data-invalid={!!error} className={cn(item, "flex-col items-stretch gap-2")}>
+        <FieldLabel htmlFor="model">Model</FieldLabel>
+        <Input
+          id="model"
+          className={field}
+          placeholder="e.g. Seedance 2, Veo 3, Midjourney v7"
+          aria-invalid={!!error}
+          {...register("model")}
+        />
+        <FieldError errors={[error]} />
+      </Field>
+    </Part>
+  )
+}
+
+function AssetsPart() {
+  const { control, register, setValue, getValues, formState } = useFormContext<ListingFormValues>()
+  const { fields, append, remove } = useFieldArray({ control, name: "assets" })
+  const values = useWatch({ control, name: "assets" })
+  const errors = formState.errors.assets
+  const [fileError, setFileError] = React.useState<{ i: number; message: string } | null>(null)
+
+  function onImage(i: number, file: File | undefined) {
+    if (!file) return
+    if (!file.type.startsWith("image/")) return setFileError({ i, message: "Add an image file." })
+    if (file.size > MAX_ASSET_MB * 1024 * 1024) return setFileError({ i, message: `Images up to ${MAX_ASSET_MB} MB.` })
+    setFileError(null)
+    // Full size, so buyers can reuse it; kept for this visit and uploaded on publish
+    setValue(`assets.${i}.url`, URL.createObjectURL(file))
+    if (!getValues(`assets.${i}.name`).trim()) {
+      setValue(`assets.${i}.name`, file.name.replace(/\.[^.]+$/, "").slice(0, 60), { shouldValidate: true })
+    }
+  }
+
+  return (
+    <Part
+      n={3}
+      icon={DocumentIcon}
+      title="Reference assets"
+      why="Reference images, style refs or start frames you used."
+      count={fields.length}
+      addLabel="Add a reference asset"
+      onAdd={() => append({ name: "", note: "", url: "" })}
+    >
+      {fields.length > 0 && (
+        <ul className="flex flex-col gap-3">
+          {fields.map((f, i) => {
+            const img = values?.[i]?.url
+            const inputId = `assets.${i}.image`
+            return (
+              <li key={f.id} className={cn(item, "flex-wrap sm:flex-nowrap")}>
+                <div className="shrink-0">
+                  <input
+                    id={inputId}
+                    type="file"
+                    accept="image/*"
+                    className="peer sr-only"
+                    onChange={(e) => {
+                      onImage(i, e.target.files?.[0])
+                      e.target.value = ""
+                    }}
+                  />
+                  <label
+                    htmlFor={inputId}
+                    className="flex size-20 cursor-pointer items-center justify-center overflow-hidden rounded-xl bg-background/60 text-muted-foreground ring-1 ring-foreground/10 peer-focus-visible:ring-2 peer-focus-visible:ring-ring"
+                  >
+                    {img ? (
+                      // eslint-disable-next-line @next/next/no-img-element -- local preview
+                      <img src={img} alt={`Reference ${i + 1}`} className="size-full object-cover" />
+                    ) : (
+                      <UploadIcon className="size-5" aria-hidden />
+                    )}
+                    <span className="sr-only">{img ? "Replace image" : "Add image"}</span>
+                  </label>
+                </div>
+                <div className="grid min-w-0 flex-1 grid-cols-1 gap-3">
+                  <Field data-invalid={!!errors?.[i]?.name}>
+                    <FieldLabel htmlFor={`assets.${i}.name`}>Name</FieldLabel>
+                    <Input
+                      id={`assets.${i}.name`}
+                      className={field}
+                      placeholder="Subject reference sheet"
+                      aria-invalid={!!errors?.[i]?.name}
+                      {...register(`assets.${i}.name`)}
+                    />
+                    <FieldError errors={[errors?.[i]?.name]} />
+                  </Field>
+                  <Field>
+                    <FieldLabel htmlFor={`assets.${i}.note`}>Note (optional)</FieldLabel>
+                    <Input
+                      id={`assets.${i}.note`}
+                      className={field}
+                      placeholder="3 angles, used as the subject reference"
+                      {...register(`assets.${i}.note`)}
+                    />
+                  </Field>
+                  {fileError?.i === i && <p className="type-meta text-destructive">{fileError.message}</p>}
+                </div>
+                <div className="sm:pt-7">
+                  <RemoveButton label={`Remove reference asset ${i + 1}`} onClick={() => remove(i)} />
+                </div>
+              </li>
+            )
+          })}
+        </ul>
+      )}
+    </Part>
+  )
+}
+
+type PairName = "editSteps"
 
 function PairPart({
   n,
@@ -284,7 +442,7 @@ function PairPart({
                       className={field}
                       placeholder={first.placeholder}
                       aria-invalid={!!e1}
-                      {...register(id1 as `settings.${number}.key`)}
+                      {...register(id1 as `editSteps.${number}.tool`)}
                     />
                     <FieldError errors={[e1]} />
                   </Field>
@@ -295,7 +453,7 @@ function PairPart({
                       className={field}
                       placeholder={second.placeholder}
                       aria-invalid={!!e2}
-                      {...register(id2 as `settings.${number}.value`)}
+                      {...register(id2 as `editSteps.${number}.note`)}
                     />
                     <FieldError errors={[e2]} />
                   </Field>

@@ -6,10 +6,11 @@ import {
   EditStackIcon,
   ImageMissingIcon,
   LockIcon,
+  OpenIcon,
   PromptsIcon,
   RecipeSettingsIcon,
 } from "@/components/icons"
-import { RecipeStep, TeaserSnippet } from "@/components/shared/recipe-steps"
+import { RecipeStep, TeaserSnippet, settingsLabel } from "@/components/shared/recipe-steps"
 import { CopyButton } from "@/components/shared/copy-button"
 import { ToolBadge } from "@/components/shared/tool-badge"
 import { formatPrice } from "@/lib/format"
@@ -58,9 +59,22 @@ export function WhatsInside({
                 <li key={p.label} className="flex flex-col gap-2 py-4 first:pt-0 last:pb-0">
                   <div className="flex items-center justify-between gap-4">
                     <span className="type-meta font-semibold text-muted-foreground">{p.label}</span>
-                    <CopyButton text={p.text} label={`Prompt: ${p.label}`} />
+                    {p.text && <CopyButton text={p.text} label={`Prompt: ${p.label}`} />}
                   </div>
-                  <p className="type-body leading-6 break-words">{p.text}</p>
+                  {p.text && <p className="type-body leading-6 break-words">{p.text}</p>}
+                  {p.fileUrl && (
+                    <a
+                      href={p.fileUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`${chip} w-fit font-semibold hover:bg-muted`}
+                    >
+                      <DocumentIcon aria-hidden className="size-4 shrink-0 text-muted-foreground" />
+                      <span className="min-w-0 truncate">{p.fileName || "Prompt.pdf"}</span>
+                      <OpenIcon aria-hidden className="size-4 shrink-0 text-muted-foreground" />
+                      <span className="sr-only">(opens the PDF in a new tab)</span>
+                    </a>
+                  )}
                 </li>
               ))}
             </ul>
@@ -77,7 +91,7 @@ export function WhatsInside({
           )}
         </RecipeStep>
 
-        <RecipeStep n={2} icon={RecipeSettingsIcon} label="Settings and seeds" count={settings.length}>
+        <RecipeStep n={2} icon={RecipeSettingsIcon} label={settingsLabel(settings)} count={settings.length}>
           {unlocked ? (
             <dl className="grid grid-cols-1 gap-2 sm:grid-cols-2">
               {settings.map((s) => (
@@ -101,10 +115,24 @@ export function WhatsInside({
 
         <RecipeStep n={3} icon={DocumentIcon} label="Reference assets" count={assets.length}>
           <ul className="flex flex-col gap-2">
-            {assets.map((a) => (
-              <li key={a.name} className="flex flex-col gap-2">
-                <span className="type-body font-semibold">{a.name}</span>
-                {unlocked && a.note && <span className="type-meta text-muted-foreground">{a.note}</span>}
+            {assets.map((a, i) => (
+              <li key={`${a.name}-${i}`} className="flex items-center gap-3">
+                {unlocked && a.url && (
+                  <a
+                    href={a.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block size-16 shrink-0 overflow-hidden rounded-lg bg-dock ring-1 ring-foreground/10 outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element -- full-size reference, opened as-is */}
+                    <img src={a.url} alt={a.name} loading="lazy" className="size-full object-cover" />
+                    <span className="sr-only">Open {a.name} full size</span>
+                  </a>
+                )}
+                <div className="flex min-w-0 flex-col gap-1">
+                  <span className="type-body font-semibold">{a.name}</span>
+                  {unlocked && a.note && <span className="type-meta text-muted-foreground">{a.note}</span>}
+                </div>
               </li>
             ))}
           </ul>
@@ -142,7 +170,7 @@ export function WhatsInside({
         <footer className="flex flex-col gap-4 border-t border-glass-border pt-6 sm:flex-row sm:items-center sm:justify-between">
           <p className="flex items-center gap-3 text-muted-foreground">
             <LockIcon aria-hidden weight="fill" className="size-4 shrink-0" />
-            Full prompts, setting values and every note unlock with the recipe.
+            Full prompts, the AI model, reference files and every note unlock with the recipe.
           </p>
           <button
             type="button"

@@ -54,8 +54,12 @@ export interface Creator {
 export interface RecipePrompt {
   label: string
   text: string
+  /** A PDF with the full prompt, for long or detailed ones (text may then be empty) */
+  fileUrl?: string
+  fileName?: string
 }
 
+/** Name and value. New posts only save the AI model (key "Model"); older ones may have seeds etc. */
 export interface RecipeSetting {
   key: string
   value: string
@@ -64,6 +68,7 @@ export interface RecipeSetting {
 export interface RecipeAsset {
   name: string
   note?: string
+  /** The reference image itself, full size */
   url?: string
 }
 

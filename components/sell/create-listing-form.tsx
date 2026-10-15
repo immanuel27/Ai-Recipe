@@ -15,6 +15,7 @@ import {
   listingDefaults,
   listingSchema,
   valuesFromListing,
+  settingsFromValues,
   withDefaults,
   type ListingFormValues,
 } from "@/components/sell/listing-schema"
@@ -86,6 +87,17 @@ export function CreateListingForm({ editing }: { editing?: { listing: Listing; p
         toast("Re-upload your cover video: uploads aren't kept between visits yet.")
       })
     }
+    // Prompt PDFs and reference images are kept for the visit only, like videos
+    const files = [
+      ...draft.values.prompts.map((p, i) => ({ url: p.fileUrl ?? "", clear: () => {
+        methods.setValue(`prompts.${i}.fileUrl`, "")
+        methods.setValue(`prompts.${i}.fileName`, "")
+      } })),
+      ...draft.values.assets.map((a, i) => ({ url: a.url ?? "", clear: () => methods.setValue(`assets.${i}.url`, "") })),
+    ].filter((f) => f.url.startsWith("blob:"))
+    Promise.all(files.map((f) => fetch(f.url).then(() => true, () => (f.clear(), false)))).then((kept) => {
+      if (kept.includes(false)) toast("Re-attach your PDFs and reference images: files aren't kept between visits yet.")
+    })
   }, [draft, clearDraft, methods])
 
   function goTo(i: number) {
@@ -148,9 +160,13 @@ export function CreateListingForm({ editing }: { editing?: { listing: Listing; p
       isAdult: values.adult || undefined,
       liveUrl: values.postType === "website" && values.liveUrl ? values.liveUrl : undefined,
       recipe: {
-        prompts: values.prompts,
-        settings: values.settings,
-        assets: values.assets.map((a) => ({ name: a.name, note: a.note || undefined })),
+        prompts: values.prompts.map((p) => ({
+          label: p.label,
+          text: p.text,
+          ...(p.fileUrl ? { fileUrl: p.fileUrl, fileName: p.fileName || "Prompt.pdf" } : {}),
+        })),
+        settings: settingsFromValues(values),
+        assets: values.assets.map((a) => ({ name: a.name, note: a.note || undefined, url: a.url || undefined })),
         editStack: values.editSteps,
         failures: values.failures.map((f) => ({ imageUrl: f.imageUrl || undefined, note: f.note })),
       },

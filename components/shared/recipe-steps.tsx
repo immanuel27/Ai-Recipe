@@ -5,6 +5,13 @@ import type { IconType } from "@/components/icons"
 /** How much of a locked prompt reaches the page: enough to taste, never the whole thing. */
 export const TEASER_CHARS = 120
 
+/** Part 2's name: new posts only have the AI model; older ones may have seeds and settings */
+export function settingsLabel(settings: { key: string }[]) {
+  const models = settings.filter((s) => /^(ai )?model$/i.test(s.key.trim())).length
+  if (settings.length > 0 && models === settings.length) return "AI model"
+  return models ? "AI model and settings" : "Settings and seeds"
+}
+
 /**
  * One numbered part of a recipe: a badge, a thread down to the next part, and
  * whatever preview the part has. An empty part says so instead of showing 0.

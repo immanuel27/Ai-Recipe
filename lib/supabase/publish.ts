@@ -13,6 +13,7 @@ function extensionFor(type: string) {
   if (type.includes("mp4")) return "mp4"
   if (type.includes("webm")) return "webm"
   if (type.includes("quicktime")) return "mov"
+  if (type.includes("pdf")) return "pdf"
   return "jpg"
 }
 
@@ -47,7 +48,19 @@ async function uploadMedia(draft: Listing, folder: string, suffix = "") {
       imageUrl: f.imageUrl ? await upload(f.imageUrl, folder, `failure-${i + 1}${suffix}`) : undefined,
     }))
   )
-  return { images, mediaUrl, posterUrl, recipe: { ...draft.recipe, failures } }
+  // Recipe files get an unguessable name: only people with the recipe see the link
+  const secret = () => crypto.randomUUID().slice(0, 12)
+  const prompts = await Promise.all(
+    draft.recipe.prompts.map(async (p, i) =>
+      p.fileUrl ? { ...p, fileUrl: await upload(p.fileUrl, folder, `prompt-${i + 1}-${secret()}`) } : p
+    )
+  )
+  const assets = await Promise.all(
+    draft.recipe.assets.map(async (a, i) =>
+      a.url ? { ...a, url: await upload(a.url, folder, `asset-${i + 1}-${secret()}`) } : a
+    )
+  )
+  return { images, mediaUrl, posterUrl, recipe: { ...draft.recipe, prompts, assets, failures } }
 }
 
 /** The editable columns of a listing, from the app's shape */

@@ -16,7 +16,7 @@ import { BuyDialog } from "@/components/listing/buy-dialog"
 import { useOwnedRecipe } from "@/components/shared/use-owned-recipe"
 import { useAppStore, userCreatorId } from "@/components/providers/app-store"
 import { MediaImage } from "@/components/shared/media-image"
-import { RecipeStep as Step, TeaserSnippet } from "@/components/shared/recipe-steps"
+import { RecipeStep as Step, TeaserSnippet, settingsLabel } from "@/components/shared/recipe-steps"
 import { ToolBadge } from "@/components/shared/tool-badge"
 import { formatCompact, formatPrice } from "@/lib/format"
 import type { Listing } from "@/lib/types"
@@ -71,7 +71,7 @@ export function RecipeCard({ listing: baseListing, className }: { listing: Listi
               {prompts.map((p) => (
                 <li key={p.label} className="flex flex-col gap-1">
                   <span className="truncate type-meta font-semibold">{p.label}</span>
-                  <p className="line-clamp-2 type-meta text-muted-foreground">{p.text}</p>
+                  <p className="line-clamp-2 type-meta text-muted-foreground">{p.text || (p.fileUrl ? "Full prompt in a PDF" : "")}</p>
                 </li>
               ))}
               <li className="type-meta text-muted-foreground">Open the full recipe to copy the prompts.</li>
@@ -80,7 +80,7 @@ export function RecipeCard({ listing: baseListing, className }: { listing: Listi
             <TeaserSnippet text={prompts[0]?.text ?? ""} />
           )}
         </Step>
-        <Step n={2} icon={RecipeSettingsIcon} label="Settings and seeds" count={settings.length}>
+        <Step n={2} icon={RecipeSettingsIcon} label={settingsLabel(settings)} count={settings.length}>
           <ul className="flex flex-wrap gap-2">
             {settings.slice(0, 4).map((s) => (
               <li key={s.key} className="rounded-md bg-dock px-2 py-1 type-meta">

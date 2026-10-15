@@ -43,19 +43,37 @@ export const listingSchema = z
     adult: z.boolean(),
     prompts: z
       .array(
-        z.object({
-          label: z.string().trim().min(1, "Name this prompt."),
-          text: z.string().trim().min(10, "Paste the full prompt."),
-        })
+        z
+          .object({
+            label: z.string().trim().min(1, "Name this prompt."),
+            text: z.string().trim(),
+            /** A PDF of the prompt (long, detailed ones): the text is then optional */
+            fileUrl: z.string(),
+            fileName: z.string(),
+          })
+          .refine((p) => !!p.fileUrl || p.text.length >= 10, {
+            path: ["text"],
+            message: "Paste the full prompt, or attach a PDF.",
+          })
       )
       .min(1, "Add at least one prompt."),
+    /** The AI model used, e.g. "Seedance 2" (saved as the "Model" setting) */
+    model: z.string().trim().max(60, "60 characters max."),
+    /** Older posts' other settings (seeds etc.), kept as they were when editing */
     settings: z.array(
       z.object({
         key: z.string().trim().min(1, "Required."),
         value: z.string().trim().min(1, "Required."),
       })
     ),
-    assets: z.array(z.object({ name: z.string().trim().min(1, "Required."), note: z.string() })),
+    assets: z.array(
+      z.object({
+        name: z.string().trim().min(1, "Name this asset."),
+        note: z.string(),
+        /** The reference image itself */
+        url: z.string(),
+      })
+    ),
     editSteps: z.array(
       z.object({
         tool: z.string().trim().min(1, "Required."),
@@ -136,7 +154,8 @@ export const listingDefaults: ListingFormValues = {
   tools: [],
   tags: [],
   adult: false,
-  prompts: [{ label: "Main prompt", text: "" }],
+  prompts: [{ label: "Main prompt", text: "", fileUrl: "", fileName: "" }],
+  model: "",
   settings: [],
   assets: [],
   editSteps: [],
@@ -144,6 +163,14 @@ export const listingDefaults: ListingFormValues = {
   pricingMode: "single",
   price: 10,
   bundleSlugs: [],
+}
+
+const isModel = (key: string) => /^(ai )?model$/i.test(key.trim())
+
+/** The AI model first (as the "Model" setting), then any older settings */
+export function settingsFromValues(v: Pick<ListingFormValues, "model" | "settings">) {
+  const rest = v.settings.filter((s) => !isModel(s.key))
+  return v.model ? [{ key: "Model", value: v.model }, ...rest] : rest
 }
 
 /** Older drafts had `kind`, a single `tool` and a version */
@@ -160,6 +187,10 @@ export function withDefaults(values: LegacyDraft): ListingFormValues {
     postType: postType ?? listingDefaults.postType,
     tools: rest.tools ?? (tool ? [tool] : []),
     media: { ...listingDefaults.media, ...rest.media },
+    // Older drafts' prompts and assets had no files
+    prompts: (rest.prompts ?? listingDefaults.prompts).map((p) => ({ ...p, fileUrl: p.fileUrl ?? "", fileName: p.fileName ?? "" })),
+    assets: (rest.assets ?? []).map((a) => ({ ...a, url: a.url ?? "" })),
+    model: rest.model ?? "",
   }
 }
 
@@ -183,9 +214,12 @@ export function valuesFromListing(l: Listing, proofUrl = ""): ListingFormValues 
     liveUrl: l.liveUrl ?? "",
     tags: l.tags,
     adult: !!l.isAdult,
-    prompts: r.prompts.length ? r.prompts : listingDefaults.prompts,
-    settings: r.settings,
-    assets: r.assets.map((a) => ({ name: a.name, note: a.note ?? "" })),
+    prompts: r.prompts.length
+      ? r.prompts.map((p) => ({ label: p.label, text: p.text, fileUrl: p.fileUrl ?? "", fileName: p.fileName ?? "" }))
+      : listingDefaults.prompts,
+    model: r.settings.find((s) => isModel(s.key))?.value ?? "",
+    settings: r.settings.filter((s) => !isModel(s.key)),
+    assets: r.assets.map((a) => ({ name: a.name, note: a.note ?? "", url: a.url ?? "" })),
     editSteps: r.editStack,
     failures: r.failures.map((f) => ({ imageUrl: f.imageUrl ?? "", note: f.note })),
     pricingMode: l.pricing.mode,
@@ -209,5 +243,5 @@ export const STEP_FIELDS = [
     "price",
     "bundleSlugs",
   ],
-  ["prompts", "settings", "assets", "editSteps", "failures"],
+  ["prompts", "model", "settings", "assets", "editSteps", "failures"],
 ] as const satisfies readonly (readonly (keyof ListingFormValues)[])[]

@@ -39,6 +39,19 @@ export function EditProfileDialog() {
 
   React.useEffect(() => () => void (photo && URL.revokeObjectURL(photo.preview)), [photo])
 
+  // /profile?edit=1 (e.g. "Add your photo" in What's new) opens the dialog straight away
+  const openedFromLink = React.useRef(false)
+  React.useEffect(() => {
+    if (openedFromLink.current || !user) return
+    const url = new URL(window.location.href)
+    if (url.searchParams.get("edit") !== "1") return
+    openedFromLink.current = true
+    url.searchParams.delete("edit")
+    window.history.replaceState(null, "", url)
+    onOpenChange(true)
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- once, when the account has loaded
+  }, [user])
+
   function onOpenChange(next: boolean) {
     if (saving) return
     // Start from the saved values each time the dialog opens

@@ -14,7 +14,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { useAppStore } from "@/components/providers/app-store"
+import { useVisitInfo } from "@/components/providers/presence-ping"
 import { LogoMark } from "@/components/shell/logo-mark"
+import { isWelcomeBack } from "@/components/shell/welcome-back-dialog"
 
 const STEPS = [
   {
@@ -36,7 +38,8 @@ const STEPS = [
 
 /** Shown once per browser, on the first visit to any page. */
 export function WelcomeDialog() {
-  const { hydrated, welcomed, dismissWelcome } = useAppStore()
+  const { hydrated, welcomed, dismissWelcome, user } = useAppStore()
+  const visit = useVisitInfo()
   // Open a beat after load: lets the page finish hydrating first (the dialog
   // marks the rest of the page aria-hidden) and feels less abrupt
   const [settled, setSettled] = React.useState(false)
@@ -44,7 +47,14 @@ export function WelcomeDialog() {
     const t = window.setTimeout(() => setSettled(true), 700)
     return () => window.clearTimeout(t)
   }, [])
-  const open = settled && hydrated && !welcomed
+  // Signed-in people coming back may get "Welcome back" instead: wait (briefly) to find out
+  const [waited, setWaited] = React.useState(false)
+  React.useEffect(() => {
+    const t = window.setTimeout(() => setWaited(true), 3000)
+    return () => window.clearTimeout(t)
+  }, [])
+  const deciding = !!user?.profileId && !visit && !waited
+  const open = settled && hydrated && !welcomed && !deciding && !isWelcomeBack(visit)
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && dismissWelcome()}>

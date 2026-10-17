@@ -76,14 +76,41 @@ export default function PrivacyPage() {
         <p>We don&apos;t use your data for advertising, and we don&apos;t sell or rent it to anyone.</p>
       </LegalSection>
 
-      <LegalSection n={4} title="Information from Google">
+      <LegalSection n={4} title="Google user data">
         <p>
-          If you sign in with Google, we only receive your name, email address and profile picture. We use them
-          only to create and run your Ai Recipy account. We don&apos;t share them with anyone else except the
-          service providers listed below that run Ai Recipy, and we don&apos;t use them for advertising.
+          This section explains exactly how Ai Recipy accesses, uses, stores and shares data from your Google account
+          when you choose &quot;Continue with Google&quot;.
         </p>
         <p>
-          Ai Recipy&apos;s use of information received from Google APIs follows the{" "}
+          <strong>What we access.</strong> Only your basic Google profile: your name, your email address and your
+          profile picture, through Google&apos;s standard sign-in permissions (&quot;openid&quot;, &quot;email&quot; and
+          &quot;profile&quot;). We don&apos;t access your Gmail, contacts, Drive, calendar, YouTube or any other
+          Google data, and we never see your Google password.
+        </p>
+        <p>
+          <strong>How we use it.</strong> Only to create your Ai Recipy account, sign you in, recognise you when you
+          come back, and contact you about your account. Your email is never shown to other users. Your Google name
+          and photo aren&apos;t shown publicly: your public profile shows the username and photo you choose.
+        </p>
+        <p>
+          <strong>How we store it.</strong> It&apos;s stored with your account in our sign-in and database provider,
+          Supabase, on servers in the EU (Sweden), protected by access rules and encrypted connections.
+        </p>
+        <p>
+          <strong>Who we share it with.</strong> No one, except the service providers listed below that run Ai Recipy
+          for us. We don&apos;t sell Google user data, use it for advertising, or use it to train AI models.
+        </p>
+        <p>
+          <strong>Keeping and deleting it.</strong> We keep it while your account is open. To delete it, email{" "}
+          {mail} and we&apos;ll delete your account and your Google data within 30 days. You can also remove Ai
+          Recipy&apos;s access at any time from your Google account at{" "}
+          <a href="https://myaccount.google.com/permissions" target="_blank" rel="noopener noreferrer">
+            myaccount.google.com/permissions
+          </a>
+          .
+        </p>
+        <p>
+          Ai Recipy&apos;s use and transfer of information received from Google APIs adheres to the{" "}
           <a href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank" rel="noopener noreferrer">
             Google API Services User Data Policy
           </a>

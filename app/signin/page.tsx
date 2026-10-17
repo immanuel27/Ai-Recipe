@@ -4,6 +4,7 @@ import Link from "next/link"
 
 import { SignInCard } from "@/components/auth/sign-in-card"
 import { PromptsIcon, ReelsIcon, UploadIcon } from "@/components/icons"
+import { LogoMark } from "@/components/shell/logo-mark"
 
 export const metadata: Metadata = { title: "Sign in" }
 
@@ -19,6 +20,11 @@ export default function SignInPage() {
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-8 px-4 py-12 md:py-16">
       <div className="flex max-w-xl flex-col items-center gap-3 text-center">
+        {/* The brand: logo next to the name (Google checks the logo against the home page) */}
+        <div className="mb-2 flex items-center gap-3">
+          <LogoMark className="size-12 rounded-xl" />
+          <span className="text-2xl font-bold tracking-tight">Ai Recipy</span>
+        </div>
         {/* The card below holds the page h1 */}
         <p className="type-headline text-balance">Every masterpiece has a recipe.</p>
         <p className="type-read text-balance text-muted-foreground">

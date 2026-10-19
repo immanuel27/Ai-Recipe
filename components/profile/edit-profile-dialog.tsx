@@ -1,5 +1,6 @@
 "use client"
 
+import { friendlyError } from "@/lib/supabase/errors"
 import * as React from "react"
 import { PencilIcon } from "lucide-react"
 import { toast } from "sonner"
@@ -91,7 +92,7 @@ export function EditProfileDialog() {
       setOpen(false)
       toast.success("Profile updated")
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Couldn't save your profile. Try again.")
+      toast.error(error instanceof Error ? friendlyError(error.message) : "Couldn't save your profile. Try again.")
     } finally {
       setSaving(false)
     }

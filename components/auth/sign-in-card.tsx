@@ -20,6 +20,7 @@ import { useAppStore } from "@/components/providers/app-store"
 import { createProfile } from "@/lib/supabase/account"
 import { createClient } from "@/lib/supabase/client"
 import { SUPABASE_KEY, SUPABASE_URL, supabaseConfigured } from "@/lib/supabase/env"
+import { MAINTENANCE_MESSAGE, friendlyError } from "@/lib/supabase/errors"
 import type { SessionUser } from "@/lib/types"
 import { EMAIL_SIGNIN_ENABLED } from "@/lib/flags"
 
@@ -55,6 +56,14 @@ export function SignInCard() {
   const shownStep: Step = needsUsername ? "username" : step
   const shownEmail = needsUsername ? authIdentity!.email : email
 
+  // If the backend is paused (e.g. a plan limit), say so up front instead of failing on click
+  React.useEffect(() => {
+    if (!supabaseConfigured) return
+    fetch(`${SUPABASE_URL}/auth/v1/settings`, { headers: { apikey: SUPABASE_KEY! } })
+      .then((r) => r.status === 402 && setError(MAINTENANCE_MESSAGE))
+      .catch(() => {})
+  }, [])
+
   // Already fully signed in: carry on to where they were going
   React.useEffect(() => {
     if (supabaseConfigured && hydrated && user) router.replace(next)
@@ -69,14 +78,21 @@ export function SignInCard() {
   async function continueWithGoogle() {
     if (supabaseConfigured) {
       setError(null)
-      // Supabase shows a raw JSON error page if Google is off, so check first
-      const enabled = await fetch(`${SUPABASE_URL}/auth/v1/settings`, {
+      // Supabase shows a raw JSON error page if Google is off (or the service is paused), so check first
+      const status = await fetch(`${SUPABASE_URL}/auth/v1/settings`, {
         headers: { apikey: SUPABASE_KEY! },
       })
-        .then((r) => r.json())
-        .then((d: { external?: { google?: boolean } }) => !!d.external?.google)
-        .catch(() => true) // can't tell: let Supabase decide
-      if (!enabled) {
+        .then(async (r) => {
+          if (r.status === 402) return "paused"
+          const d = (await r.json()) as { external?: { google?: boolean } }
+          return d.external?.google ? "on" : "off"
+        })
+        .catch(() => "on") // can't tell: let Supabase decide
+      if (status === "paused") {
+        setError(MAINTENANCE_MESSAGE)
+        return
+      }
+      if (status === "off") {
         setError("Google sign-in isn't switched on yet. Use email for now.")
         return
       }
@@ -88,7 +104,7 @@ export function SignInCard() {
         setError(
           /provider is not enabled/i.test(error.message)
             ? "Google sign-in isn't switched on yet. Use email for now."
-            : error.message
+            : friendlyError(error.message)
         )
       }
       return
@@ -110,7 +126,7 @@ export function SignInCard() {
         options: { emailRedirectTo: callbackUrl() },
       })
       setBusy(false)
-      if (error) return setError(error.message)
+      if (error) return setError(friendlyError(error.message))
       setStep("sent")
       return
     }
@@ -129,7 +145,7 @@ export function SignInCard() {
       setBusy(true)
       const { profileId, error } = await createProfile(u)
       setBusy(false)
-      if (error || !profileId) return setError(error ?? "Couldn't create your profile.")
+      if (error || !profileId) return setError(error ? friendlyError(error) : "Couldn't create your profile.")
       signIn({ username: u, profileId, email: shownEmail, provider: authIdentity?.provider ?? "email", isSeller: false })
       toast.success(`Welcome, @${u}`)
       router.push(next)

@@ -1,5 +1,6 @@
 "use client"
 
+import { friendlyError } from "@/lib/supabase/errors"
 import * as React from "react"
 import { toast } from "sonner"
 
@@ -42,7 +43,7 @@ export function DeletePostDialog({
       onOpenChange(false)
       onDeleted?.()
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Couldn't delete the post. Try again.")
+      toast.error(error instanceof Error ? friendlyError(error.message) : "Couldn't delete the post. Try again.")
     } finally {
       setDeleting(false)
     }

@@ -1,5 +1,6 @@
 "use client"
 
+import { friendlyError } from "@/lib/supabase/errors"
 import * as React from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -182,7 +183,7 @@ export function CreateListingForm({ editing }: { editing?: { listing: Listing; p
           : await publishListing(listing, user.profileId, proof || undefined)
       } catch (error) {
         setPublishing(false)
-        toast.error(error instanceof Error ? error.message : `Couldn't ${original ? "save" : "publish"}. Try again.`)
+        toast.error(error instanceof Error ? friendlyError(error.message) : `Couldn't ${original ? "save" : "publish"}. Try again.`)
         return
       }
     }

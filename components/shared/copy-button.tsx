@@ -7,7 +7,7 @@ import { CheckIcon, CopyIcon } from "@/components/icons"
 import { cn } from "@/lib/utils"
 
 /** Put text on the clipboard, with a fallback for browsers without the Clipboard API. */
-async function writeClipboard(text: string) {
+export async function writeClipboard(text: string) {
   try {
     await navigator.clipboard.writeText(text)
     return true

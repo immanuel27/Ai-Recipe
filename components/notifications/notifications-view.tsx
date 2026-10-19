@@ -4,7 +4,7 @@ import * as React from "react"
 import Link from "next/link"
 
 import { Skeleton } from "@/components/ui/skeleton"
-import { LikeIcon, NotificationsIcon, PromptsIcon, SaveIcon, type IconType } from "@/components/icons"
+import { CommentsIcon, LikeIcon, NotificationsIcon, PromptsIcon, SaveIcon, type IconType } from "@/components/icons"
 import { announceNotificationsRead } from "@/components/notifications/use-unread-count"
 import { CreatorAvatar } from "@/components/shared/creator-avatar"
 import { EmptyState } from "@/components/shared/empty-state"
@@ -26,6 +26,7 @@ const WHAT: Record<NotificationType, { verb: string; icon: IconType }> = {
   like: { verb: "liked your post", icon: LikeIcon },
   save: { verb: "saved your post", icon: SaveIcon },
   unlock: { verb: "unlocked your recipe", icon: PromptsIcon },
+  comment: { verb: "commented on", icon: CommentsIcon },
 }
 
 /** Who liked, saved or unlocked your posts, newest first. Opening the page marks them seen. */
@@ -56,7 +57,7 @@ export function NotificationsView() {
 
   return (
     <div className="mx-auto w-full max-w-2xl">
-      <PageHeader title="Notifications" description="Who liked, saved or unlocked your recipes." />
+      <PageHeader title="Notifications" description="Who liked, saved, unlocked or commented on your recipes." />
 
       {failed ? (
         <EmptyState
@@ -75,7 +76,7 @@ export function NotificationsView() {
         <EmptyState
           icon={NotificationsIcon}
           title="No notifications yet"
-          description="When people like, save or unlock your recipes, you'll see it here."
+          description="When people like, save, unlock or comment on your recipes, you'll see it here."
           action={{ label: "Post a recipe", href: "/sell" }}
         />
       ) : (
@@ -124,6 +125,7 @@ function NotificationRow({ n }: { n: AppNotification }) {
             </>
           )}
         </p>
+        {n.comment && <p className="line-clamp-2 type-body text-muted-foreground">&ldquo;{n.comment}&rdquo;</p>}
         <span className="type-meta text-muted-foreground">
           {formatRelative(n.createdAt)}
           {!n.read && <span className="ml-2 font-semibold text-brand">New</span>}

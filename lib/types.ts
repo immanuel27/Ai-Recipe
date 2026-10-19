@@ -131,7 +131,7 @@ export interface Listing {
   price: number
   pricing: { mode: PricingMode; bundleSlugs?: string[] }
   createdAt: string
-  stats: { views: number; sales: number; saves: number; likes: number }
+  stats: { views: number; sales: number; saves: number; likes: number; comments?: number }
   trendingScore: number
   /** Creator flagged the media as adult content */
   isAdult?: boolean

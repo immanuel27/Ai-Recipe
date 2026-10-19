@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import {
   CheckIcon,
+  CommentsIcon,
   HideIcon,
   LikeIcon,
   LinkIcon,
@@ -24,6 +25,7 @@ import {
   UserIcon,
 } from "@/components/icons"
 import { useAppStore, userCreatorId } from "@/components/providers/app-store"
+import { CommentsSheet } from "@/components/comments/comments-sheet"
 import { CreatorAvatar } from "@/components/shared/creator-avatar"
 import { LikeBurst } from "@/components/shared/like-burst"
 import { useLike } from "@/components/shared/like-button"
@@ -59,6 +61,8 @@ export function ReelActions({
   className?: string
 }) {
   const { user, hydrated, saved, toggleSave, following, toggleFollow } = useAppStore()
+  const [commentsOpen, setCommentsOpen] = React.useState(false)
+  const [comments, setComments] = React.useState(listing.stats.comments ?? 0)
   const like = useLike(listing)
   const isSaved = saved.includes(listing.slug)
   const isFollowing = following.includes(creator.id)
@@ -67,17 +71,21 @@ export function ReelActions({
 
   const onMedia = variant === "media"
 
+  // Phones with short screens: smaller, tighter buttons so the column fits under the header
+  const short = onMedia && "[@media(max-height:740px)]:size-10"
   const round = cn(
     "flex size-12 items-center justify-center rounded-full outline-none transition-colors duration-160 focus-visible:ring-2 focus-visible:ring-ring",
+    short,
     onMedia ? "glass-button-media text-on-media" : "glass-button text-foreground"
   )
+  const stack = cn("flex flex-col items-center gap-2", onMedia && "gap-1 [@media(max-height:740px)]:gap-0.5")
   const count = cn("type-meta font-semibold tabular-nums", onMedia && "text-on-media drop-shadow")
 
   return (
-    <div className={cn("flex flex-col items-center gap-4", className)}>
+    <div className={cn("flex flex-col items-center gap-4", onMedia && "gap-3 [@media(max-height:740px)]:gap-2", className)}>
       <div className="relative mb-2">
         <Link href={profileHref(creator.username)} aria-label={`${creator.displayName} profile`} className="block rounded-full">
-          <CreatorAvatar creator={creator} className="size-12" />
+          <CreatorAvatar creator={creator} className={cn("size-12", short)} />
         </Link>
         {hydrated && !isOwner && (
           <button
@@ -92,7 +100,7 @@ export function ReelActions({
         )}
       </div>
 
-      <div className="flex flex-col items-center gap-2">
+      <div className={stack}>
         <button
           type="button"
           onClick={onLike}
@@ -111,17 +119,16 @@ export function ReelActions({
         <span aria-hidden className={count}>{formatCompact(like.count)}</span>
       </div>
 
-      <div className="flex flex-col items-center gap-2">
+      <div className={stack}>
         <button
           type="button"
-          onClick={() => saveToast(toggleSave(listing.slug))}
-          aria-pressed={isSaved}
-          aria-label={isSaved ? "Remove from saved" : "Save"}
+          onClick={() => setCommentsOpen(true)}
+          aria-label={`Comments, ${comments}`}
           className={round}
         >
-          <SaveIcon aria-hidden weight={isSaved ? "fill" : "regular"} className="size-6" />
+          <CommentsIcon aria-hidden className="size-6" />
         </button>
-        <span aria-hidden className={count}>{formatCompact(listing.stats.saves + (isSaved ? 1 : 0))}</span>
+        <span aria-hidden className={count}>{formatCompact(comments)}</span>
       </div>
 
       <button type="button" onClick={() => shareListing(listing)} aria-label="Share" className={round}>
@@ -135,6 +142,10 @@ export function ReelActions({
           </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent side="left" align="end" sideOffset={12} className="w-60">
+          <DropdownMenuItem onSelect={() => saveToast(toggleSave(listing.slug))}>
+            <SaveIcon aria-hidden weight={isSaved ? "fill" : "regular"} />
+            {isSaved ? "Remove from saved" : "Save"}
+          </DropdownMenuItem>
           <DropdownMenuItem asChild>
             <Link href={`/r/${listing.slug}`}>
               <OpenIcon aria-hidden />
@@ -167,6 +178,8 @@ export function ReelActions({
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+
+      <CommentsSheet listing={listing} open={commentsOpen} onOpenChange={setCommentsOpen} onCountChange={setComments} />
     </div>
   )
 }

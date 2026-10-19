@@ -22,6 +22,7 @@ export function RecipeStep({
   label,
   count,
   last = false,
+  action,
   children,
 }: {
   n: number
@@ -30,6 +31,8 @@ export function RecipeStep({
   count: number
   /** The final step has no line running on to a next one */
   last?: boolean
+  /** A control on the right of the step's title (e.g. Copy) */
+  action?: React.ReactNode
   children?: React.ReactNode
 }) {
   return (
@@ -42,12 +45,15 @@ export function RecipeStep({
       </span>
       {/* The thread from this step down to the next one */}
       {!last && <span aria-hidden className="absolute top-8 -bottom-3 left-3 w-px -translate-x-1/2 bg-foreground/12" />}
-      <span className="flex min-h-6 items-center gap-2 font-semibold">
-        <span className="sr-only">Step {n}:</span>
-        <Icon aria-hidden className="size-4 text-muted-foreground" />
-        {label}
-        {count > 0 && <span className="font-normal text-muted-foreground tabular-nums">{count}</span>}
-      </span>
+      <div className="flex min-h-6 items-center justify-between gap-2">
+        <span className="flex items-center gap-2 font-semibold">
+          <span className="sr-only">Step {n}:</span>
+          <Icon aria-hidden className="size-4 text-muted-foreground" />
+          {label}
+          {count > 0 && <span className="font-normal text-muted-foreground tabular-nums">{count}</span>}
+        </span>
+        {count > 0 && action}
+      </div>
       <div className="col-start-2">
         {count === 0 ? <p className="type-meta text-muted-foreground">None in this recipe</p> : children}
       </div>

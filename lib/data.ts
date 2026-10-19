@@ -32,7 +32,7 @@ const LISTINGS = PAYMENTS_ENABLED ? MOCK_LISTINGS : MOCK_LISTINGS.map((l) => ({ 
 const CATALOG_TTL = 60
 
 const LISTING_COLUMNS =
-  "id, slug, creator_id, title, description, type, media_url, poster_url, images, clip, credit, ai_tag, tool, tools, tool_version, tags, price_cents, pricing, is_adult, views, sales, saves, likes, trending_score, preview, live_url, verified_at, archived_at, created_at"
+  "id, slug, creator_id, title, description, type, media_url, poster_url, images, clip, credit, ai_tag, tool, tools, tool_version, tags, price_cents, pricing, is_adult, views, sales, saves, likes, comments, trending_score, preview, live_url, verified_at, archived_at, created_at"
 
 /** Every listing (with teaser recipes) and creator. Fetched once per request. */
 export const getCatalog = cache(async (): Promise<{ listings: Listing[]; creators: Creator[] }> => {

@@ -13,6 +13,7 @@ import { MediaCreditLine } from "@/components/listing/media-credit"
 import { PurchaseCard } from "@/components/listing/purchase-card"
 import { RecipeBreadcrumb } from "@/components/listing/recipe-breadcrumb"
 import { WhatsInside } from "@/components/listing/whats-inside"
+import { CommentsPanel } from "@/components/comments/comments-panel"
 import { MasonryTile } from "@/components/explore/masonry-tile"
 import { InsetPanel } from "@/components/shared/inset-panel"
 import { useOwnedRecipe } from "@/components/shared/use-owned-recipe"
@@ -97,6 +98,12 @@ export function ListingDetail({
         <div className="lg:col-start-1">
           <FailuresGallery failures={listing.recipe.failures} unlocked={unlocked} />
         </div>
+        <section aria-labelledby="comments-heading" className="glass flex flex-col gap-5 rounded-3xl p-6 md:p-8 lg:col-start-1">
+          <h2 id="comments-heading" className="type-section">
+            Comments
+          </h2>
+          <CommentsPanel listing={listing} />
+        </section>
       </div>
 
       {/* Only when there is more to see */}
@@ -113,7 +120,7 @@ export function ListingDetail({
               See all
             </Link>
           </div>
-          <ul className="columns-2 gap-3 md:columns-3 md:gap-4 xl:columns-4">
+          <ul className="columns-2 gap-1.5 md:columns-3 md:gap-2.5 xl:columns-4">
             {more.slice(0, 8).map((l) => (
               <MasonryTile key={l.id} listing={l} creator={creator} size={null} />
             ))}

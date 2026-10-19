@@ -41,6 +41,8 @@ export {
   X as CloseIcon,
   Check as CheckIcon,
   Bell as NotificationsIcon,
+  ChatCircle as CommentsIcon,
+  PaperPlaneRight as SendIcon,
   CaretDown as CaretDownIcon,
   CaretUp as CaretUpIcon,
   CaretLeft as CaretLeftIcon,

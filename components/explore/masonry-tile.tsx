@@ -65,7 +65,7 @@ export function MasonryTile({
   const height = size?.height ?? 1200
 
   return (
-    <li ref={ref} className="mb-4 break-inside-avoid">
+    <li ref={ref} className="mb-1.5 break-inside-avoid md:mb-2.5">
       <div className="group relative overflow-hidden rounded-2xl bg-muted focus-within:ring-2 focus-within:ring-ring">
         <MediaImage
           src={listing.posterUrl}

@@ -6,6 +6,8 @@ import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
 import {
+  CheckIcon,
+  CopyIcon,
   EditStackIcon,
   ImageMissingIcon,
   LockIcon,
@@ -24,6 +26,8 @@ import { cn } from "@/lib/utils"
 import { VerifiedBadge } from "@/components/shared/verified-badge"
 import { listingTools } from "@/lib/mock/tools"
 import { PAYMENTS_ENABLED } from "@/lib/flags"
+import { copyPrompt } from "@/lib/copy-prompt"
+import { useRouter } from "next/navigation"
 
 /** Fanned like prints; they spread a little more on hover. */
 const TAKE_REST = ["-rotate-6", "rotate-1", "rotate-7"]
@@ -64,17 +68,22 @@ export function RecipeCard({ listing: baseListing, className }: { listing: Listi
       </header>
 
       <ol className="-mx-2 flex min-h-0 flex-col gap-5 overflow-y-auto px-2">
-        <Step n={1} icon={PromptsIcon} label="Prompts" count={prompts.length}>
+        <Step
+          n={1}
+          icon={PromptsIcon}
+          label="Prompts"
+          count={prompts.length}
+          action={<CopyPromptButton listing={listing} owned={owned} onBuy={() => setBuying(true)} />}
+        >
           {owned ? (
-            // A preview only: prompts are copied on the recipe page (keeps people on the post)
-            <ul className="flex select-none flex-col gap-3">
+            // Short preview; Copy (in the step's title) copies them in full
+            <ul className="flex flex-col gap-3">
               {prompts.map((p) => (
                 <li key={p.label} className="flex flex-col gap-1">
                   <span className="truncate type-meta font-semibold">{p.label}</span>
                   <p className="line-clamp-2 type-meta text-muted-foreground">{p.text || (p.fileUrl ? "Full prompt in a PDF" : "")}</p>
                 </li>
               ))}
-              <li className="type-meta text-muted-foreground">Open the full recipe to copy the prompts.</li>
             </ul>
           ) : (
             <TeaserSnippet text={prompts[0]?.text ?? ""} />
@@ -165,5 +174,49 @@ export function RecipeCard({ listing: baseListing, className }: { listing: Listi
         }}
       />
     </section>
+  )
+}
+
+/**
+ * One tap copies every prompt in full, even from the locked preview: it fetches
+ * the full recipe and unlocks it (free) so the creator still gets the unlock.
+ */
+function CopyPromptButton({ listing, owned, onBuy }: { listing: Listing; owned: boolean; onBuy: () => void }) {
+  const { purchase } = useAppStore()
+  const router = useRouter()
+  const [state, setState] = React.useState<"idle" | "copying" | "copied">("idle")
+
+  React.useEffect(() => {
+    if (state !== "copied") return
+    const t = window.setTimeout(() => setState("idle"), 2000)
+    return () => window.clearTimeout(t)
+  }, [state])
+
+  async function copy() {
+    if (state === "copying") return
+    if (!owned && listing.price > 0) return onBuy()
+    setState("copying")
+    const result = await copyPrompt(listing)
+    if (result === "copied") {
+      setState("copied")
+      toast.success("Prompt copied")
+      if (!owned) purchase(listing.slug)
+      return
+    }
+    setState("idle")
+    if (result === "pdf") toast("This prompt is in a PDF. Opening the recipe…")
+    router.push(`/r/${listing.slug}`)
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={() => void copy()}
+      aria-label="Copy prompt"
+      className="glass-button flex h-8 shrink-0 items-center gap-1.5 rounded-full px-3 type-meta font-semibold outline-none focus-visible:ring-2 focus-visible:ring-ring"
+    >
+      {state === "copied" ? <CheckIcon aria-hidden className="size-4" /> : <CopyIcon aria-hidden className={cn("size-4", state === "copying" && "animate-pulse")} />}
+      {state === "copied" ? "Copied" : "Copy"}
+    </button>
   )
 }

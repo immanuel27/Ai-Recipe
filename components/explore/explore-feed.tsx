@@ -46,7 +46,7 @@ export function ExploreFeed({ items, initialSlug }: { items: FeedItem[]; initial
 
   return (
     <>
-      <div className="flex items-start gap-3 md:gap-4">
+      <div className="flex items-start gap-1.5 md:gap-2.5">
         {columns.map((col, c) => (
           <ul key={c} className="flex min-w-0 flex-1 flex-col">
             {col.items.map(({ item: it, index: i }) => (

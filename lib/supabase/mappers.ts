@@ -47,6 +47,7 @@ export interface ListingRow {
   sales: number
   saves: number
   likes: number
+  comments?: number
   trending_score: number | string
   preview: RecipePreview
   live_url: string | null
@@ -135,7 +136,7 @@ export function listingFromRow(row: ListingRow, recipe?: RecipeRow): Listing {
     verified: !!row.verified_at || undefined,
     archived: !!row.archived_at || undefined,
     createdAt: row.created_at,
-    stats: { views: row.views, sales: row.sales, saves: row.saves, likes: row.likes },
+    stats: { views: row.views, sales: row.sales, saves: row.saves, likes: row.likes, comments: row.comments ?? 0 },
     trendingScore: Number(row.trending_score),
     recipe: recipe ? recipeFromRow(recipe) : recipeFromPreview(row.preview ?? {}),
     recipeLocked: !recipe,

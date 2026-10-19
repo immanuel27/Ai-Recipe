@@ -1,5 +1,6 @@
 "use client"
 
+import { compressVideo } from "@/lib/video-compress"
 import * as React from "react"
 import {
   BookmarkIcon,
@@ -36,7 +37,10 @@ const NO_TAG_NOTE =
   "No AI tag in this file (many tools don't add one). Add your tool's share link as proof before publishing."
 
 /** Supabase's free plan caps each upload at 50 MB */
+/** What can be stored (Supabase's per-file limit) */
 const MAX_VIDEO_MB = 50
+/** Bigger originals are fine if optimising brings them under MAX_VIDEO_MB */
+const MAX_ORIGINAL_MB = 200
 const MAX_IMAGE_MB = 25
 
 /**
@@ -65,6 +69,8 @@ function MediaCover({ postType }: { postType: "video" | "photo" }) {
   const videoFit = useFitMode(frameRef, videoAspect)
   const [selected, setSelected] = React.useState(0)
   const [busy, setBusy] = React.useState(false)
+  // Optimising a video: share done (0 to 1), or null when not optimising
+  const [optimising, setOptimising] = React.useState<number | null>(null)
   const [dragging, setDragging] = React.useState(false)
   const [localError, setLocalError] = React.useState<string | null>(null)
   const error = localError ?? fieldState.error?.message
@@ -107,12 +113,19 @@ function MediaCover({ postType }: { postType: "video" | "photo" }) {
       // One video on its own...
       if (!photos.length) {
         const file = videos[0]!
-        if (file.size > MAX_VIDEO_MB * 1024 * 1024) return setLocalError(`Videos up to ${MAX_VIDEO_MB} MB.`)
+        if (file.size > MAX_ORIGINAL_MB * 1024 * 1024) return setLocalError(`Videos up to ${MAX_ORIGINAL_MB} MB.`)
         // AI-made media: files with an AI tag are confirmed straight away; files without one
-        // (many tools don't embed it) are accepted, and the proof link becomes required
+        // (many tools don't embed it) are accepted, and the proof link becomes required.
+        // Checked on the original: optimising drops the tag.
         const aiTag = (await detectAiTag(file)) ?? undefined
-        // Mock storage: the video lives in memory for this session; the poster is persisted.
-        const url = URL.createObjectURL(file)
+        // Smaller file for every play in the feed (looks the same on a phone)
+        setOptimising(0)
+        const optimised = await compressVideo(file, setOptimising).finally(() => setOptimising(null))
+        if (optimised.size > MAX_VIDEO_MB * 1024 * 1024) {
+          return setLocalError(`This video is too big even after optimising. Export it at 1080p or shorter, under ${MAX_VIDEO_MB} MB.`)
+        }
+        // Kept in memory for this visit and uploaded on publish; the poster is persisted.
+        const url = URL.createObjectURL(optimised)
         const posterUrl = await captureVideoPoster(url)
         setValue("media", { url, posterUrl, type: "video", images: [], aiTag }, { shouldValidate: true })
         if (aiTag) toast.success(`AI tag found: ${aiTag.detail}`)
@@ -250,11 +263,17 @@ function MediaCover({ postType }: { postType: "video" | "photo" }) {
           <>
             <Button type="button" size="pill" onClick={browse} disabled={busy}>
               {busy && <Loader2Icon className="animate-spin" aria-hidden />}
-              {busy ? "Processing…" : wantsVideo ? "Upload a video" : "Upload photos"}
+              {optimising !== null
+                ? `Optimising video… ${Math.round(optimising * 100)}%`
+                : busy
+                  ? "Processing…"
+                  : wantsVideo
+                    ? "Upload a video"
+                    : "Upload photos"}
             </Button>
             <p className="max-w-64 text-sm text-muted-foreground">
               {wantsVideo
-                ? `One video up to ${MAX_VIDEO_MB} MB, made with AI. Upload the original export from your AI tool. Or drag it here.`
+                ? `One video up to ${MAX_ORIGINAL_MB} MB, made with AI. Upload the original export from your AI tool. Or drag it here.`
                 : `Up to ${MAX_IMAGES} images made with AI. Upload the original exports from your AI tool. Or drag them here.`}
             </p>
           </>

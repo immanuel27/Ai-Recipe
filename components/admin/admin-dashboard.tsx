@@ -26,6 +26,7 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart"
+import { OptimiseVideos } from "@/components/admin/optimise-videos"
 import { useRequireUser } from "@/hooks/use-require-user"
 import { usePrefersReducedMotion } from "@/hooks/use-prefers-reduced-motion"
 import {
@@ -155,6 +156,8 @@ export function AdminDashboard() {
       </div>
 
       <PendingVerification items={data.pendingVerification} onChange={load} now={now} />
+
+      <OptimiseVideos />
     </div>
   )
 }

@@ -139,6 +139,8 @@ export interface Listing {
   liveUrl?: string
   /** The team checked the creator's private proof link (share link from the tool) */
   verified?: boolean
+  /** Placeholder post by a seeded demo creator (no login): ranks after real posts */
+  demo?: boolean
   /** The creator deleted it: only they and its buyers can still open it */
   archived?: boolean
   recipe: Recipe

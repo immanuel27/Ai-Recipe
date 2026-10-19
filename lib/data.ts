@@ -36,17 +36,20 @@ const LISTING_COLUMNS =
 
 /** Every listing (with teaser recipes) and creator. Fetched once per request. */
 export const getCatalog = cache(async (): Promise<{ listings: Listing[]; creators: Creator[] }> => {
-  if (!supabaseConfigured) return { listings: LISTINGS, creators: CREATORS }
+  if (!supabaseConfigured) return { listings: DEMO_LISTINGS, creators: CREATORS }
   try {
     return await cachedCatalog()
   } catch (error) {
     // Keep the site up if Supabase is misconfigured or down; the real error is in the server logs
     console.error("[data] Supabase catalog read failed, showing demo data instead:", error)
-    return { listings: LISTINGS, creators: CREATORS }
+    return { listings: DEMO_LISTINGS, creators: CREATORS }
   }
 })
 
-const cachedCatalog = unstable_cache(() => fetchCatalog(), ["catalog-v1"], {
+/** The built-in demo posts, marked so real posts outrank them */
+const DEMO_LISTINGS = LISTINGS.map((l) => ({ ...l, demo: true }))
+
+const cachedCatalog = unstable_cache(() => fetchCatalog(), ["catalog-v2"], {
   revalidate: CATALOG_TTL,
   tags: [CATALOG_TAG],
 })
@@ -55,29 +58,34 @@ async function fetchCatalog() {
   const supabase = createPublicClient()
   const [listingsRes, profilesRes] = await Promise.all([
     supabase.from("listings").select(LISTING_COLUMNS).order("trending_score", { ascending: false }),
-    supabase.from("profiles").select("id, username, display_name, bio, avatar_url"),
+    supabase.from("profiles").select("id, username, display_name, bio, avatar_url, auth_user_id"),
   ])
   if (listingsRes.error) throw listingsRes.error
   if (profilesRes.error) throw profilesRes.error
+  const profiles = profilesRes.data as (ProfileRow & { auth_user_id: string | null })[]
+  // Seeded demo creators have no login; only this flag leaves the server, never the id
+  const demoCreators = new Set(profiles.filter((p) => !p.auth_user_id).map((p) => p.id))
   return {
-    listings: (listingsRes.data as ListingRow[]).map((row) => listingFromRow(row)),
-    creators: (profilesRes.data as ProfileRow[]).map(profileToCreator),
+    listings: (listingsRes.data as ListingRow[]).map((row) => {
+      const listing = listingFromRow(row)
+      return demoCreators.has(row.creator_id) ? { ...listing, demo: true } : listing
+    }),
+    creators: profiles.map(profileToCreator),
   }
 }
 
-/** New posts stay at the top, newest first, for this many hours */
-const NEW_HOURS = 96
-/** Far above any trending score, so new posts always lead */
-const NEW_BASE = 1_000_000
+/** Far above any trending score, so real posts always lead */
+const REAL_BASE = 1_000_000_000
 
 /**
- * Feed rank. Posts from the last NEW_HOURS come first, newest at the top, so a
- * new post is the first thing people see; older posts rank by trending score.
+ * Feed rank. Real posts (by people with an account) come first, newest at the
+ * top, so what creators post is what people see; the demo posts follow, by
+ * trending score.
  */
 export function rankScore(listing: Listing, now = Date.now()) {
+  if (listing.demo) return listing.trendingScore
   const ageHours = (now - new Date(listing.createdAt).getTime()) / 3_600_000
-  if (Number.isFinite(ageHours) && ageHours < NEW_HOURS) return NEW_BASE - Math.max(0, ageHours)
-  return listing.trendingScore
+  return REAL_BASE - (Number.isFinite(ageHours) ? Math.max(0, ageHours) : REAL_BASE / 2)
 }
 
 function byRank(listings: Listing[]) {

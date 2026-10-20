@@ -1,4 +1,5 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { FoundingBadge } from "@/components/shared/founding-badge"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { InsetPanel } from "@/components/shared/inset-panel"
 import { initials } from "@/lib/format"
@@ -9,6 +10,7 @@ export function ProfileHeader({
   username,
   bio,
   avatarUrl,
+  foundingNumber,
   stats,
   action,
 }: {
@@ -16,6 +18,7 @@ export function ProfileHeader({
   username: string
   bio?: string
   avatarUrl?: string
+  foundingNumber?: number
   stats: { label: string; value: React.ReactNode }[]
   /** One clear action, e.g. Edit profile or Share profile */
   action?: React.ReactNode
@@ -33,6 +36,7 @@ export function ProfileHeader({
           <div className="flex min-w-0 flex-col gap-1">
             <h1 className="truncate text-2xl font-bold tracking-tight md:text-3xl">{displayName}</h1>
             <p className="text-muted-foreground">@{username}</p>
+            {foundingNumber && <FoundingBadge number={foundingNumber} className="mt-1 self-center sm:self-start" />}
             {bio ? (
               <p className="mt-1 max-w-prose text-sm text-balance">{bio}</p>
             ) : null}

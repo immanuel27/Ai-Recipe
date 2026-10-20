@@ -24,6 +24,7 @@ export function OwnProfileView() {
         username={user.username}
         bio={user.bio}
         avatarUrl={user.avatarUrl}
+        foundingNumber={user.foundingNumber}
         stats={[
           { label: "Posts", value: posts.length },
           { label: "Likes", value: formatCompact(likes) },

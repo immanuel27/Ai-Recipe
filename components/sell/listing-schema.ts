@@ -106,23 +106,14 @@ export const listingSchema = z
     path: ["liveUrl"],
     message: "Get a preview of your site first.",
   })
-  // New media without an AI tag in the file (many tools don't embed one) needs the proof
-  // link instead; already-published media was checked when posted
-  .refine((v) => !needsProofLink(v) || !!v.proofUrl, {
-    path: ["proofUrl"],
-    message: "Your file has no AI tag, so paste the share link from your AI tool to prove it's AI-made.",
-  })
+  // The proof link is optional: posts without one go live, they just can't get the
+  // Verified badge (only a checked proof link earns it)
   .refine((v) => {
     const allowed = new Set(toolsForPostType(v.postType).map((t) => t.id))
     return v.tools.every((t) => allowed.has(t))
   }, {
     path: ["tools"],
     message: "Choose tools for this kind of post.",
-  })
-  // Websites need proof: a share link, unless the live link itself is one (e.g. a lovable.app site)
-  .refine((v) => v.postType !== "website" || !!v.proofUrl || (!!v.liveUrl && isProofLinkForAny(v.tools, v.liveUrl)), {
-    path: ["proofUrl"],
-    message: "Paste the share link so we can check where the site came from.",
   })
   .refine((v) => !v.proofUrl || !!parseHttpsUrl(v.proofUrl), {
     path: ["proofUrl"],

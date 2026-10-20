@@ -4,6 +4,7 @@ import { useController, useFormContext } from "react-hook-form"
 
 import { FieldError } from "@/components/ui/field"
 import { ImageIcon, VideoIcon, WebsiteIcon, type IconType } from "@/components/icons"
+import { FoundingSpots } from "@/components/sell/founding-spots"
 import { listingDefaults, type ListingFormValues } from "@/components/sell/listing-schema"
 import { toolsForPostType } from "@/lib/mock/tools"
 import type { PostType } from "@/lib/types"
@@ -40,6 +41,7 @@ export function TypeStep({ onPick }: { onPick: () => void }) {
 
   return (
     <div className="flex flex-col gap-3">
+      <FoundingSpots />
       <div role="radiogroup" aria-label="What are you posting?" className="grid gap-3 sm:grid-cols-3">
         {TYPES.map(({ value, title, description, icon: Icon }) => {
           const selected = field.value === value

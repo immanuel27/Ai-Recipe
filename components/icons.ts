@@ -42,6 +42,7 @@ export {
   Check as CheckIcon,
   Bell as NotificationsIcon,
   ChatCircle as CommentsIcon,
+  Star as FoundingIcon,
   PaperPlaneRight as SendIcon,
   CaretDown as CaretDownIcon,
   CaretUp as CaretUpIcon,

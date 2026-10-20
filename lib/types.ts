@@ -49,6 +49,8 @@ export interface Creator {
   displayName: string
   avatarUrl?: string
   bio: string
+  /** Founding Creator #1 to #50 (the first 50 outside the team to post) */
+  foundingNumber?: number
 }
 
 export interface RecipePrompt {
@@ -176,6 +178,8 @@ export interface SessionUser {
   bio?: string
   /** Profile picture (Supabase Storage URL) */
   avatarUrl?: string
+  /** Founding Creator number, once their first post earned one */
+  foundingNumber?: number
   email: string
   provider: "google" | "email"
   isSeller: boolean

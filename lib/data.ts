@@ -49,7 +49,7 @@ export const getCatalog = cache(async (): Promise<{ listings: Listing[]; creator
 /** The built-in demo posts, marked so real posts outrank them */
 const DEMO_LISTINGS = LISTINGS.map((l) => ({ ...l, demo: true }))
 
-const cachedCatalog = unstable_cache(() => fetchCatalog(), ["catalog-v2"], {
+const cachedCatalog = unstable_cache(() => fetchCatalog(), ["catalog-v3"], {
   revalidate: CATALOG_TTL,
   tags: [CATALOG_TAG],
 })
@@ -58,7 +58,7 @@ async function fetchCatalog() {
   const supabase = createPublicClient()
   const [listingsRes, profilesRes] = await Promise.all([
     supabase.from("listings").select(LISTING_COLUMNS).order("trending_score", { ascending: false }),
-    supabase.from("profiles").select("id, username, display_name, bio, avatar_url, auth_user_id"),
+    supabase.from("profiles").select("id, username, display_name, bio, avatar_url, founding_number, auth_user_id"),
   ])
   if (listingsRes.error) throw listingsRes.error
   if (profilesRes.error) throw profilesRes.error

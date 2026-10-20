@@ -1,5 +1,6 @@
 "use client"
 
+import { createClient } from "@/lib/supabase/client"
 import { friendlyError } from "@/lib/supabase/errors"
 import * as React from "react"
 import Link from "next/link"
@@ -49,7 +50,7 @@ const STEPS = [
  */
 export function CreateListingForm({ editing }: { editing?: { listing: Listing; proofUrl: string } } = {}) {
   const router = useRouter()
-  const { user, addListing, updateListing: updateStored, draft: savedDraft, saveDraft, clearDraft } = useAppStore()
+  const { user, addListing, updateListing: updateStored, draft: savedDraft, saveDraft, clearDraft, setFoundingNumber } = useAppStore()
   const draft = editing ? null : savedDraft
   const steps = editing ? STEPS.slice(1) : STEPS
   const stepFields = editing ? STEP_FIELDS.slice(1) : STEP_FIELDS
@@ -198,6 +199,18 @@ export function CreateListingForm({ editing }: { editing?: { listing: Listing; p
     clearDraft()
     toast.success("Your recipe is live")
     router.push(`/r/${slug}`)
+    // A first post may have earned a Founding Creator spot (the database assigns it)
+    if (supabaseConfigured && user.profileId && !user.foundingNumber) {
+      const { data } = await createClient().from("profiles").select("founding_number").eq("id", user.profileId).maybeSingle()
+      const n = (data as { founding_number: number | null } | null)?.founding_number
+      if (n) {
+        setFoundingNumber(n)
+        toast.success(`You're Founding Creator #${n} 🎉`, {
+          description: "One of the first 50 creators on Ai Recipy. The badge is on your profile and posts.",
+          duration: 8000,
+        })
+      }
+    }
   }
 
   const current = steps[step]!

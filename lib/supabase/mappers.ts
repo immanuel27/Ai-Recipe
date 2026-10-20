@@ -10,6 +10,7 @@ export interface ProfileRow {
   display_name: string
   bio: string
   avatar_url: string | null
+  founding_number?: number | null
 }
 
 /** Public teaser of a locked recipe, stored on listings.preview */
@@ -71,6 +72,7 @@ export function profileToCreator(p: ProfileRow): Creator {
     displayName: p.display_name,
     bio: p.bio,
     avatarUrl: p.avatar_url ?? undefined,
+    foundingNumber: p.founding_number ?? undefined,
   }
 }
 

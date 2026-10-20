@@ -1,5 +1,6 @@
 "use client"
 
+import { FoundingBadge } from "@/components/shared/founding-badge"
 import * as React from "react"
 import Link from "next/link"
 
@@ -233,6 +234,7 @@ function ReelBody({
           <Link href={profileHref(creator.username)} className="pointer-events-auto flex items-center gap-2 self-start font-semibold">
             <CreatorAvatar creator={creator} className="size-8" />
             {creator.displayName}
+            {creator.foundingNumber && <FoundingBadge number={creator.foundingNumber} onMedia compact />}
           </Link>
           {listing.verified && <VerifiedBadge tool={listing.tool} onMedia />}
           <p className="line-clamp-2 type-heading">{listing.title}</p>

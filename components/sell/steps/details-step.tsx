@@ -18,7 +18,7 @@ import { TagInput } from "@/components/sell/tag-input"
 import { CoverField } from "@/components/sell/steps/cover-field"
 import { PricingFields } from "@/components/sell/steps/pricing-step"
 import { ToolLogo } from "@/components/shared/tool-logo"
-import { getTool, isProofLinkForAny, toolsForPostType } from "@/lib/mock/tools"
+import { getTool, toolsForPostType } from "@/lib/mock/tools"
 import { cn } from "@/lib/utils"
 import { PAYMENTS_ENABLED } from "@/lib/flags"
 
@@ -26,15 +26,11 @@ import { PAYMENTS_ENABLED } from "@/lib/flags"
 export function DetailsStep({ footer }: { footer: React.ReactNode }) {
   const { register, control, formState } = useFormContext<ListingFormValues>()
   const { errors } = formState
-  const [postType, tools, liveUrl, media] = useWatch({ control, name: ["postType", "tools", "liveUrl", "media"] })
-  const isWebsite = postType === "website"
+  const [postType, tools, media] = useWatch({ control, name: ["postType", "tools", "media"] })
   const options = toolsForPostType(postType)
   const proofHint = tools.length === 1 ? getTool(tools[0]!)?.proofHint : undefined
-  // e.g. a lovable.app site is already proof that it was made with Lovable
-  const liveCountsAsProof = isWebsite && !!liveUrl && isProofLinkForAny(tools, liveUrl)
-  // Required for websites (unless the live link is proof) and for uploads without an AI tag
+  // Optional, but it's how a post gets Verified (worth suggesting for untagged uploads)
   const untagged = needsProofLink({ postType, media })
-  const proofRequired = (isWebsite && !liveCountsAsProof) || untagged
 
   return (
     <div className="flex flex-col gap-8">
@@ -95,10 +91,7 @@ export function DetailsStep({ footer }: { footer: React.ReactNode }) {
 
             <Field data-invalid={!!errors.proofUrl}>
               <FieldLabel htmlFor="proofUrl">
-                Proof link
-                {!proofRequired && (
-                  <span className="font-normal text-muted-foreground"> (optional)</span>
-                )}
+                Proof link <span className="font-normal text-muted-foreground">(optional)</span>
               </FieldLabel>
               <Input
                 id="proofUrl"
@@ -111,10 +104,10 @@ export function DetailsStep({ footer }: { footer: React.ReactNode }) {
                 {...register("proofUrl")}
               />
               <FieldDescription id="proofUrl-hint">
-                {untagged && "Your file has no AI tag, so this link is how we know it's AI-made. "}
+                Add it to get the <strong>Verified</strong> badge.{" "}
+                {untagged && "Your file has no AI tag, so this is the best way to show it's AI-made. "}
                 {proofHint ? `${proofHint} ` : "The share link of your generation, chat or project. "}
-                Kept private: only our team checks it, and people who unlock your recipe see it. Checked posts
-                get a Verified badge.
+                Kept private: only our team checks it, and people who unlock your recipe see it.
               </FieldDescription>
               <FieldError errors={[errors.proofUrl]} />
             </Field>

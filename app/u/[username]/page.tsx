@@ -42,6 +42,7 @@ export default async function PublicProfilePage(props: PageProps<"/u/[username]"
         username={creator.username}
         bio={creator.bio}
         avatarUrl={creator.avatarUrl}
+        foundingNumber={creator.foundingNumber}
         stats={[
           { label: "Posts", value: posts.length },
           { label: "Likes", value: formatCompact(likes) },

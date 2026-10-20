@@ -34,7 +34,7 @@ import { ScreenshotError, captureWebsite } from "@/lib/screenshot"
 import { cn } from "@/lib/utils"
 
 const NO_TAG_NOTE =
-  "No AI tag in this file (many tools don't add one). Add your tool's share link as proof before publishing."
+  "No AI tag in this file (many tools don't add one). You can still post it: add your tool's share link to get the Verified badge."
 
 /** Supabase's free plan caps each upload at 50 MB */
 /** What can be stored (Supabase's per-file limit) */

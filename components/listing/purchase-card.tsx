@@ -1,4 +1,5 @@
 import Link from "next/link"
+import { FoundingBadge } from "@/components/shared/founding-badge"
 import { CheckIcon } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
@@ -78,6 +79,7 @@ export function PurchaseCard({
           <div className="flex min-w-0 flex-col">
             <span className="name truncate font-semibold">{creator.displayName}</span>
             <span className="truncate text-sm text-muted-foreground">@{creator.username}</span>
+            {creator.foundingNumber && <FoundingBadge number={creator.foundingNumber} className="mt-1" />}
           </div>
         </Link>
 

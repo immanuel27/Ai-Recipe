@@ -48,6 +48,8 @@ interface StoreActions {
   becomeSeller: (seller: NonNullable<SessionUser["seller"]>) => void
   /** Save name and bio; pass `avatarUrl` (or undefined to remove it) only when the photo changed */
   updateProfile: (profile: Pick<SessionUser, "displayName" | "bio" | "avatarUrl">, changeAvatar?: boolean) => void
+  /** Their first post earned a Founding Creator number (set by the database) */
+  setFoundingNumber: (n: number) => void
   purchase: (slug: string) => void
   toggleSave: (slug: string) => boolean
   toggleLike: (slug: string) => boolean
@@ -154,6 +156,7 @@ const actions: StoreActions = {
     setState((s) => (s.user ? { ...s, user: { ...s.user, isSeller: true, seller } } : s))
     sync((id) => remote.becomeSeller(id, seller))
   },
+  setFoundingNumber: (n) => setState((s) => (s.user ? { ...s, user: { ...s.user, foundingNumber: n } } : s)),
   updateProfile: (profile, changeAvatar = false) => {
     setState((s) => {
       if (!s.user) return s
@@ -253,5 +256,6 @@ export function creatorFromUser(user: SessionUser): Creator {
     displayName: user.displayName || user.username,
     bio: user.bio ?? "",
     avatarUrl: user.avatarUrl,
+    foundingNumber: user.foundingNumber,
   }
 }

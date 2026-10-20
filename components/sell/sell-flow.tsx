@@ -1,5 +1,8 @@
 "use client"
 
+import * as React from "react"
+
+import { useAppStore } from "@/components/providers/app-store"
 import { Skeleton } from "@/components/ui/skeleton"
 import { CreateListingForm } from "@/components/sell/create-listing-form"
 import { SellerSetup } from "@/components/sell/seller-setup"
@@ -9,6 +12,15 @@ import { PAYMENTS_ENABLED } from "@/lib/flags"
 
 export function SellFlow() {
   const { ready, user } = useRequireUser()
+  const { becomeSeller } = useAppStore()
+  // While payments are off there's nothing to set up: go straight to posting
+  // (marking them a creator keeps their Listings tab and seller tools working)
+  const skipSetup = !PAYMENTS_ENABLED
+  React.useEffect(() => {
+    if (skipSetup && ready && user && !user.isSeller) {
+      becomeSeller({ payoutMethod: "none", country: "none", proofOfWorkUrl: "" })
+    }
+  }, [skipSetup, ready, user, becomeSeller])
 
   if (!ready || !user) {
     return (
@@ -19,7 +31,7 @@ export function SellFlow() {
     )
   }
 
-  if (!user.isSeller) {
+  if (!user.isSeller && !skipSetup) {
     return (
       <>
         <div className="mx-auto w-full max-w-md">

@@ -43,7 +43,7 @@ export async function loadAccount(): Promise<Account | null> {
   const [profileRes, purchasesRes, savesRes, likesRes] = await Promise.all([
     supabase
       .from("profiles")
-      .select("id, username, display_name, bio, avatar_url, is_seller, seller_settings(payout_method, country, proof_of_work_url, payout_currency, payout_threshold)")
+      .select("id, username, display_name, bio, avatar_url, founding_number, is_seller, seller_settings(payout_method, country, proof_of_work_url, payout_currency, payout_threshold)")
       .eq("auth_user_id", authUser.id)
       .maybeSingle(),
     supabase.from("purchases").select("listings(slug)").order("created_at"),
@@ -57,6 +57,7 @@ export async function loadAccount(): Promise<Account | null> {
         username: string
         display_name: string
         avatar_url: string | null
+        founding_number: number | null
         bio: string
         is_seller: boolean
         seller_settings: {
@@ -94,6 +95,7 @@ export async function loadAccount(): Promise<Account | null> {
           displayName: p.display_name !== p.username ? p.display_name : undefined,
           bio: p.bio || undefined,
           avatarUrl: p.avatar_url || undefined,
+          foundingNumber: p.founding_number ?? undefined,
           email: identity.email,
           provider: identity.provider,
           isSeller: p.is_seller,

@@ -43,6 +43,8 @@ export {
   Bell as NotificationsIcon,
   ChatCircle as CommentsIcon,
   Star as FoundingIcon,
+  Export as IosShareIcon,
+  PlusSquare as AddToHomeIcon,
   PaperPlaneRight as SendIcon,
   CaretDown as CaretDownIcon,
   CaretUp as CaretUpIcon,

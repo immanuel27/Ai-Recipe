@@ -27,6 +27,7 @@ import { VerifiedBadge } from "@/components/shared/verified-badge"
 import { listingTools } from "@/lib/mock/tools"
 import { PAYMENTS_ENABLED } from "@/lib/flags"
 import { copyPrompt } from "@/lib/copy-prompt"
+import { markEngaged } from "@/components/shell/install-prompt"
 import { useRouter } from "next/navigation"
 
 /** Fanned like prints; they spread a little more on hover. */
@@ -201,6 +202,7 @@ function CopyPromptButton({ listing, owned, onBuy }: { listing: Listing; owned: 
       setState("copied")
       toast.success("Prompt copied")
       if (!owned) purchase(listing.slug)
+      markEngaged()
       return
     }
     setState("idle")

@@ -9,6 +9,7 @@ import { ThemeProvider } from "@/components/providers/theme-provider"
 import { CanvasScroll } from "@/components/shell/canvas-scroll"
 import { Dock } from "@/components/shell/dock"
 import { SiteFooter } from "@/components/shell/site-footer"
+import { InstallPrompt } from "@/components/shell/install-prompt"
 import { WelcomeBackDialog } from "@/components/shell/welcome-back-dialog"
 import { WelcomeDialog } from "@/components/shell/welcome-dialog"
 import { BRAND } from "@/lib/brand"
@@ -82,6 +83,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             <Toaster position="top-center" />
             <WelcomeDialog />
             <WelcomeBackDialog />
+            <InstallPrompt />
             <AccountSync />
             <PresencePing />
           </TooltipProvider>

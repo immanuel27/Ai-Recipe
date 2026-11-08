@@ -4,6 +4,10 @@ const nextConfig: NextConfig = {
   // The dev badge sits on top of the dock; errors still show their overlay
   devIndicators: false,
   images: {
+    // Serve images as they are. Vercel's optimiser is metered (Hobby ran out on 2026-11-07
+    // and answered 402, so new website previews and logos showed as broken images), and
+    // uploads are already downscaled to ≤1080px JPEGs in the browser (lib/media.ts).
+    unoptimized: true,
     remotePatterns: [
       { protocol: "https", hostname: "picsum.photos" },
       { protocol: "https", hostname: "fastly.picsum.photos" },

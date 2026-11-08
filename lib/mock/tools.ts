@@ -89,6 +89,15 @@ export const TOOLS: Tool[] = [
     proofLinks: ["framer.com/", "*.framer.com/", "framer.link/", "*.framer.website/", "*.framer.app/", "*.framer.ai/", "*.framer.media/"],
     proofHint: "Your Framer share or remix link (framer.link/…), or the published framer.website address.",
   },
+
+  // Motion graphics, often written as code and rendered on the creator's own computer,
+  // so the video carries no AI tag. Proof is any link or a few screenshots.
+  { id: "claude-code", name: "Claude Code", kind: "motion", mediaTypes: ["video"], logo: "/logos/claude.webp", url: "https://claude.com/product/claude-code" },
+  { id: "codex", name: "Codex", kind: "motion", mediaTypes: ["video"], logo: "/logos/openai.webp", url: "https://openai.com/codex/" },
+  { id: "cursor", name: "Cursor", kind: "motion", mediaTypes: ["video"], logo: "/logos/cursor.webp", url: "https://cursor.com" },
+  { id: "remotion", name: "Remotion", kind: "motion", mediaTypes: ["video"], logo: "/logos/remotion.webp", url: "https://www.remotion.dev" },
+  { id: "after-effects", name: "After Effects", kind: "motion", mediaTypes: ["video"], logo: "/logos/after-effects.webp", url: "https://www.adobe.com/products/aftereffects.html" },
+  { id: "jitter", name: "Jitter", kind: "motion", mediaTypes: ["video"], logo: "/logos/jitter.webp", url: "https://jitter.video" },
 ]
 
 export function getTool(id: string) {
@@ -99,7 +108,7 @@ export function getToolName(id: string) {
   return TOOLS.find((t) => t.id === id)?.name ?? id
 }
 
-/** "website" for site builders and chat tools, "media" for video and image tools */
+/** "website" for site builders and chat tools, "motion" for motion graphics tools, "media" for video and image tools */
 export function toolKind(id: string): ListingKind {
   return getTool(id)?.kind ?? "media"
 }
@@ -138,7 +147,7 @@ export function listingTools(listing: Pick<Listing, "tool" | "tools">): ToolId[]
 
 /** Tools offered for each kind of post */
 export function toolsForPostType(type: PostType) {
-  if (type === "website") return TOOLS.filter((t) => t.kind === "website")
+  if (type === "website" || type === "motion") return TOOLS.filter((t) => t.kind === type)
   const media = type === "video" ? "video" : "image"
   return TOOLS.filter((t) => t.kind === "media" && t.mediaTypes.includes(media))
 }

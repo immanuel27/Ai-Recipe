@@ -22,7 +22,7 @@ const STEPS = [
   {
     icon: ReelsIcon,
     title: "Watch",
-    text: "Scroll through AI-made videos, images and websites.",
+    text: "Scroll through AI-made videos, motion graphics and websites.",
   },
   {
     icon: PromptsIcon,
@@ -32,7 +32,7 @@ const STEPS = [
   {
     icon: UploadIcon,
     title: "Share yours",
-    text: "Post your own video, image or website recipes and share them.",
+    text: "Post your own video, motion graphics or website recipes and share them.",
   },
 ]
 

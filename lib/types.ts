@@ -17,12 +17,21 @@ export type ToolId =
   | "lovable"
   | "figma-make"
   | "framer"
+  | "claude-code"
+  | "codex"
+  | "cursor"
+  | "remotion"
+  | "after-effects"
+  | "jitter"
 
-/** What a recipe makes: AI video/images, or a website built from prompts */
-export type ListingKind = "media" | "website"
+/** What a recipe makes: AI video/images, a website built from prompts, or motion graphics (often made with code) */
+export type ListingKind = "media" | "website" | "motion"
 
-/** The first choice when posting */
-export type PostType = "video" | "photo" | "website"
+/**
+ * The first choice when posting. Photos aren't offered for new posts any more
+ * (since 2026-11-08), but older photo posts still edit as "photo".
+ */
+export type PostType = "video" | "photo" | "website" | "motion"
 
 export interface Tool {
   id: ToolId
@@ -190,7 +199,7 @@ export interface SessionUser {
   }
 }
 
-export type ExploreType = "all" | MediaType | "website"
+export type ExploreType = "all" | MediaType | "website" | "motion"
 export type ExploreSort = "trending" | "newest" | "price-asc"
 export type ExplorePrice = "any" | "free" | "under-10" | "10-20" | "over-20"
 

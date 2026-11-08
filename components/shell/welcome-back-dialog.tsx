@@ -3,7 +3,7 @@
 import * as React from "react"
 import Link from "next/link"
 
-import { DocumentIcon, NotificationsIcon, UserIcon, type IconType } from "@/components/icons"
+import { CommentsIcon, LockIcon, MotionIcon, type IconType } from "@/components/icons"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -21,11 +21,11 @@ import { LogoMark } from "@/components/shell/logo-mark"
  * What's new. Bump UPDATE_ID and edit UPDATES when shipping something worth
  * telling people about: everyone who comes back after AWAY_MS sees it once.
  */
-const UPDATE_ID = "2026-10-15"
+const UPDATE_ID = "2026-11-08"
 const UPDATES: { icon: IconType; title: string; text: string }[] = [
-  { icon: UserIcon, title: "Profile pictures", text: "Add a photo so people know it's you." },
-  { icon: NotificationsIcon, title: "Notifications", text: "See who liked, saved or unlocked your posts." },
-  { icon: DocumentIcon, title: "Richer recipes", text: "Attach PDFs for long prompts, plus reference images." },
+  { icon: MotionIcon, title: "Motion graphics", text: "Post animations made with Claude Code, Cursor, Remotion and more." },
+  { icon: LockIcon, title: "Private proof", text: "Prove it's AI with a link or screenshots. Only our team sees them." },
+  { icon: CommentsIcon, title: "Comments", text: "Talk to creators right on their posts." },
 ]
 
 const AWAY_MS = 2 * 24 * 60 * 60_000

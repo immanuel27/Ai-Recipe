@@ -86,6 +86,7 @@ export {
   CheckCircle as SuccessIcon,
   SealCheck as VerifiedIcon,
   Globe as WebsiteIcon,
+  Shapes as MotionIcon,
   Info as InfoIcon,
   Warning as WarningIcon,
   XCircle as ErrorIcon,

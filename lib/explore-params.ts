@@ -10,8 +10,10 @@ export const SORT_OPTIONS: { value: ExploreSort; label: string }[] = [
 export const TYPE_OPTIONS: { value: ExploreType; label: string }[] = [
   { value: "all", label: "All" },
   { value: "video", label: "Videos" },
-  { value: "image", label: "Images" },
+  { value: "motion", label: "Motion graphics" },
   { value: "website", label: "Websites" },
+  // Images aren't promoted any more (no new photo posts), but old links still work
+  { value: "image", label: "Images" },
 ]
 
 export const PRICE_OPTIONS: { value: ExplorePrice; label: string }[] = [

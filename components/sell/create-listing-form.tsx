@@ -20,6 +20,7 @@ import {
   settingsFromValues,
   withDefaults,
   type ListingFormValues,
+  type ProofValues,
 } from "@/components/sell/listing-schema"
 import { DetailsStep } from "@/components/sell/steps/details-step"
 import { TypeStep } from "@/components/sell/steps/type-step"
@@ -48,7 +49,7 @@ const STEPS = [
  * 3. Recipe contents → Publish
  * Editing a post reuses it from Details on (the type stays), without drafts.
  */
-export function CreateListingForm({ editing }: { editing?: { listing: Listing; proofUrl: string } } = {}) {
+export function CreateListingForm({ editing }: { editing?: { listing: Listing; proof: ProofValues } } = {}) {
   const router = useRouter()
   const { user, addListing, updateListing: updateStored, draft: savedDraft, saveDraft, clearDraft, setFoundingNumber } = useAppStore()
   const draft = editing ? null : savedDraft
@@ -60,7 +61,7 @@ export function CreateListingForm({ editing }: { editing?: { listing: Listing; p
   const methods = useForm<ListingFormValues>({
     resolver: zodResolver(listingSchema),
     defaultValues: editing
-      ? valuesFromListing(editing.listing, editing.proofUrl)
+      ? valuesFromListing(editing.listing, editing.proof)
       : draft
         ? withDefaults(draft.values)
         : listingDefaults,
@@ -174,14 +175,17 @@ export function CreateListingForm({ editing }: { editing?: { listing: Listing; p
       },
     }
     // A site link that is itself a share link (e.g. a lovable.app site) doubles as proof
-    const proof = values.proofUrl || (values.postType === "website" ? values.liveUrl : "")
+    const proof: ProofValues = {
+      url: values.proofUrl || (values.postType === "website" ? values.liveUrl : ""),
+      shots: values.proofShots,
+    }
     let published = listing
     if (supabaseConfigured && user.profileId) {
       // Upload media to Storage and save the listing + locked recipe
       try {
         published = original
-          ? await updateListing(original, listing, proof || undefined)
-          : await publishListing(listing, user.profileId, proof || undefined)
+          ? await updateListing(original, listing, proof)
+          : await publishListing(listing, user.profileId, proof)
       } catch (error) {
         setPublishing(false)
         toast.error(error instanceof Error ? friendlyError(error.message) : `Couldn't ${original ? "save" : "publish"}. Try again.`)

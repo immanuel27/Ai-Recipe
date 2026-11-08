@@ -7,7 +7,7 @@ import { LockIcon } from "@/components/icons"
 import { userCreatorId } from "@/components/providers/app-store"
 import { CreateListingForm } from "@/components/sell/create-listing-form"
 import { EmptyState } from "@/components/shared/empty-state"
-import { useProofLinkState } from "@/components/shared/use-proof-link"
+import { useProofState } from "@/components/shared/use-proof-link"
 import { useRequireUser } from "@/hooks/use-require-user"
 import { createClient } from "@/lib/supabase/client"
 import { supabaseConfigured } from "@/lib/supabase/env"
@@ -45,8 +45,8 @@ export function EditPost({ slug }: { slug: string }) {
     }
   }, [ready, stored, slug])
 
-  // The private proof link, so it shows in the form
-  const proof = useProofLinkState(listing?.id ?? "", isOwner)
+  // The private proof (link and screenshots), so it shows in the form
+  const proof = useProofState(listing?.id ?? "", isOwner)
   const loading = !ready || (!stored && supabaseConfigured && fetched === undefined)
 
   if (loading || !proof.loaded) {
@@ -69,5 +69,5 @@ export function EditPost({ slug }: { slug: string }) {
     )
   }
 
-  return <CreateListingForm key={listing.id} editing={{ listing, proofUrl: proof.url ?? "" }} />
+  return <CreateListingForm key={listing.id} editing={{ listing, proof: proof.proof }} />
 }

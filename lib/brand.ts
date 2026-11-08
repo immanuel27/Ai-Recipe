@@ -3,7 +3,7 @@
 export const BRAND = {
   name: "Ai Recipy",
   tagline: "A hub for AI creators: share and discover the recipes behind amazing shots.",
-  description: "Get the step-by-step recipes behind AI-made videos, images and websites.",
+  description: "Get the step-by-step recipes behind AI-made videos, motion graphics and websites.",
   background: "#faf8f5", // --background
   backgroundDark: "#141210", // .dark --background
   primary: "#e8613c", // --brand (paprika, the single accent)

@@ -13,14 +13,13 @@ import { profileHref } from "@/lib/profile"
 import type { Creator, Listing } from "@/lib/types"
 import { VerifiedBadge } from "@/components/shared/verified-badge"
 import { DeleteIcon, EditIcon, OpenIcon, WebsiteIcon } from "@/components/icons"
-import { getToolName, listingTools } from "@/lib/mock/tools"
+import { listingTools } from "@/lib/mock/tools"
 import { PAYMENTS_ENABLED } from "@/lib/flags"
 
 export function PurchaseCard({
   listing,
   creator,
   unlocked,
-  proofUrl,
   isOwner,
   onDelete,
   onBuy,
@@ -31,8 +30,6 @@ export function PurchaseCard({
   /** Your own post: show Edit and Delete */
   isOwner?: boolean
   onDelete?: () => void
-  /** The creator's share link from the tool, for owners and buyers */
-  proofUrl?: string | null
   onBuy: () => void
 }) {
   const free = listing.price === 0
@@ -134,17 +131,6 @@ export function PurchaseCard({
               Delete
             </Button>
           </div>
-        )}
-        {unlocked && proofUrl && (
-          <a
-            href={proofUrl}
-            target="_blank"
-            rel="noopener noreferrer nofollow"
-            className="inline-flex items-center justify-center gap-1 text-xs font-semibold text-primary underline-offset-4 outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring"
-          >
-            See the original on {getToolName(listing.tool)}
-            <OpenIcon className="size-3" aria-hidden />
-          </a>
         )}
       </CardFooter>
     </Card>

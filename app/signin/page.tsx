@@ -10,7 +10,7 @@ export const metadata: Metadata = { title: "Sign in" }
 
 // Also the public front page (for visitors and Google's reviewers): what Ai Recipy is
 const ABOUT = [
-  { icon: ReelsIcon, title: "Watch", text: "AI-made videos, images and websites from creators." },
+  { icon: ReelsIcon, title: "Watch", text: "AI-made videos, motion graphics and websites from creators." },
   { icon: PromptsIcon, title: "Get the recipe", text: "The exact prompts, AI model, reference files and even the failed takes." },
   { icon: UploadIcon, title: "Share yours", text: "Post your own AI work with the recipe behind it." },
 ]

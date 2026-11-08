@@ -5,6 +5,7 @@ import { TOOLS, isProofLinkForAny, listingTools, parseHttpsUrl, toolKind, toolsF
 import type { Listing, PostType, ToolId } from "@/lib/types"
 
 export const MAX_IMAGES = 8
+export const MAX_PROOF_SHOTS = 3
 
 const TOOL_IDS = TOOLS.map((t) => t.id) as [ToolId, ...ToolId[]]
 
@@ -15,8 +16,8 @@ export function needsProofLink(v: { postType: string; media: { url: string; aiTa
 
 export const listingSchema = z
   .object({
-    /** Step 1: videos, photos, or websites & apps */
-    postType: z.enum(["video", "photo", "website"], "Choose what you're posting."),
+    /** Step 1: videos, motion graphics, or websites & apps (older posts can be photos) */
+    postType: z.enum(["video", "photo", "website", "motion"], "Choose what you're posting."),
     media: z.object({
       /** The video, the cover photo, or (websites) the captured screenshot of the live site */
       url: z.string(),
@@ -33,8 +34,16 @@ export const listingSchema = z
     description: z.string().trim().max(280, "280 characters max."),
     /** Every tool used, main one first */
     tools: z.array(z.enum(TOOL_IDS)).min(1, "Choose at least one tool.").max(5, "Up to 5 tools."),
-    /** Private: the tool's share link for the generation, chat or project. Checked by the team. */
+    /** Private: the tool's share link for the generation, chat or project. Only the team checks it. */
     proofUrl: z.string().trim().max(500, "That link is too long."),
+    /**
+     * Private: screenshots of the generation (e.g. the chat or terminal), instead of or as
+     * well as the link. `src` shows it (a data: URL when new, a signed URL when saved);
+     * `path` is its place in the private proofs bucket once saved.
+     */
+    proofShots: z
+      .array(z.object({ src: z.string(), path: z.string() }))
+      .max(MAX_PROOF_SHOTS, `Up to ${MAX_PROOF_SHOTS} screenshots.`),
     /** Websites & apps: the live site (public). Its screenshot is the cover. */
     liveUrl: z.string().trim().max(500, "That link is too long."),
     tags: z
@@ -96,7 +105,7 @@ export const listingSchema = z
   })
   .refine((v) => v.postType === "website" || !!v.media.url, {
     path: ["media", "url"],
-    message: "Add your video or photos.",
+    message: "Add your video.",
   })
   .refine((v) => v.postType !== "website" || !!v.liveUrl, {
     path: ["liveUrl"],
@@ -106,8 +115,8 @@ export const listingSchema = z
     path: ["liveUrl"],
     message: "Get a preview of your site first.",
   })
-  // The proof link is optional: posts without one go live, they just can't get the
-  // Verified badge (only a checked proof link earns it)
+  // Proof (a link or screenshots) is optional: posts without it go live, they just
+  // can't get the Verified badge (only proof the team has checked earns it)
   .refine((v) => {
     const allowed = new Set(toolsForPostType(v.postType).map((t) => t.id))
     return v.tools.every((t) => allowed.has(t))
@@ -138,6 +147,7 @@ export type ListingFormValues = z.infer<typeof listingSchema>
 export const listingDefaults: ListingFormValues = {
   postType: "" as PostType,
   proofUrl: "",
+  proofShots: [],
   liveUrl: "",
   media: { url: "", posterUrl: "", type: "image", images: [] },
   title: "",
@@ -182,15 +192,28 @@ export function withDefaults(values: LegacyDraft): ListingFormValues {
     prompts: (rest.prompts ?? listingDefaults.prompts).map((p) => ({ ...p, fileUrl: p.fileUrl ?? "", fileName: p.fileName ?? "" })),
     assets: (rest.assets ?? []).map((a) => ({ ...a, url: a.url ?? "" })),
     model: rest.model ?? "",
+    proofShots: rest.proofShots ?? [],
   }
 }
 
+/** A post's kind of post, from its main tool and media */
+export function postTypeOf(l: Pick<Listing, "tool" | "type">): PostType {
+  const kind = toolKind(l.tool)
+  return kind === "website" || kind === "motion" ? kind : l.type === "video" ? "video" : "photo"
+}
+
+/** The private proof as the form holds it */
+export interface ProofValues {
+  url: string
+  shots: ListingFormValues["proofShots"]
+}
+
 /** An existing post as form values, for editing it */
-export function valuesFromListing(l: Listing, proofUrl = ""): ListingFormValues {
+export function valuesFromListing(l: Listing, proof: ProofValues = { url: "", shots: [] }): ListingFormValues {
   const r = l.recipe
   return {
     ...listingDefaults,
-    postType: toolKind(l.tool) === "website" ? "website" : l.type === "video" ? "video" : "photo",
+    postType: postTypeOf(l),
     media: {
       url: l.mediaUrl,
       posterUrl: l.posterUrl,
@@ -201,7 +224,8 @@ export function valuesFromListing(l: Listing, proofUrl = ""): ListingFormValues 
     title: l.title,
     description: l.description,
     tools: listingTools(l),
-    proofUrl,
+    proofUrl: proof.url,
+    proofShots: proof.shots,
     liveUrl: l.liveUrl ?? "",
     tags: l.tags,
     adult: !!l.isAdult,
@@ -224,6 +248,7 @@ export const STEP_FIELDS = [
   [
     "media",
     "proofUrl",
+    "proofShots",
     "liveUrl",
     "title",
     "description",

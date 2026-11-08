@@ -16,7 +16,7 @@ import { PAYMENTS_ENABLED } from "@/lib/flags"
 
 const TABS = [
   { value: "video", label: "Videos" },
-  { value: "image", label: "Images" },
+  { value: "motion", label: "Motion" },
   { value: "website", label: "Websites" },
 ] as const
 

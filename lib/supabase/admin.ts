@@ -23,7 +23,18 @@ export interface AdminOverview {
   postsTotal: number
   signupsByDay: { day: string; count: number }[]
   topPosts: { slug: string; title: string; creator: string; unlocks: number; likes: number; saves: number; verified: boolean }[]
-  pendingVerification: { id: string; slug: string; title: string; creator: string; proof: string; unlocks: number; created_at: string }[]
+  pendingVerification: {
+    id: string
+    slug: string
+    title: string
+    creator: string
+    /** The share link, if any */
+    proof: string | null
+    /** Paths in the private proofs bucket (the dashboard signs them) */
+    screenshots: string[] | null
+    unlocks: number
+    created_at: string
+  }[]
   activity: { kind: "signup" | "post" | "unlock" | "like"; at: string; who: string | null; title: string | null; slug: string | null }[]
 }
 

@@ -37,6 +37,7 @@ import {
 } from "@/lib/supabase/admin"
 import { formatRelative } from "@/lib/format"
 import { supabaseConfigured } from "@/lib/supabase/env"
+import { proofShotUrls } from "@/lib/supabase/proof"
 
 const REFRESH_MS = 30_000
 
@@ -310,28 +311,33 @@ function PendingVerification({
       <CardHeader>
         <CardTitle>Waiting for verification</CardTitle>
         <p className="text-sm text-muted-foreground">
-          Open the proof link, check it matches the post, then verify. The post gets the Verified badge.
+          Open the proof link or screenshots, check they match the post, then verify. The post gets the Verified badge.
         </p>
       </CardHeader>
       <CardContent className="flex flex-col gap-2">
         {items.length === 0 && <p className="text-sm text-muted-foreground">All caught up.</p>}
         {items.map((p) => (
           <InsetPanel key={p.id} className="flex flex-col gap-3 p-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex min-w-0 flex-col">
-              <Link href={`/r/${p.slug}`} className="truncate font-medium hover:underline">
-                {p.title}
-              </Link>
-              <span className="truncate text-sm text-muted-foreground">
-                @{p.creator} · {p.unlocks} unlocks · {formatRelative(p.created_at, now)}
-              </span>
+            <div className="flex min-w-0 flex-col gap-2">
+              <div className="flex min-w-0 flex-col">
+                <Link href={`/r/${p.slug}`} className="truncate font-medium hover:underline">
+                  {p.title}
+                </Link>
+                <span className="truncate text-sm text-muted-foreground">
+                  @{p.creator} · {p.unlocks} unlocks · {formatRelative(p.created_at, now)}
+                </span>
+              </div>
+              {!!p.screenshots?.length && <ProofScreenshots paths={p.screenshots} title={p.title} />}
             </div>
             <div className="flex shrink-0 gap-2">
-              <Button asChild variant="outline" size="sm">
-                <a href={p.proof} target="_blank" rel="noopener noreferrer nofollow">
-                  <OpenIcon aria-hidden />
-                  Open proof
-                </a>
-              </Button>
+              {p.proof && (
+                <Button asChild variant="outline" size="sm">
+                  <a href={p.proof} target="_blank" rel="noopener noreferrer nofollow">
+                    <OpenIcon aria-hidden />
+                    Open proof
+                  </a>
+                </Button>
+              )}
               <Button size="sm" disabled={busy === p.id} onClick={() => verify(p.id, p.title)}>
                 {busy === p.id ? <SpinnerIcon className="animate-spin" aria-hidden /> : null}
                 Verify
@@ -341,5 +347,42 @@ function PendingVerification({
         ))}
       </CardContent>
     </Card>
+  )
+}
+
+/** A post's private proof screenshots, signed for an hour; each opens full size */
+function ProofScreenshots({ paths, title }: { paths: string[]; title: string }) {
+  const key = paths.join("|")
+  const [urls, setUrls] = React.useState<{ key: string; list: string[] } | null>(null)
+
+  React.useEffect(() => {
+    let cancelled = false
+    proofShotUrls(key.split("|")).then((list) => {
+      if (!cancelled) setUrls({ key, list })
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [key])
+
+  const list = urls?.key === key ? urls.list : []
+  return (
+    <ul className="flex gap-2" aria-label={`Proof screenshots for ${title}`}>
+      {paths.map((path, i) => (
+        <li key={path}>
+          <a
+            href={list[i] || undefined}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block size-14 overflow-hidden rounded-lg bg-background ring-1 ring-foreground/10 outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            {list[i] && (
+              // eslint-disable-next-line @next/next/no-img-element -- signed private image
+              <img src={list[i]} alt={`Proof screenshot ${i + 1}`} className="size-full object-cover" />
+            )}
+          </a>
+        </li>
+      ))}
+    </ul>
   )
 }

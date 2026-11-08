@@ -236,11 +236,11 @@ export function filterListings(
   }
 }
 
-/** Websites are their own type; Videos and Images are AI media only */
+/** Websites and motion graphics are their own types; Videos and Images are AI media only */
 function matchesType(l: Listing, type: ExploreFilters["type"]) {
   if (type === "all") return true
-  const website = toolKind(l.tool) === "website"
-  return type === "website" ? website : !website && l.type === type
+  const kind = toolKind(l.tool)
+  return type === "website" || type === "motion" ? kind === type : kind === "media" && l.type === type
 }
 
 /** Filter, sort and paginate. */

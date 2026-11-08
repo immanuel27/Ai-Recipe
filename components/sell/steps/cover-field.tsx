@@ -34,7 +34,7 @@ import { ScreenshotError, captureWebsite } from "@/lib/screenshot"
 import { cn } from "@/lib/utils"
 
 const NO_TAG_NOTE =
-  "No AI tag in this file (many tools don't add one). You can still post it: add your tool's share link to get the Verified badge."
+  "No AI tag in this file (many tools don't add one, and code-made motion graphics never do). You can still post it: add a share link or screenshots to get the Verified badge."
 
 /** Supabase's free plan caps each upload at 50 MB */
 /** What can be stored (Supabase's per-file limit) */
@@ -45,12 +45,12 @@ const MAX_IMAGE_MB = 25
 
 /**
  * Left column of the Details step. Websites & apps: paste the link and we capture
- * a preview. Videos: upload one. Photos: up to 8 images (any shape), pick the cover.
+ * a preview. Videos and motion graphics: upload one. Photos (older posts): up to 8 images, pick the cover.
  */
 export function CoverField() {
   const { control } = useFormContext<ListingFormValues>()
   const postType = useWatch({ control, name: "postType" })
-  return postType === "website" ? <WebsiteCover /> : <MediaCover postType={postType === "video" ? "video" : "photo"} />
+  return postType === "website" ? <WebsiteCover /> : <MediaCover postType={postType === "photo" ? "photo" : "video"} />
 }
 
 function MediaCover({ postType }: { postType: "video" | "photo" }) {

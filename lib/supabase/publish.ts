@@ -1,7 +1,9 @@
 "use client"
 
+import type { ProofValues } from "@/components/sell/listing-schema"
 import { createClient } from "@/lib/supabase/client"
 import { previewFromRecipe } from "@/lib/supabase/mappers"
+import { PROOF_BUCKET } from "@/lib/supabase/proof"
 import type { Listing } from "@/lib/types"
 
 const BUCKET = "media"
@@ -99,6 +101,45 @@ async function refreshCatalog() {
   await fetch("/api/revalidate", { method: "POST" }).catch(() => {})
 }
 
+/**
+ * Save a listing's private proof: upload new screenshots to the private proofs
+ * bucket, then store the link and screenshot paths (or remove the proof when
+ * there's none). Screenshots no longer used are deleted. Never throws: the post
+ * is live either way, it just can't be verified without proof.
+ */
+async function saveProof(listingId: string, folder: string, proof: ProofValues, previousPaths: string[] = []) {
+  const supabase = createClient()
+  try {
+    const paths = await Promise.all(
+      proof.shots.map(async (shot) => {
+        if (shot.path) return shot.path
+        const blob = await (await fetch(shot.src)).blob()
+        // Unguessable name, in the creator's own folder
+        const path = `${folder}/proof-${crypto.randomUUID().slice(0, 12)}.${extensionFor(blob.type)}`
+        const { error } = await supabase.storage.from(PROOF_BUCKET).upload(path, blob, { contentType: blob.type || undefined })
+        if (error) throw new Error(error.message)
+        return path
+      })
+    )
+    const url = proof.url || null
+    const { error } =
+      url || paths.length
+        ? await supabase.from("listing_proofs").upsert({ listing_id: listingId, url, screenshots: paths })
+        : await supabase.from("listing_proofs").delete().eq("listing_id", listingId)
+    if (error) throw new Error(error.message)
+    const unused = previousPaths.filter((p) => !paths.includes(p))
+    if (unused.length) await supabase.storage.from(PROOF_BUCKET).remove(unused)
+  } catch (error) {
+    console.warn("[proof] Couldn't save the proof", error instanceof Error ? error.message : error)
+  }
+}
+
+/** The screenshot paths a listing's proof had before an edit */
+async function savedProofPaths(listingId: string) {
+  const { data } = await createClient().from("listing_proofs").select("screenshots").eq("listing_id", listingId).maybeSingle()
+  return ((data as { screenshots: string[] | null } | null)?.screenshots ?? []) as string[]
+}
+
 async function currentUserId() {
   const { data: auth } = await createClient().auth.getUser()
   if (!auth.user) throw new Error("Your sign-in expired. Please sign in again.")
@@ -107,9 +148,9 @@ async function currentUserId() {
 
 /**
  * Save an edited listing: upload any replaced media, then update the listing,
- * its recipe and its private proof link (a new proof link clears Verified).
+ * its recipe and its private proof (new proof clears Verified).
  */
-export async function updateListing(original: Listing, draft: Listing, proofUrl?: string): Promise<Listing> {
+export async function updateListing(original: Listing, draft: Listing, proof: ProofValues): Promise<Listing> {
   const supabase = createClient()
   const uid = await currentUserId()
   // New file names, so cached copies of the old media never show
@@ -130,10 +171,7 @@ export async function updateListing(original: Listing, draft: Listing, proofUrl?
     .eq("listing_id", original.id)
   if (recipeError) throw new Error(recipeError.message)
 
-  const proof = proofUrl
-    ? await supabase.from("listing_proofs").upsert({ listing_id: original.id, url: proofUrl })
-    : await supabase.from("listing_proofs").delete().eq("listing_id", original.id)
-  if (proof.error) console.warn("[edit] Couldn't save the proof link", proof.error.message)
+  await saveProof(original.id, `${uid}/${original.slug}`, proof, await savedProofPaths(original.id))
 
   await refreshCatalog()
   return {
@@ -164,10 +202,10 @@ export async function deleteListing(listingId: string) {
 /**
  * Publish a listing built by the sell form: upload its media to Storage, then
  * save the listing (public, with a recipe teaser) and its recipe (locked).
- * The proof link (the tool's share link) is stored privately for review.
+ * The proof (the tool's share link and/or screenshots) is stored privately for the team.
  * Returns the listing with its stored URLs and database id.
  */
-export async function publishListing(draft: Listing, profileId: string, proofUrl?: string): Promise<Listing> {
+export async function publishListing(draft: Listing, profileId: string, proof: ProofValues): Promise<Listing> {
   const supabase = createClient()
   const uid = await currentUserId()
 
@@ -198,11 +236,7 @@ export async function publishListing(draft: Listing, profileId: string, proofUrl
     throw new Error(recipeError.message)
   }
 
-  if (proofUrl) {
-    const { error: proofError } = await supabase.from("listing_proofs").insert({ listing_id: row.id, url: proofUrl })
-    // The post is live either way; the creator can't be verified without it
-    if (proofError) console.warn("[publish] Couldn't save the proof link", proofError.message)
-  }
+  if (proof.url || proof.shots.length) await saveProof(row.id, `${uid}/${draft.slug}`, proof)
 
   // Show the new listing everywhere right away (the public catalog is cached)
   await refreshCatalog()

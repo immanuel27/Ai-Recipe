@@ -64,6 +64,16 @@ export default async function ExplorePage(props: PageProps<"/explore">) {
                     Post a website recipe
                   </Link>
                 </>
+              ) : filters.type === "motion" ? (
+                <>
+                  <p className="type-section">No motion graphics yet</p>
+                  <p className="max-w-md type-read text-muted-foreground">
+                    Made an animation with Claude Code, Cursor, Remotion or After Effects? Be the first to share how.
+                  </p>
+                  <Link href="/sell" className="glass-button rounded-full px-5 py-2 font-semibold">
+                    Post motion graphics
+                  </Link>
+                </>
               ) : (
                 <>
                   <p className="type-section">Nothing matches yet</p>

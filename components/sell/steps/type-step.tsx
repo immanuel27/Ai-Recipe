@@ -3,7 +3,7 @@
 import { useController, useFormContext } from "react-hook-form"
 
 import { FieldError } from "@/components/ui/field"
-import { ImageIcon, VideoIcon, WebsiteIcon, type IconType } from "@/components/icons"
+import { MotionIcon, VideoIcon, WebsiteIcon, type IconType } from "@/components/icons"
 import { FoundingSpots } from "@/components/sell/founding-spots"
 import { listingDefaults, type ListingFormValues } from "@/components/sell/listing-schema"
 import { toolsForPostType } from "@/lib/mock/tools"
@@ -12,7 +12,12 @@ import { cn } from "@/lib/utils"
 
 const TYPES: { value: PostType; title: string; description: string; icon: IconType }[] = [
   { value: "video", title: "Videos", description: "A clip made with an AI video tool.", icon: VideoIcon },
-  { value: "photo", title: "Photos", description: "Up to 8 images made with AI.", icon: ImageIcon },
+  {
+    value: "motion",
+    title: "Motion graphics",
+    description: "Animation made with AI, like Claude Code, Cursor, Remotion or After Effects.",
+    icon: MotionIcon,
+  },
   {
     value: "website",
     title: "Websites & apps",
@@ -21,7 +26,7 @@ const TYPES: { value: PostType; title: string; description: string; icon: IconTy
   },
 ]
 
-/** Step 1: videos, photos, or websites & apps. Picking one moves on. */
+/** Step 1: videos, motion graphics, or websites & apps. Picking one moves on. (Photos aren't offered any more.) */
 export function TypeStep({ onPick }: { onPick: () => void }) {
   const { control, getValues, setValue } = useFormContext<ListingFormValues>()
   const { field, fieldState } = useController({ control, name: "postType" })
@@ -32,7 +37,7 @@ export function TypeStep({ onPick }: { onPick: () => void }) {
       const allowed = new Set(toolsForPostType(type).map((t) => t.id))
       setValue("tools", getValues("tools").filter((t) => allowed.has(t)))
       const media = getValues("media")
-      const fits = type === "video" ? media.type === "video" : type === "photo" ? media.type === "image" : false
+      const fits = type === "video" || type === "motion" ? media.type === "video" : type === "photo" ? media.type === "image" : false
       if (media.url && !fits) setValue("media", listingDefaults.media)
       field.onChange(type)
     }

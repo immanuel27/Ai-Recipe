@@ -51,8 +51,8 @@ export function ExploreSidebar({ filters, toolCounts }: { filters: ExploreFilter
         <Item href={exploreHref({ type: "video" })} active={onlyType("video")}>
           Videos
         </Item>
-        <Item href={exploreHref({ type: "image" })} active={onlyType("image")}>
-          Images
+        <Item href={exploreHref({ type: "motion" })} active={onlyType("motion")}>
+          Motion graphics
         </Item>
         <Item href={exploreHref({ type: "website" })} active={onlyType("website")}>
           Websites

@@ -16,6 +16,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { needsProofLink, type ListingFormValues } from "@/components/sell/listing-schema"
 import { TagInput } from "@/components/sell/tag-input"
 import { CoverField } from "@/components/sell/steps/cover-field"
+import { ProofShotsField } from "@/components/sell/steps/proof-shots-field"
 import { PricingFields } from "@/components/sell/steps/pricing-step"
 import { ToolLogo } from "@/components/shared/tool-logo"
 import { getTool, toolsForPostType } from "@/lib/mock/tools"
@@ -89,9 +90,9 @@ export function DetailsStep({ footer }: { footer: React.ReactNode }) {
               )}
             />
 
-            <Field data-invalid={!!errors.proofUrl}>
+            <Field data-invalid={!!errors.proofUrl || !!errors.proofShots}>
               <FieldLabel htmlFor="proofUrl">
-                Proof link <span className="font-normal text-muted-foreground">(optional)</span>
+                Proof <span className="font-normal text-muted-foreground">(optional)</span>
               </FieldLabel>
               <Input
                 id="proofUrl"
@@ -103,13 +104,15 @@ export function DetailsStep({ footer }: { footer: React.ReactNode }) {
                 aria-describedby="proofUrl-hint"
                 {...register("proofUrl")}
               />
-              <FieldDescription id="proofUrl-hint">
-                Add it to get the <strong>Verified</strong> badge.{" "}
-                {untagged && "Your file has no AI tag, so this is the best way to show it's AI-made. "}
-                {proofHint ? `${proofHint} ` : "The share link of your generation, chat or project. "}
-                Kept private: only our team checks it, and people who unlock your recipe see it.
-              </FieldDescription>
               <FieldError errors={[errors.proofUrl]} />
+              <ProofShotsField describedBy="proofUrl-hint" />
+              <FieldDescription id="proofUrl-hint">
+                Add a share link or up to 3 screenshots (your chat, terminal or project) to get the{" "}
+                <strong>Verified</strong> badge.{" "}
+                {untagged && "Your file has no AI tag, so this is the best way to show it's AI-made. "}
+                {proofHint && `${proofHint} `}
+                <strong>Private:</strong> only the Ai Recipy team sees it, never the people who unlock your recipe.
+              </FieldDescription>
             </Field>
 
             <Controller

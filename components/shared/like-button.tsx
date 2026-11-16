@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import { HeartIcon } from "lucide-react"
+import posthog from "posthog-js"
 
 import { Button } from "@/components/ui/button"
 import { useAppStore } from "@/components/providers/app-store"
@@ -43,7 +44,12 @@ export function LikeButton({
   const [pop, setPop] = React.useState(0)
 
   function onClick() {
-    if (toggle()) setPop((n) => n + 1)
+    const nowLiked = toggle()
+    if (nowLiked) setPop((n) => n + 1)
+    posthog.capture("listing_like_changed", {
+      listing_type: listing.type,
+      liked: nowLiked,
+    })
   }
 
   const heart = (

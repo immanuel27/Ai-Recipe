@@ -4,6 +4,7 @@ import * as React from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
+import posthog from "posthog-js"
 
 import { BuyDialog } from "@/components/listing/buy-dialog"
 import { FailuresGallery } from "@/components/listing/failures-gallery"
@@ -46,8 +47,15 @@ export function ListingDetail({
   }
 
   function onBuy() {
+    const properties = {
+      listing_type: listing.type,
+      payment_required: listing.price > 0,
+    }
+    posthog.capture("recipe_unlock_started", properties)
+
     if (listing.price === 0) {
       purchase(listing.slug)
+      posthog.capture("recipe_unlocked", properties)
       toast.success("Recipe unlocked")
       revealRecipe()
     } else {
@@ -57,6 +65,10 @@ export function ListingDetail({
 
   function onConfirm() {
     purchase(listing.slug)
+    posthog.capture("recipe_unlocked", {
+      listing_type: listing.type,
+      payment_required: true,
+    })
     setDialogOpen(false)
     toast.success("Purchase complete: recipe unlocked")
     revealRecipe()

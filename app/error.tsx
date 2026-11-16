@@ -2,6 +2,7 @@
 
 import { useEffect } from "react"
 import { TriangleAlertIcon } from "lucide-react"
+import posthog from "posthog-js"
 
 import { EmptyState } from "@/components/shared/empty-state"
 
@@ -13,6 +14,7 @@ export default function Error({
   retry: () => void
 }) {
   useEffect(() => {
+    posthog.captureException(error)
     console.error(error)
   }, [error])
 

@@ -8,6 +8,7 @@ import type { Listing, SessionUser } from "@/lib/types"
 // Used by the client store (components/providers/app-store.tsx).
 
 export interface AuthIdentity {
+  id: string
   email: string
   provider: SessionUser["provider"]
 }
@@ -36,6 +37,7 @@ export async function loadAccount(): Promise<Account | null> {
   if (!authUser) return null
 
   const identity: AuthIdentity = {
+    id: authUser.id,
     email: authUser.email ?? "",
     provider: authUser.app_metadata?.provider === "google" ? "google" : "email",
   }

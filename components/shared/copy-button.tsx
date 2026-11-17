@@ -4,6 +4,7 @@ import * as React from "react"
 import { toast } from "sonner"
 
 import { CheckIcon, CopyIcon } from "@/components/icons"
+import { track } from "@/lib/analytics"
 import { cn } from "@/lib/utils"
 
 /** Put text on the clipboard, with a fallback for browsers without the Clipboard API. */
@@ -51,6 +52,7 @@ export function CopyButton({
     if (await writeClipboard(text)) {
       setCopied(true)
       toast.success(`${label} copied`)
+      track("prompt_copied", { where: "recipe_page" })
     } else {
       toast.error("Couldn't copy. Select the text and copy it instead.")
     }

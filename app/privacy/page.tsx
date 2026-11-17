@@ -61,7 +61,14 @@ export default function PrivacyPage() {
         <p>
           <strong>Your device.</strong> Your browser keeps a few settings on your device (for example your theme,
           drafts and which messages you&apos;ve seen). We use sign-in cookies to keep you signed in. We don&apos;t
-          use advertising or tracking cookies.
+          use advertising cookies.
+        </p>
+        <p>
+          <strong>How the site is used.</strong> We use PostHog, a product analytics service, to see how people use
+          Ai Recipy: pages viewed, buttons used (like unlocking, saving, liking, copying a prompt or posting), your
+          rough location from your IP address, your browser and device, and errors when something breaks. It sets a
+          cookie to tell visits apart. When you&apos;re signed in, this is linked to your account id and username,
+          never your email. We don&apos;t record your screen or what you type, and we never use it for advertising.
         </p>
       </LegalSection>
 
@@ -121,7 +128,8 @@ export default function PrivacyPage() {
       <LegalSection n={5} title="What other people can see">
         <ul>
           <li>Anyone can see your public profile and your posts.</li>
-          <li>People who unlock your recipe see the full recipe and your proof link.</li>
+          <li>People who unlock your recipe see the full recipe.</li>
+          <li>Your proof (links and screenshots) is only seen by you and the Ai Recipy team.</li>
           <li>When you like, save or unlock someone&apos;s post, they get a notification with your username.</li>
           <li>Your email address is never shown to other users.</li>
         </ul>
@@ -135,6 +143,9 @@ export default function PrivacyPage() {
           </li>
           <li>
             <strong>Vercel</strong>: hosts the website.
+          </li>
+          <li>
+            <strong>PostHog</strong>: product analytics and error reports (how the site is used, as described above).
           </li>
           <li>
             <strong>Google</strong>: &quot;Sign in with Google&quot;, if you use it.

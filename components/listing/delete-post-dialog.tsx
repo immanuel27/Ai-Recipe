@@ -3,6 +3,7 @@
 import { friendlyError } from "@/lib/supabase/errors"
 import * as React from "react"
 import { toast } from "sonner"
+import { track } from "@/lib/analytics"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -39,6 +40,7 @@ export function DeletePostDialog({
     try {
       if (supabaseConfigured) await deleteListing(listing.id)
       removeListing(listing.slug)
+      track("listing_deleted")
       toast.success("Post deleted")
       onOpenChange(false)
       onDeleted?.()

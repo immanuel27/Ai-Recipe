@@ -3,6 +3,7 @@
 import * as React from "react"
 import Link from "next/link"
 import { toast } from "sonner"
+import { track } from "@/lib/analytics"
 
 import { CommentsIcon, DeleteIcon, SendIcon, SpinnerIcon } from "@/components/icons"
 import { useAppStore, userCreatorId } from "@/components/providers/app-store"
@@ -66,6 +67,7 @@ export function CommentsPanel({
       const next = [comment, ...(comments ?? [])]
       setComments(next)
       onCountChange?.(next.length)
+      track("comment_added")
       setText("")
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Couldn't post your comment. Try again.")

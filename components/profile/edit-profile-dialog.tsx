@@ -4,6 +4,7 @@ import { friendlyError } from "@/lib/supabase/errors"
 import * as React from "react"
 import { PencilIcon } from "lucide-react"
 import { toast } from "sonner"
+import { track } from "@/lib/analytics"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -89,6 +90,11 @@ export function EditProfileDialog() {
       } else {
         updateProfile(profile)
       }
+      track("profile_updated", {
+        display_name_changed: profile.displayName !== (user?.displayName || undefined),
+        bio_changed: profile.bio !== (user?.bio || undefined),
+        avatar_changed: Boolean(photo || removePhoto),
+      })
       setOpen(false)
       toast.success("Profile updated")
     } catch (error) {

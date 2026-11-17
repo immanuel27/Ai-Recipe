@@ -8,6 +8,7 @@ import type { ListingFormValues } from "@/components/sell/listing-schema"
 import { remote, type Account, type AuthIdentity } from "@/lib/supabase/account"
 import { supabaseConfigured } from "@/lib/supabase/env"
 import type { Creator, Listing, SessionUser } from "@/lib/types"
+import { track } from "@/lib/analytics"
 
 /**
  * Client state: session, purchases, saves, likes, listings the user has
@@ -167,6 +168,7 @@ const actions: StoreActions = {
     if (user) sync((id) => remote.updateProfile(id, { ...profile, username: user.username }, changeAvatar))
   },
   purchase: (slug) => {
+    if (!getSnapshot().purchased.includes(slug)) track("recipe_unlocked", { slug })
     setState((s) => (s.purchased.includes(slug) ? s : { ...s, purchased: [...s.purchased, slug] }))
     sync(() => remote.purchase(slug))
   },
@@ -177,6 +179,7 @@ const actions: StoreActions = {
       saved: nowSaved ? [...s.saved, slug] : s.saved.filter((x) => x !== slug),
     }))
     sync(() => remote.setSave(slug, nowSaved))
+    track(nowSaved ? "listing_saved" : "listing_unsaved", { slug })
     return nowSaved
   },
   toggleLike: (slug) => {
@@ -186,10 +189,12 @@ const actions: StoreActions = {
       liked: nowLiked ? [...s.liked, slug] : s.liked.filter((x) => x !== slug),
     }))
     sync(() => remote.setLike(slug, nowLiked))
+    track(nowLiked ? "listing_liked" : "listing_unliked", { slug })
     return nowLiked
   },
   toggleFollow: (creatorId) => {
     const nowFollowing = !getSnapshot().following.includes(creatorId)
+    track(nowFollowing ? "creator_followed" : "creator_unfollowed")
     setState((s) => ({
       ...s,
       following: nowFollowing

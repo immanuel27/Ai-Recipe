@@ -23,6 +23,7 @@ import { SUPABASE_KEY, SUPABASE_URL, supabaseConfigured } from "@/lib/supabase/e
 import { MAINTENANCE_MESSAGE, friendlyError } from "@/lib/supabase/errors"
 import type { SessionUser } from "@/lib/types"
 import { EMAIL_SIGNIN_ENABLED } from "@/lib/flags"
+import { identify, track } from "@/lib/analytics"
 
 type Step = "method" | "email" | "sent" | "username"
 
@@ -147,6 +148,8 @@ export function SignInCard() {
       setBusy(false)
       if (error || !profileId) return setError(error ? friendlyError(error) : "Couldn't create your profile.")
       signIn({ username: u, profileId, email: shownEmail, provider: authIdentity?.provider ?? "email", isSeller: false })
+      if (authIdentity) identify(authIdentity.id, { username: u, provider: authIdentity.provider })
+      track("signed_up", { provider: authIdentity?.provider ?? "email" })
       toast.success(`Welcome, @${u}`)
       router.push(next)
       return

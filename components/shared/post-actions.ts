@@ -2,11 +2,13 @@
 
 import { toast } from "sonner"
 
+import { track } from "@/lib/analytics"
 import type { Listing } from "@/lib/types"
 
 /** Native share sheet, falling back to copying the link. */
 export async function shareListing(listing: Pick<Listing, "slug" | "title">) {
   const url = `${window.location.origin}/r/${listing.slug}`
+  track("listing_shared", { slug: listing.slug })
   try {
     if (navigator.share) {
       await navigator.share({ title: listing.title, url })

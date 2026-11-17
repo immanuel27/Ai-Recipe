@@ -2,6 +2,7 @@
 
 import { useEffect } from "react"
 import { TriangleAlertIcon } from "lucide-react"
+import { trackError } from "@/lib/analytics"
 
 import { EmptyState } from "@/components/shared/empty-state"
 
@@ -13,6 +14,7 @@ export default function Error({
   retry: () => void
 }) {
   useEffect(() => {
+    trackError(error)
     console.error(error)
   }, [error])
 

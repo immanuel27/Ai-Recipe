@@ -50,4 +50,4 @@ export function LegalSection({ n, title, children }: { n: number; title: string;
 
 export const CONTACT_EMAIL = "atomtheecreator@gmail.com"
 export const OPERATOR = "Emmanuel Ovie Joseph"
-export const UPDATED = "October 17, 2026"
+export const UPDATED = "November 17, 2026"

@@ -29,6 +29,7 @@ import { PAYMENTS_ENABLED } from "@/lib/flags"
 import { copyPrompt } from "@/lib/copy-prompt"
 import { markEngaged } from "@/components/shell/install-prompt"
 import { useRouter } from "next/navigation"
+import { track } from "@/lib/analytics"
 
 /** Fanned like prints; they spread a little more on hover. */
 const TAKE_REST = ["-rotate-6", "rotate-1", "rotate-7"]
@@ -201,6 +202,7 @@ function CopyPromptButton({ listing, owned, onBuy }: { listing: Listing; owned: 
     if (result === "copied") {
       setState("copied")
       toast.success("Prompt copied")
+      track("prompt_copied", { slug: listing.slug, where: "recipe_card" })
       if (!owned) purchase(listing.slug)
       markEngaged()
       return

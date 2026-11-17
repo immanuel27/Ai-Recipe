@@ -9,6 +9,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { Loader2Icon } from "lucide-react"
 import { FormProvider, useForm } from "react-hook-form"
 import { toast } from "sonner"
+import { track } from "@/lib/analytics"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -16,6 +17,7 @@ import {
   STEP_FIELDS,
   listingDefaults,
   listingSchema,
+  postTypeOf,
   valuesFromListing,
   settingsFromValues,
   withDefaults,
@@ -192,8 +194,16 @@ export function CreateListingForm({ editing }: { editing?: { listing: Listing; p
         return
       }
     }
+    const eventProperties = {
+      post_type: postTypeOf(published),
+      tool: published.tool,
+      tool_count: published.tools?.length ?? 1,
+      has_proof: Boolean(proof.url || proof.shots.length),
+      pricing_mode: published.pricing.mode,
+    }
     if (original) {
       updateStored(published)
+      track("listing_updated", eventProperties)
       toast.success("Changes saved")
       router.push(`/r/${slug}`)
       router.refresh()
@@ -201,6 +211,7 @@ export function CreateListingForm({ editing }: { editing?: { listing: Listing; p
     }
     addListing(published)
     clearDraft()
+    track("listing_published", eventProperties)
     toast.success("Your recipe is live")
     router.push(`/r/${slug}`)
     // A first post may have earned a Founding Creator spot (the database assigns it)
